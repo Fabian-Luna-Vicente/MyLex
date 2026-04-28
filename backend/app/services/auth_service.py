@@ -1,0 +1,129 @@
+import httpx
+from fastapi import HTTPException, status
+from sqlalchemy.orm import Session
+from jose import jwt, JOSEError
+from app.core.config import settings
+from app.core.security import create_access_token, create_refresh_token
+from app.repositories.user_repository import UserRepository
+import os
+
+API_URL = "https://oauth2.googleapis.com/tokeninfo?id_token="
+
+# Normally load this from settings/env
+CLIENT_ID = os.getenv("GOOGLE_CLIENT_ID") 
+
+class AuthService:
+    def __init__(self, db: Session):
+        self.db = db
+        self.user_repo = UserRepository(db)
+
+    async def verify_google_token(self, id_token: str) -> dict:
+        async with httpx.AsyncClient() as client:
+            response = await client.get(API_URL + id_token)
+            if response.status_code != 200:
+                raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid Google token")
+            data = response.json()
+            # If you want strictly check audience, uncomment below and ensure CLIENT_ID is correct
+            # if data.get("aud") != CLIENT_ID:
+            #    raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Token audience mismatch")
+            return data
+
+    async def signin(self, id_token: str, username: str, age: int):
+        user_info = await self.verify_google_token(id_token)
+        email = user_info.get("email")
+        sub = user_info.get("sub")
+
+        if not email or not sub:
+            raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Missing email or sub in token")
+
+        existing_user = self.user_repo.get_user_by_id(sub)
+        if existing_user:
+            return {"status": False, "detail": "User already exists, please login"}
+        
+        self.user_repo.create_user(id=sub, email=email, name=username, age=age)
+        return {"status": True}
+
+    async def login(self, id_token: str):
+        user_info = await self.verify_google_token(id_token)
+        email = user_info.get("email")
+        sub = user_info.get("sub")
+
+        if not email or not sub:
+            raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Missing email or sub in token")
+
+        user = self.user_repo.get_user_by_id(sub)
+        if not user:
+            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="User does not exist, please sign in")
+        
+        if not user.is_active:
+            raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Inactive user")
+
+        # Create access token
+        access_token = create_access_token(
+            subject=user.id, 
+            extra_data={"email": user.email, "username": user.name}
+        )
+
+        # Create refresh token
+        refresh_token, jti, refresh_expire = create_refresh_token(subject=user.id)
+        
+        # Save refresh token
+        self.user_repo.save_refresh_token(user_id=user.id, jti=jti, expires_at=refresh_expire)
+
+        return {
+            "status": True,
+            "access_token": access_token,
+            "refresh_token": refresh_token,
+            "user": {
+                "id": user.id,
+                "username": user.name,
+                "email": user.email
+            }
+        }
+
+    def rotate_refresh_token(self, old_refresh_token: str):
+        try:
+            payload = jwt.decode(old_refresh_token, settings.SECRET_KEY, algorithms=["HS256"])
+            user_id = payload.get("sub")
+            old_jti = payload.get("jti")
+            
+            if not user_id or not old_jti:
+                raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid token payload")
+
+            # Verify and delete old token (Rotation)
+            deleted = self.user_repo.delete_refresh_token(jti=old_jti, user_id=user_id)
+            if not deleted:
+                raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Token already used or invalid")
+            
+            user = self.user_repo.get_user_by_id(user_id)
+            if not user or not user.is_active:
+                 raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="User not found or inactive")
+
+            # Generate new tokens
+            new_access_token = create_access_token(
+                subject=user.id, 
+                extra_data={"email": user.email, "username": user.name}
+            )
+            new_refresh_token, new_jti, new_expire = create_refresh_token(subject=user.id)
+            
+            self.user_repo.save_refresh_token(user_id=user.id, jti=new_jti, expires_at=new_expire)
+
+            return {
+                "access_token": new_access_token,
+                "refresh_token": new_refresh_token
+            }
+        except JOSEError:
+            raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid refresh token")
+
+    def logout(self, refresh_token: str | None, access_token: str | None):
+        # We can implement a Redis blacklist here if needed for access_token,
+        # but for now we just delete the refresh token from DB.
+        if refresh_token:
+            try:
+                payload = jwt.decode(refresh_token, settings.SECRET_KEY, algorithms=["HS256"])
+                user_id = payload.get("sub")
+                jti = payload.get("jti")
+                if user_id and jti:
+                    self.user_repo.delete_refresh_token(jti=jti, user_id=user_id)
+            except JOSEError:
+                pass
