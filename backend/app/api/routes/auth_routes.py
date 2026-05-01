@@ -1,7 +1,7 @@
 from fastapi import APIRouter, Depends, Body, Response, Cookie, HTTPException, BackgroundTasks, status
 from sqlalchemy.orm import Session
 from app.core.database import get_db
-from app.schemas.user import GoogleAuthRequest
+from app.schemas.user import GoogleAuthRequest, UserRegister, UserLogin, EmailVerification
 from app.services.auth_service import AuthService
 from app.core.config import settings
 
@@ -12,6 +12,53 @@ def get_auth_service(db: Session = Depends(get_db)):
 
 def cleanup_tokens_task(auth_service: AuthService):
     auth_service.user_repo.delete_expired_tokens()
+
+@router.post("/register")
+async def register_user(
+    data: UserRegister,
+    auth_service: AuthService = Depends(get_auth_service)
+):
+    return auth_service.register(
+        email=data.email,
+        name=data.name,
+        password=data.password,
+        age=data.age
+    )
+
+@router.post("/verify-email")
+async def verify_email(
+    data: EmailVerification,
+    auth_service: AuthService = Depends(get_auth_service)
+):
+    return auth_service.verify_email(token=data.token)
+
+@router.post("/login")
+async def login(
+    response: Response,
+    data: UserLogin,
+    auth_service: AuthService = Depends(get_auth_service)
+):
+    result = auth_service.traditional_login(email=data.email, password=data.password)
+    
+    response.set_cookie(
+        key="access_token",
+        value=result["access_token"],
+        max_age=settings.ACCESS_TOKEN_EXPIRE_MINUTES * 60,
+        httponly=True, secure=True, samesite="None", path="/"
+    )
+
+    response.set_cookie(
+        key="refresh_token",
+        value=result["refresh_token"],
+        max_age=30 * 24 * 60 * 60,
+        httponly=True, secure=True, samesite="None", path="/refresh"
+    )
+
+    return {
+        "status": True,
+        "access_token": result["access_token"],
+        "user": result["user"]
+    }
 
 @router.post("/google_signin")
 async def google_signin(

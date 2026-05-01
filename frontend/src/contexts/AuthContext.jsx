@@ -45,11 +45,50 @@ export const AuthProvider = ({ children }) => {
         localStorage.setItem('mylex_user', JSON.stringify(userData));
         return { success: true };
       }
+      return { success: false, message: 'Fallo al iniciar sesión con Google.' };
+    } catch (error) {
+      return { success: false, message: error.response?.data?.detail || 'Error en el servidor.' };
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const loginWithEmail = async (email, password) => {
+    setLoading(true);
+    try {
+      const response = await api.post('/auth/login', { email, password });
+      if (response.data.status) {
+        const userData = response.data.user;
+        setUser(userData);
+        localStorage.setItem('mylex_user', JSON.stringify(userData));
+        return { success: true };
+      }
       return { success: false, message: 'Fallo al iniciar sesión.' };
     } catch (error) {
       return { success: false, message: error.response?.data?.detail || 'Error en el servidor.' };
     } finally {
       setLoading(false);
+    }
+  };
+
+  const registerUser = async (email, name, password) => {
+    setLoading(true);
+    try {
+      const response = await api.post('/auth/register', { email, name, password });
+      return { success: true, message: response.data.detail };
+    } catch (error) {
+      return { success: false, message: error.response?.data?.detail || 'Error en el registro.' };
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const verifyEmail = async (token) => {
+    try {
+      const response = await api.post('/auth/verify-email', { token });
+      return { success: true, message: response.data.detail };
+    } catch (error) {
+      return { success: false, message: error.response?.data?.detail || 'Fallo al verificar el correo.' };
     }
   };
 
@@ -67,7 +106,7 @@ export const AuthProvider = ({ children }) => {
   };
 
   return (
-    <AuthContext.Provider value={{ user, loading, loginWithGoogle, logout }}>
+    <AuthContext.Provider value={{ user, loading, loginWithGoogle, loginWithEmail, registerUser, verifyEmail, logout }}>
       {children}
     </AuthContext.Provider>
   );

@@ -1,11 +1,11 @@
+import bcrypt
 from datetime import datetime, timedelta
 from typing import Any, Union, Tuple
 from jose import jwt
-from passlib.context import CryptContext
 from app.core.config import settings
 import uuid
+import bcrypt
 
-pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
 ALGORITHM = "HS256"
 
@@ -14,10 +14,15 @@ ACCESS_TOKEN_EXPIRE_MINUTES = 15  # Short duration
 REFRESH_TOKEN_EXPIRE_DAYS = 30    # Long duration
 
 def verify_password(plain_password: str, hashed_password: str) -> bool:
-    return pwd_context.verify(plain_password, hashed_password)
+    password_byte_enc=plain_password.encode('utf-8')
+    hashed_password_byte_enc=hashed_password.encode('utf-8')
+    return bcrypt.checkpw(password_byte_enc,hashed_password_byte_enc) 
 
 def get_password_hash(password: str) -> str:
-    return pwd_context.hash(password)
+    pwd_bytes=password.encode('utf-8')
+    salt = bcrypt.gensalt()
+    hashed_password=bcrypt.hashpw(pwd_bytes,salt)
+    return hashed_password.decode('utf-8')
 
 def create_access_token(subject: Union[str, Any], extra_data: dict = None) -> str:
     expire = datetime.utcnow() + timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)

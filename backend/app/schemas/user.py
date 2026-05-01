@@ -10,9 +10,20 @@ class UserBase(BaseModel):
 class UserCreate(UserBase):
     id_token: str # Google ID token
 
+class UserRegister(UserBase):
+    password: str
+
+class UserLogin(BaseModel):
+    email: EmailStr
+    password: str
+
+class EmailVerification(BaseModel):
+    token: str
+
 class UserInDB(UserBase):
     id: str
     is_active: bool
+    is_verified: bool
     created_at: datetime
 
     class Config:

@@ -12,8 +12,8 @@ class UserRepository:
     def get_user_by_email(self, email: str) -> User | None:
         return self.db.query(User).filter(User.email == email).first()
 
-    def create_user(self, id: str, email: str, name: str, age: int | None = None) -> User:
-        db_user = User(id=id, email=email, name=name, age=age)
+    def create_user(self, id: str, email: str, name: str, age: int | None = None, hashed_password: str = None, is_verified: bool = False) -> User:
+        db_user = User(id=id, email=email, name=name, age=age, hashed_password=hashed_password, is_verified=is_verified)
         self.db.add(db_user)
         self.db.commit()
         self.db.refresh(db_user)

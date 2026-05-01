@@ -7,6 +7,11 @@ from app.core.security import create_access_token, create_refresh_token
 from app.repositories.user_repository import UserRepository
 import os
 
+from datetime import datetime, timedelta
+from jose import jwt, JOSEError
+import uuid
+from app.core.security import get_password_hash, verify_password
+
 API_URL = "https://oauth2.googleapis.com/tokeninfo?id_token="
 
 # Normally load this from settings/env
@@ -17,33 +22,95 @@ class AuthService:
         self.db = db
         self.user_repo = UserRepository(db)
 
+    def create_verification_token(self, email: str) -> str:
+        expire = datetime.utcnow() + timedelta(hours=24)
+        to_encode = {"exp": expire, "sub": email, "type": "verification"}
+        return jwt.encode(to_encode, settings.SECRET_KEY, algorithm="HS256")
+
+    def register(self, email: str, name: str, password: str, age: int | None = None):
+        existing_user = self.user_repo.get_user_by_email(email)
+        if existing_user:
+            raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Email already registered")
+        
+        hashed_pw = get_password_hash(password)
+        user_id = str(uuid.uuid4())
+        
+        user = self.user_repo.create_user(
+            id=user_id, 
+            email=email, 
+            name=name, 
+            age=age, 
+            hashed_password=hashed_pw,
+            is_verified=False
+        )
+        
+        # Generar token y "enviar" correo
+        token = self.create_verification_token(email)
+        verification_link = f"http://localhost:5173/verify-email?token={token}"
+        print(f"\n==============================================")
+        print(f"VERIFICATION EMAIL FOR {email}")
+        print(f"Please click here to verify: {verification_link}")
+        print(f"==============================================\n")
+        
+        return {"status": True, "detail": "User registered successfully. Please verify your email."}
+
+    def verify_email(self, token: str):
+        try:
+            payload = jwt.decode(token, settings.SECRET_KEY, algorithms=["HS256"])
+            if payload.get("type") != "verification":
+                raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Invalid token type")
+            
+            email = payload.get("sub")
+            user = self.user_repo.get_user_by_email(email)
+            if not user:
+                raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="User not found")
+            
+            if user.is_verified:
+                return {"status": True, "detail": "User already verified"}
+                
+            user.is_verified = True
+            self.db.commit()
+            return {"status": True, "detail": "Email verified successfully"}
+            
+        except JOSEError:
+            raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Invalid or expired verification token")
+
+    def traditional_login(self, email: str, password: str):
+        user = self.user_repo.get_user_by_email(email)
+        if not user:
+            raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid credentials")
+        
+        if not user.hashed_password or not verify_password(password, user.hashed_password):
+            raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid credentials")
+            
+        if not user.is_active:
+            raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Inactive user")
+            
+        if not user.is_verified:
+            raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Please verify your email first")
+
+        access_token = create_access_token(
+            subject=user.id, 
+            extra_data={"email": user.email, "username": user.name}
+        )
+        refresh_token, jti, refresh_expire = create_refresh_token(subject=user.id)
+        self.user_repo.save_refresh_token(user_id=user.id, jti=jti, expires_at=refresh_expire)
+
+        return {
+            "status": True,
+            "access_token": access_token,
+            "refresh_token": refresh_token,
+            "user": {"id": user.id, "username": user.name, "email": user.email}
+        }
+
     async def verify_google_token(self, id_token: str) -> dict:
         async with httpx.AsyncClient() as client:
             response = await client.get(API_URL + id_token)
             if response.status_code != 200:
                 raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid Google token")
-            data = response.json()
-            # If you want strictly check audience, uncomment below and ensure CLIENT_ID is correct
-            # if data.get("aud") != CLIENT_ID:
-            #    raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Token audience mismatch")
-            return data
+            return response.json()
 
-    async def signin(self, id_token: str, username: str, age: int):
-        user_info = await self.verify_google_token(id_token)
-        email = user_info.get("email")
-        sub = user_info.get("sub")
-
-        if not email or not sub:
-            raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Missing email or sub in token")
-
-        existing_user = self.user_repo.get_user_by_id(sub)
-        if existing_user:
-            return {"status": False, "detail": "User already exists, please login"}
-        
-        self.user_repo.create_user(id=sub, email=email, name=username, age=age)
-        return {"status": True}
-
-    async def login(self, id_token: str):
+    async def login_with_google(self, id_token: str):
         user_info = await self.verify_google_token(id_token)
         email = user_info.get("email")
         sub = user_info.get("sub")
