@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useVocabulary } from '../hooks/useVocabulary';
+import { usePaginate } from '../hooks/usePaginate';
 import CreateListModal from '../components/CreateListModal';
 
 export default function AllLists() {
@@ -16,10 +17,7 @@ export default function AllLists() {
     fetchLists();
   }, [fetchLists]);
 
-  const indexOfLastItem = currentPage * itemsPerPage;
-  const indexOfFirstItem = indexOfLastItem - itemsPerPage;
-  const currentLists = lists.slice(indexOfFirstItem, indexOfLastItem);
-  const totalPages = Math.ceil(lists.length / itemsPerPage);
+  const { currentItems, totalPages } = usePaginate(currentPage, itemsPerPage, lists)
 
   const handleCreateList = async (listData) => {
     await addList(listData);
@@ -60,7 +58,7 @@ export default function AllLists() {
             {lists.length > 0 ? (
               /* Grid de Listas adaptado a HeroCard */
               <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-[25px] justify-items-center mb-12">
-                {currentLists.map((list) => (
+                {currentItems.map((list) => (
                   <div
                     key={list.id}
                     onClick={() => navigate(`/list/${list.id}`)}

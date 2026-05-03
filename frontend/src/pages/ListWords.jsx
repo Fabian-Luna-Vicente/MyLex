@@ -1,107 +1,29 @@
-import { useEffect, useState } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
-import api from '../services/api';
 import { IoAddCircleSharp } from "react-icons/io5";
 import { CiPlay1 } from "react-icons/ci";
 import { MdOutlineModeEdit, MdDeleteOutline, MdOutlineDriveFileMove } from "react-icons/md";
 import { BsXLg } from "react-icons/bs";
 import { GrPrevious, GrNext } from "react-icons/gr";
+import { useListWords } from '../hooks/useListWords';
+import { usePaginate } from '../hooks/usePaginate';
 
 export default function ListWords() {
-  const { id } = useParams();
-  const navigate = useNavigate();
+  const { 
+    list, lists, loading, id, navigate,
+    showEditListMenu, setShowEditListMenu, 
+    showMoveMenu, setShowMoveMenu, 
+    showConfirmDelete, setShowConfirmDelete, 
+    newTitle, setNewTitle, 
+    wordToMove, setWordToMove, 
+    wordToDelete, setWordToDelete, 
+    deleteMode, setDeleteMode, 
+    currentPage, setCurrentPage, 
+    itemsPerPage, 
+    playSound,
+    handleEditList, handleDeleteList, handleDeleteWord, handleMoveWord
+  } = useListWords();
 
-  // --- ESTADOS PRINCIPALES ---
-  const [list, setList] = useState(null);
-  const [loading, setLoading] = useState(true);
+  const { currentItems, totalPages } = usePaginate(currentPage, itemsPerPage, list?.words || []);
 
-  // --- ESTADOS DE UI Y MODALES ---
-  const [showEditListMenu, setShowEditListMenu] = useState(false);
-  const [showMoveMenu, setShowMoveMenu] = useState(false);
-  const [showConfirmDelete, setShowConfirmDelete] = useState(false);
-
-  // --- ESTADOS TEMPORALES PARA ACCIONES ---
-  const [newTitle, setNewTitle] = useState("");
-  const [wordToMove, setWordToMove] = useState(null);
-  const [wordToDelete, setWordToDelete] = useState(null);
-  const [deleteMode, setDeleteMode] = useState(false);
-
-  // --- PAGINACIÓN ---
-  const [currentPage, setCurrentPage] = useState(1);
-  const itemsPerPage = 8;
-
-  // --- LÓGICA DE OBTENCIÓN DE DATOS (Original de ListWords) ---
-  useEffect(() => {
-    const fetchListDetails = async () => {
-      setLoading(true);
-      try {
-        const response = await api.get(`/api/lists/${id}`);
-        setList(response.data);
-      } catch (error) {
-        console.error("Error fetching list", error);
-      } finally {
-        setLoading(false);
-      }
-    };
-    fetchListDetails();
-  }, [id]);
-
-  // --- HANDLERS PREPARADOS PARA TU API ---
-
-  const handleEditList = async () => {
-    if (!newTitle.trim()) return;
-    try {
-      // TODO: Conectar  API aquí
-      // await api.put(`/api/lists/${id}`, { name: newTitle });
-
-      setList(prev => ({ ...prev, name: newTitle }));
-      setShowEditListMenu(false);
-    } catch (error) {
-      console.error("Error updating list", error);
-    }
-  };
-
-  const handleDeleteList = async () => {
-    if (window.confirm("Are you sure you want to delete this entire list?")) {
-      try {
-        // TODO: Conectar la API aquí
-        // await api.delete(`/api/lists/${id}`);
-        navigate('/lists');
-      } catch (error) {
-        console.error("Error deleting list", error);
-      }
-    }
-  };
-
-  const handleDeleteWord = async () => {
-    try {
-      // TODO: Conectar la API aquí
-      // await api.delete(`/api/words/${wordToDelete.id}`);
-
-      // Actualización  del estado local
-      setList(prev => ({
-        ...prev,
-        words: prev.words.filter(w => w.id !== wordToDelete.id)
-      }));
-      setShowConfirmDelete(false);
-    } catch (error) {
-      console.error("Error deleting word", error);
-    }
-  };
-
-  const playSound = async (text) => {
-    const utterance = new SpeechSynthesisUtterance(text);
-    utterance.lang = 'en-US'; // O el idioma que uses
-    window.speechSynthesis.speak(utterance);
-  };
-
-  // --- CÁLCULOS DE PAGINACIÓN ---
-  const indexOfLastItem = currentPage * itemsPerPage;
-  const indexOfFirstItem = indexOfLastItem - itemsPerPage;
-  const currentWords = list?.words ? list.words.slice(indexOfFirstItem, indexOfLastItem) : [];
-  const totalPages = list?.words ? Math.ceil(list.words.length / itemsPerPage) : 0;
-
-  // --- RENDER DE CARGA ---
   if (loading) {
     return (
       <div className="min-h-screen bg-[#071320] flex justify-center items-center">
@@ -156,7 +78,7 @@ export default function ListWords() {
           </div>
 
           <button
-            onClick={() => navigate(`/list/${id}/add-word`)} // Cambia esto a tu ruta real
+            onClick={() => navigate(`/create-word?listId=${id}`)}
             className="flex items-center gap-2 px-6 py-2.5 bg-[#0e0c1d]/60 backdrop-blur-sm border border-[#00c3ff]/50 text-[#00c3ff] rounded-full hover:bg-[#00c3ff]/20 hover:border-[#00c3ff] shadow-[0_0_10px_rgba(0,195,255,0.2)] hover:shadow-[0_0_20px_rgba(0,195,255,0.5)] transition-all duration-300 font-bold tracking-wider uppercase text-sm"
           >
             <IoAddCircleSharp size={20} />
@@ -166,15 +88,15 @@ export default function ListWords() {
 
         {/* GRID DE PALABRAS */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-[25px] justify-items-center mb-12">
-          {currentWords.length > 0 ? (
-            currentWords.map((word) => (
+          {currentItems.length > 0 ? (
+            currentItems.map((word) => (
 
               <div
                 key={word.id}
-                className="group bg-[#0e0c1d]/60 backdrop-blur-[10px] border border-[#00c3ff]/20 rounded-[20px] w-full max-w-[350px] p-6 flex flex-col shadow-[0_5px_15px_rgba(0,0,0,0.3)] transition-all duration-[400ms] ease-[cubic-bezier(0.175,0.885,0.32,1.275)] hover:-translate-y-2 hover:bg-[#0e0c1d]/80 hover:border-[#00c3ff] hover:shadow-[0_10px_25px_rgba(0,195,255,0.3)]"
+                className="group bg-[#0e0c1d]/60 backdrop-blur-[10px] border border-[#00c3ff]/20 rounded-[20px] w-full max-w-[350px] p-6 flex flex-col shadow-[0_5px_15px_rgba(0,0,0,0.3)] transition-all duration-[400ms] ease-[cubic-bezier(0.175,0.885,0.32,1.275)] hover:-translate-y-2 hover:bg-[#0e0c1d]/80 hover:border-[#00c3ff] hover:shadow-[0_10px_25px_rgba(0,195,255,0.3)] h-full"
               >
-                {/* Cabecera de la tarjeta: Título y Tags (Ajustado a la lógica de ListWords) */}
-                <div className="flex justify-between items-start mb-4 border-b border-[#00c3ff]/20 pb-3">
+                {/* Cabecera de la tarjeta: Título y Tags */}
+                <div className="flex justify-between items-start mb-4 border-b border-[#00c3ff]/20 pb-3 flex-shrink-0">
                   <h3 className="text-[1.5rem] font-bold text-white transition-colors duration-300 group-hover:text-[#00c3ff]">
                     {word.name}
                   </h3>
@@ -190,29 +112,34 @@ export default function ListWords() {
                   </div>
                 </div>
 
-                {/* Significado */}
-                {word.meaning && (
-                  <div className="flex-grow">
+                {/* CONTENEDOR FLEXIBLE */}
+                <div className="flex-grow flex flex-col">
+                  {/* Imagen */}
+                  {word.image && (
+                    <div className="w-full h-32 mb-4 rounded-xl overflow-hidden border border-[#00c3ff]/20 flex-shrink-0">
+                      <img src={word.image} alt={word.name} className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110" />
+                    </div>
+                  )}
+
+                  {/* Significado */}
+                  {word.meaning && (
                     <p className="text-[#a0a0a0] mb-4 whitespace-pre-wrap text-[0.95rem] leading-[1.4]">
                       {word.meaning}
                     </p>
-                  </div>
-                )}
+                  )}
 
-                {/* Ejemplo (Ajustado a la lógica de ListWords) */}
-                {word.examples && word.examples.length > 0 && word.examples[0] !== "" && (
-                  <div className="mt-auto pt-3">
-                    <p className="text-[10px] text-[#00c3ff]/70 mb-1 font-bold uppercase tracking-widest">
-                      Example
-                    </p>
-                    <p className="text-[#a0a0a0] italic text-sm line-clamp-2">
-                      "{word.examples[0]}"
-                    </p>
-                  </div>
-                )}
+                  {/* Conjugaciones */}
+                  {(word.past || word.gerund || word.participle) && (
+                    <div className="flex gap-2 mb-3 text-[10px] text-[#a0a0a0] font-medium italic overflow-x-auto custom-scrollbar pb-1">
+                      {word.past && <span className="bg-[#0e0c1d] px-2 py-1 rounded border border-[#00c3ff]/10 whitespace-nowrap">Past: {word.past}</span>}
+                      {word.gerund && <span className="bg-[#0e0c1d] px-2 py-1 rounded border border-[#00c3ff]/10 whitespace-nowrap">Gerund: {word.gerund}</span>}
+                      {word.participle && <span className="bg-[#0e0c1d] px-2 py-1 rounded border border-[#00c3ff]/10 whitespace-nowrap">Participle: {word.participle}</span>}
+                    </div>
+                  )}
+                </div>
 
                 {/* BARRA DE ACCIONES DE LA TARJETA */}
-                <div className="flex justify-end gap-3 mt-4 pt-4 border-t border-[#00c3ff]/10">
+                <div className="mt-auto flex justify-end gap-3 pt-4 border-t border-[#00c3ff]/10 flex-shrink-0">
                   <button onClick={() => playSound(word.name)} className="text-[#a0a0a0] hover:text-[#00c3ff] transition-colors" title="Listen">
                     <CiPlay1 size={22} />
                   </button>
@@ -292,7 +219,7 @@ export default function ListWords() {
         </div>
       )}
 
-      {/* 2. Modal Mover Palabra (Maquetado listo para tu API) */}
+      {/* 2. Modal Mover Palabra */}
       {showMoveMenu && (
         <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
           <div className="absolute inset-0 bg-[#071320]/80 backdrop-blur-md" onClick={() => setShowMoveMenu(false)}></div>
@@ -309,8 +236,15 @@ export default function ListWords() {
 
             <p className="text-[11px] font-bold text-[#00c3ff]/80 uppercase tracking-widest mb-3">Select Target List</p>
             <div className="flex flex-col gap-2 max-h-[40vh] overflow-y-auto pr-2 custom-scrollbar text-[#a0a0a0] text-sm italic">
-              {/* Aquí mapearías tus otras listas cuando las obtengas de la API */}
-              (Fetch and list your other lists here to select the destination)
+              {lists.filter(l => l.id !== parseInt(id)).map((targetList) => (
+                <button
+                  key={targetList.id}
+                  onClick={handleMoveWord} // Requires further backend logic
+                  className="w-full text-left px-4 py-3 rounded-[12px] bg-[#071320] border border-[#00c3ff]/20 text-white hover:border-[#00c3ff] hover:bg-[#00c3ff]/10 hover:text-[#00c3ff] transition-all duration-300"
+                >
+                  {targetList.name}
+                </button>
+              ))}
             </div>
           </div>
         </div>

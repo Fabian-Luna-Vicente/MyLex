@@ -11,4 +11,38 @@
     color: var(--foreground);
     font-family: 'Inter', system-ui, Avenir, Helvetica, Arial, sans-serif;
   }
+
+
+  /* --- ESTILOS GLOBALES PARA BARRAS DE SCROLL --- */
+
+  /* Para navegadores basados en WebKit (Chrome, Edge, Safari, Opera) */
+  ::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+  }
+
+  ::-webkit-scrollbar-track {
+    background-color: rgba(0, 0, 0, 0.2);
+    /* Equivalente a bg-black/20 */
+    border-radius: 9999px;
+  }
+
+  ::-webkit-scrollbar-thumb {
+    background-color: #00c3ffd2;
+    /* Equivalente a bg-emerald-500/30 */
+    border-radius: 9999px;
+    border: 2px solid transparent;
+    background-clip: padding-box;
+  }
+
+  ::-webkit-scrollbar-thumb:hover {
+    background-color: #00c3ffd2;
+    /* Equivalente a bg-emerald-500/60 */
+  }
+
+  /* Para Firefox */
+  * {
+    scrollbar-width: thin;
+    scrollbar-color: #00c3ffd2 rgba(0, 0, 0, 0.2);
+  }
 }

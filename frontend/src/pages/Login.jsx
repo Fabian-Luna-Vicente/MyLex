@@ -79,65 +79,68 @@ export default function Login() {
   if (authLoading) return null;
 
   return (
-    <div className="min-h-screen bg-slate-900 flex items-center justify-center p-4 relative overflow-hidden">
-      {/* Glows */}
-      <div className="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] bg-blue-600/20 rounded-full blur-[120px] pointer-events-none"></div>
+    <div className="min-h-screen bg-[#071320] flex items-center justify-center p-4 relative overflow-hidden font-sans z-[1]">
 
-      <div className="w-full max-w-md bg-slate-800/80 backdrop-blur-xl p-8 rounded-3xl border border-slate-700/50 shadow-2xl relative z-10">
+      <div className="absolute top-[-20%] left-[-10%] w-[50%] h-[50%] bg-[#00c3ff]/10 rounded-full blur-[150px] pointer-events-none z-0"></div>
+      <div className="absolute bottom-[-20%] right-[-10%] w-[50%] h-[50%] bg-[#00c3ff]/5 rounded-full blur-[150px] pointer-events-none z-0"></div>
+
+      {/* Contenedor Glassmorphism */}
+      <div className="w-full max-w-md bg-[#0e0c1d]/80 backdrop-blur-[15px] p-8 md:p-10 rounded-[25px] border border-[#00c3ff]/30 shadow-[0_10px_40px_rgba(0,0,0,0.8)] relative z-10 transition-all duration-500">
+
         <div className="text-center mb-8">
-          <h1 className="text-4xl font-extrabold bg-gradient-to-r from-blue-400 to-indigo-500 bg-clip-text text-transparent">
-            MyLex
+          <h1 className="text-[2.5rem] font-extrabold text-white drop-shadow-[0_0_10px_rgba(0,195,255,0.5)] tracking-wide">
+            My<span className='text-[#00c3ff]'>Lex</span>
           </h1>
-          <p className="text-slate-400 mt-2 text-sm">
+          <p className="text-[#a0a0a0] mt-2 text-sm uppercase tracking-widest font-bold">
             {isRegistering ? "Create your account" : "Sign in to your account"}
           </p>
         </div>
 
         {error && (
-          <div className="bg-red-500/10 border border-red-500/50 text-red-400 p-3 rounded-lg mb-6 text-sm text-center">
+          <div className="bg-red-500/10 border border-red-500/30 text-red-400 px-4 py-3 rounded-[15px] mb-6 text-sm text-center shadow-[inset_0_0_10px_rgba(239,68,68,0.1)] font-medium">
             {error}
           </div>
         )}
 
         {successMsg && (
-          <div className="bg-green-500/10 border border-green-500/50 text-green-400 p-3 rounded-lg mb-6 text-sm text-center">
+          <div className="bg-[#00c3ff]/10 border border-[#00c3ff]/30 text-[#00c3ff] px-4 py-3 rounded-[15px] mb-6 text-sm text-center shadow-[inset_0_0_10px_rgba(0,195,255,0.1)] font-medium drop-shadow-[0_0_5px_rgba(0,195,255,0.5)]">
             {successMsg}
           </div>
         )}
 
-        <form onSubmit={handleEmailSubmit} className="flex flex-col gap-4 mb-6">
+        <form onSubmit={handleEmailSubmit} className="flex flex-col gap-5 mb-6">
           {isRegistering && (
             <div>
-              <label className="block text-xs font-medium text-slate-400 mb-1">Name</label>
+              <label className="block text-[11px] font-bold text-[#00c3ff]/80 uppercase tracking-widest mb-2">Name</label>
               <input
                 type="text"
                 name="name"
                 value={formData.name}
                 onChange={handleChange}
-                className="w-full bg-slate-900/50 border border-slate-700 rounded-xl px-4 py-2.5 text-slate-100 focus:outline-none focus:border-blue-500 transition-colors"
+                className="w-full bg-[#071320] border border-[#00c3ff]/30 rounded-[15px] px-4 py-3.5 text-white placeholder-[#a0a0a0]/40 focus:outline-none focus:border-[#00c3ff] focus:ring-1 focus:ring-[#00c3ff] shadow-[inset_0_2px_5px_rgba(0,0,0,0.5)] transition-all duration-300"
                 placeholder="John Doe"
               />
             </div>
           )}
           <div>
-            <label className="block text-xs font-medium text-slate-400 mb-1">Email</label>
+            <label className="block text-[11px] font-bold text-[#00c3ff]/80 uppercase tracking-widest mb-2">Email</label>
             <input
               type="email"
               name="email"
               value={formData.email}
               onChange={handleChange}
-              className="w-full bg-slate-900/50 border border-slate-700 rounded-xl px-4 py-2.5 text-slate-100 focus:outline-none focus:border-blue-500 transition-colors"
+              className="w-full bg-[#071320] border border-[#00c3ff]/30 rounded-[15px] px-4 py-3.5 text-white placeholder-[#a0a0a0]/40 focus:outline-none focus:border-[#00c3ff] focus:ring-1 focus:ring-[#00c3ff] shadow-[inset_0_2px_5px_rgba(0,0,0,0.5)] transition-all duration-300"
               placeholder="you@example.com"
             />
           </div>
           <div>
-            <label className="block text-xs font-medium text-slate-400 mb-1">Password</label>
+            <label className="block text-[11px] font-bold text-[#00c3ff]/80 uppercase tracking-widest mb-2">Password</label>
             <input
               type="password"
               name="password"
               value={formData.password}
               onChange={handleChange}
-              className="w-full bg-slate-900/50 border border-slate-700 rounded-xl px-4 py-2.5 text-slate-100 focus:outline-none focus:border-blue-500 transition-colors"
+              className="w-full bg-[#071320] border border-[#00c3ff]/30 rounded-[15px] px-4 py-3.5 text-white placeholder-[#a0a0a0]/40 focus:outline-none focus:border-[#00c3ff] focus:ring-1 focus:ring-[#00c3ff] shadow-[inset_0_2px_5px_rgba(0,0,0,0.5)] transition-all duration-300"
               placeholder="••••••••"
             />
           </div>
@@ -145,23 +148,27 @@ export default function Login() {
           <button
             type="submit"
             disabled={loading}
-            className="w-full mt-2 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 text-white py-3 rounded-xl font-semibold transition-all disabled:opacity-50"
+            className="w-full mt-2 bg-[#00c3ff]/10 border border-[#00c3ff]/50 hover:bg-[#00c3ff]/20 text-[#00c3ff] py-3.5 rounded-full font-bold tracking-widest uppercase text-sm transition-all duration-300 hover:shadow-[0_0_15px_rgba(0,195,255,0.4)] disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center"
           >
-            {loading ? "Processing..." : (isRegistering ? "Register" : "Sign In")}
+            {loading ? (
+              <div className="h-5 w-5 animate-spin rounded-full border-2 border-[#00c3ff] border-t-transparent shadow-[0_0_5px_rgba(0,195,255,0.5)]"></div>
+            ) : (
+              isRegistering ? "Register" : "Sign In"
+            )}
           </button>
         </form>
 
         <div className="relative flex items-center py-2 mb-6">
-          <div className="flex-grow border-t border-slate-700"></div>
-          <span className="flex-shrink-0 mx-4 text-slate-500 text-xs">Or continue with</span>
-          <div className="flex-grow border-t border-slate-700"></div>
+          <div className="flex-grow border-t border-[#00c3ff]/20"></div>
+          <span className="flex-shrink-0 mx-4 text-[#a0a0a0] text-[10px] uppercase tracking-widest font-bold">Or continue with</span>
+          <div className="flex-grow border-t border-[#00c3ff]/20"></div>
         </div>
 
         <button
           type="button"
           onClick={handleFakeGoogleLogin}
           disabled={loading}
-          className="w-full bg-white text-slate-900 py-3 rounded-xl font-semibold flex items-center justify-center gap-3 hover:bg-slate-100 transition-colors disabled:opacity-50"
+          className="w-full bg-white text-[#071320] py-3.5 rounded-full font-extrabold flex items-center justify-center gap-3 hover:bg-gray-200 transition-colors duration-300 disabled:opacity-50 shadow-[0_5px_15px_rgba(255,255,255,0.1)] hover:shadow-[0_5px_20px_rgba(255,255,255,0.2)]"
         >
           <svg className="w-5 h-5" viewBox="0 0 24 24">
             <path fill="currentColor" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" />
@@ -172,7 +179,7 @@ export default function Login() {
           Google
         </button>
 
-        <p className="text-center text-slate-400 text-sm mt-6">
+        <p className="text-center text-[#a0a0a0] text-sm mt-8">
           {isRegistering ? "Already have an account?" : "Don't have an account?"}
           <button
             type="button"
@@ -181,7 +188,7 @@ export default function Login() {
               setError('');
               setSuccessMsg('');
             }}
-            className="ml-2 text-blue-400 hover:text-blue-300 font-medium transition-colors"
+            className="ml-2 text-[#00c3ff] hover:text-white font-bold transition-colors duration-300 underline underline-offset-4"
           >
             {isRegistering ? "Sign In" : "Register"}
           </button>

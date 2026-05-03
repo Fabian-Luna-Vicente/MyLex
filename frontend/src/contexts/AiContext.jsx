@@ -1,5 +1,5 @@
 import { createContext, useState } from 'react';
-import api from '../services/api';
+import { aiService } from '../services/aiService';
 
 export const AiContext = createContext();
 
@@ -9,8 +9,7 @@ export const AiProvider = ({ children }) => {
   const searchDictionary = async (wordData) => {
     setLoading(true);
     try {
-      const response = await api.post('/api/ai/dictionary/search', wordData);
-      return response.data;
+      return await aiService.searchDictionary(wordData);
     } catch (error) {
       console.error("Dictionary Search Error", error);
       throw error;
@@ -22,8 +21,7 @@ export const AiProvider = ({ children }) => {
   const analyzeGrammar = async (grammarData) => {
     setLoading(true);
     try {
-      const response = await api.post('/api/ai/grammar/analyze', grammarData);
-      return response.data;
+      return await aiService.analyzeGrammar(grammarData);
     } catch (error) {
       console.error("Grammar Analysis Error", error);
       throw error;
@@ -35,8 +33,7 @@ export const AiProvider = ({ children }) => {
   const correctWriting = async (writingData) => {
     setLoading(true);
     try {
-      const response = await api.post('/api/ai/corrector/assist', writingData);
-      return response.data;
+      return await aiService.correctWriting(writingData);
     } catch (error) {
       console.error("Writing Corrector Error", error);
       throw error;

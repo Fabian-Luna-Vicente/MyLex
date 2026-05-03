@@ -1,5 +1,5 @@
 import { createContext, useState, useEffect, useCallback } from 'react';
-import api from '../services/api';
+import { authService } from '../services/authService';
 
 export const AuthContext = createContext();
 
@@ -9,9 +9,6 @@ export const AuthProvider = ({ children }) => {
 
   const checkAuth = useCallback(async () => {
     try {
-      // Intentamos refrescar o verificar sesión. Podrías tener un endpoint /auth/me en el backend.
-      // Si no existe, podemos forzar un refresh simulado o usar userInfo guardado.
-      // Para este caso, asumimos que si el auth:logout no se disparó, y tenemos info guardada, estamos logueados.
       const storedUser = localStorage.getItem('mylex_user');
       if (storedUser) {
         setUser(JSON.parse(storedUser));
@@ -30,7 +27,6 @@ export const AuthProvider = ({ children }) => {
       logout();
     };
     
-    // Escuchar el evento de token expirado desde api.js
     window.addEventListener('auth:logout', handleLogoutEvent);
     return () => window.removeEventListener('auth:logout', handleLogoutEvent);
   }, [checkAuth]);
@@ -38,11 +34,10 @@ export const AuthProvider = ({ children }) => {
   const loginWithGoogle = async (googleIdToken) => {
     setLoading(true);
     try {
-      const response = await api.post('/auth/google_login', { id_token: googleIdToken });
-      if (response.data.status) {
-        const userData = response.data.user;
-        setUser(userData);
-        localStorage.setItem('mylex_user', JSON.stringify(userData));
+      const data = await authService.loginWithGoogle(googleIdToken);
+      if (data.status) {
+        setUser(data.user);
+        localStorage.setItem('mylex_user', JSON.stringify(data.user));
         return { success: true };
       }
       return { success: false, message: 'Fallo al iniciar sesión con Google.' };
@@ -56,11 +51,10 @@ export const AuthProvider = ({ children }) => {
   const loginWithEmail = async (email, password) => {
     setLoading(true);
     try {
-      const response = await api.post('/auth/login', { email, password });
-      if (response.data.status) {
-        const userData = response.data.user;
-        setUser(userData);
-        localStorage.setItem('mylex_user', JSON.stringify(userData));
+      const data = await authService.loginWithEmail(email, password);
+      if (data.status) {
+        setUser(data.user);
+        localStorage.setItem('mylex_user', JSON.stringify(data.user));
         return { success: true };
       }
       return { success: false, message: 'Fallo al iniciar sesión.' };
@@ -74,8 +68,8 @@ export const AuthProvider = ({ children }) => {
   const registerUser = async (email, name, password) => {
     setLoading(true);
     try {
-      const response = await api.post('/auth/register', { email, name, password });
-      return { success: true, message: response.data.detail };
+      const data = await authService.registerUser(email, name, password);
+      return { success: true, message: data.detail };
     } catch (error) {
       return { success: false, message: error.response?.data?.detail || 'Error en el registro.' };
     } finally {
@@ -85,8 +79,8 @@ export const AuthProvider = ({ children }) => {
 
   const verifyEmail = async (token) => {
     try {
-      const response = await api.post('/auth/verify-email', { token });
-      return { success: true, message: response.data.detail };
+      const data = await authService.verifyEmail(token);
+      return { success: true, message: data.detail };
     } catch (error) {
       return { success: false, message: error.response?.data?.detail || 'Fallo al verificar el correo.' };
     }
@@ -95,7 +89,7 @@ export const AuthProvider = ({ children }) => {
   const logout = async () => {
     setLoading(true);
     try {
-      await api.post('/auth/logout');
+      await authService.logout();
     } catch (e) {
       console.error("Error logging out", e);
     } finally {
