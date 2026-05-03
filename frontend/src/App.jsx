@@ -10,6 +10,9 @@ import ListWords from './pages/ListWords';
 import VerifyEmail from './pages/VerifyEmail';
 import CreateWord from './pages/CreateWord';
 
+import RandomGame from './pages/RandomGame';
+import HangmanGame from './pages/HangmanGame';
+
 function App() {
   return (
     <AuthProvider>
@@ -25,6 +28,9 @@ function App() {
               <Route path="/list/:id" element={<ProtectedRoute><ListWords /></ProtectedRoute>} />
               <Route path="/create-word" element={<ProtectedRoute><CreateWord /></ProtectedRoute>} />
               
+              <Route path="/games/random" element={<ProtectedRoute><RandomGame /></ProtectedRoute>} />
+              <Route path="/games/hangman" element={<ProtectedRoute><HangmanGame /></ProtectedRoute>} />
+
               {/* Redirect root to dashboard */}
               <Route path="/" element={<Navigate to="/dashboard" replace />} />
             </Routes>

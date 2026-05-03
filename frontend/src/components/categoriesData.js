@@ -4,7 +4,7 @@ export const categories = {
             title: "Add Vocabulary",
             description: "Add new vocabulary to your lists.",
             img: "https://i.postimg.cc/3wxkyDWH/unnamed_2_removebg_preview.png",
-            onClick: "createWords/create",
+            onClick: "create-word/listId=0",
         },
         {
             title: "Your Lists",
@@ -18,13 +18,13 @@ export const categories = {
             title: "Random Repetition",
             description: "Flashcards for quick review.",
             img: "https://i.postimg.cc/N0jKyrLt/unnamed_4_removebg_preview.png",
-            onClick: "Random",
+            onClick: "/games/random",
         },
         {
             title: "Hangman",
             description: "Guess the hidden word.",
             img: "https://i.postimg.cc/k4jF6m7j/ahorcado.png",
-            onClick: "Hand",
+            onClick: "/games/hangman",
         },
         {
             title: "Visual Memory",
