@@ -14,7 +14,9 @@ export default function CreateWord() {
 
   const { searchWord, setSearchWord, useAiMode, setUseAiMode, searchResults, aiContext,
     setAiContext, handleSubmit, handleSelectResult, handleSearch, setSelectedListId,
-    selectedListId, error } = useCreateWord(lists, addWord, fetchLists, searchDictionary, aiLoading);
+    selectedListId, error, formData, setFormData, imageQuery, setImageQuery, imageResults,
+    isSearchingImages, imagePage, setImagePage, searchGoogleImages, handleImageSearchSubmit,
+    handleLoadMoreImages, toggleListSelection, saving, setSaving } = useCreateWord(lists, addWord, fetchLists, searchDictionary, aiLoading);
 
   return (
     <div className="min-h-screen bg-[#071320] text-white p-6 md:p-12 font-sans relative z-[1] overflow-hidden">

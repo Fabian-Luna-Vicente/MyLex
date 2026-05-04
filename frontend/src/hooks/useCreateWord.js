@@ -1,8 +1,8 @@
-import { useNavigate, useSearchParams } from 'react-router-dom';
+import { useSearchParams } from 'react-router-dom';
 import { useState, useEffect } from 'react';
 import { googleImagesService } from '../services/googleImagesService';
 
-export const useCreateWord = () => {
+export const useCreateWord = (lists, addWord, fetchLists, searchDictionary, aiLoading) => {
     const [searchParams] = useSearchParams();
     const defaultListId = searchParams.get('listId') || 0;
     // --- Estados del Buscador de Diccionario ---

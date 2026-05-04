@@ -1,4 +1,4 @@
-from sqlalchemy import Column, String, Integer, DateTime, ForeignKey, Table
+from sqlalchemy import Column, String, Integer, DateTime, Boolean, ForeignKey, Table, UniqueConstraint
 from sqlalchemy.orm import relationship
 from sqlalchemy.sql import func
 from sqlalchemy.dialects.postgresql import ARRAY
@@ -50,3 +50,35 @@ class Word(Base):
 
     user = relationship("User", backref="words")
     lists = relationship("VocabularyList", secondary=list_word_association, back_populates="words")
+    progress = relationship("WordProgress", back_populates="word", cascade="all, delete-orphan")
+
+
+class WordProgress(Base):
+    """
+    Tracks per-word, per-game progress for each user.
+
+    - game: 'random' | 'hangman' | future games
+    - difficulty: only for 'random' ('easy', 'normal', 'hard', 'ultrahard')
+    - is_correct: only for non-random games (True/False)
+    - reviewed_at: last time this record was updated (used for spaced repetition)
+
+    Unique constraint on (user_id, word_id, game) ensures one record per user/word/game,
+    enabling clean upserts.
+    """
+    __tablename__ = "word_progress"
+
+    id = Column(Integer, primary_key=True, index=True, autoincrement=True)
+    user_id = Column(String, ForeignKey("users.id", ondelete="CASCADE"), nullable=False)
+    word_id = Column(Integer, ForeignKey("words.id", ondelete="CASCADE"), nullable=False)
+    game = Column(String, nullable=False)  # 'random', 'hangman', etc.
+    difficulty = Column(String, nullable=True)  # 'easy', 'normal', 'hard', 'ultrahard'
+    is_correct = Column(Boolean, nullable=True)  # for non-random games
+    reviewed_at = Column(DateTime(timezone=True), server_default=func.now(), onupdate=func.now())
+
+    __table_args__ = (
+        UniqueConstraint("user_id", "word_id", "game", name="uq_user_word_game"),
+    )
+
+    user = relationship("User", backref="word_progress")
+    word = relationship("Word", back_populates="progress")
+

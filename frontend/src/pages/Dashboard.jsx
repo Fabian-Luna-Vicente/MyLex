@@ -1,21 +1,42 @@
 import { useAuth } from '../hooks/useAuth';
 import { useVocabulary } from '../hooks/useVocabulary';
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { categories } from "../components/categoriesData";
+import { progressService } from '../services/progressService';
+import { 
+  AreaChart, Area, ResponsiveContainer, XAxis, YAxis, Tooltip 
+} from 'recharts';
+import { motion } from 'framer-motion';
 
 export default function Dashboard() {
   const { user, logout } = useAuth();
   const { words, lists, fetchWords, fetchLists, loading } = useVocabulary();
   const navigate = useNavigate();
+  const [stats, setStats] = useState(null);
 
   useEffect(() => {
     fetchWords();
     fetchLists();
+    loadStats();
   }, [fetchWords, fetchLists]);
 
+  const loadStats = async () => {
+    try {
+      const data = await progressService.getOverallStats();
+      setStats(data);
+    } catch (e) {
+      console.error("Dashboard stats error:", e);
+    }
+  };
+
+  const activityData = stats?.recent_activity?.map(a => ({
+    date: new Date(a.date).toLocaleDateString(undefined, { weekday: 'short' }),
+    count: a.count
+  })) || [];
+
   return (
-    <div className="min-h-screen bg-[#071320] pt-28 relative z-[1] overflow-hidden font-sans">
+    <div className="min-h-screen bg-[#071320] pt-28 relative z-[1] overflow-x-hidden font-sans">
 
       <div className="absolute top-0 left-0 w-full overflow-hidden leading-none z-0">
         <svg
@@ -33,14 +54,86 @@ export default function Dashboard() {
         </svg>
       </div>
 
-      <div className="text-center mb-8 relative z-10">
-        <h1 className="text-[2.5rem] md:text-5xl font-bold text-white drop-shadow-[0_0_10px_rgba(0,195,255,0.5)] mb-4">
-          Welcome back, <span className="text-[#00c3ff]">{user?.username}</span>
-        </h1>
-
-      </div>
-
       <div className="w-full max-w-[1400px] mx-auto relative z-10 px-5 pb-12">
+        
+        <header className="text-center mb-12">
+          <motion.h1 
+            initial={{ opacity: 0, y: -20 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="text-[2.5rem] md:text-5xl font-bold text-white drop-shadow-[0_0_10px_rgba(0,195,255,0.5)] mb-4"
+          >
+            Welcome back, <span className="text-[#00c3ff]">{user?.username}</span>
+          </motion.h1>
+
+          {/* Quick Stats Summary */}
+          <div className="grid grid-cols-1 lg:grid-cols-4 gap-6 mt-12 text-left">
+            
+            {/* Total Mastery / Words card */}
+            <motion.div 
+              initial={{ opacity: 0, scale: 0.95 }}
+              animate={{ opacity: 1, scale: 1 }}
+              className="bg-[#0e0c1d]/60 backdrop-blur-[10px] border border-[#00c3ff]/20 rounded-[25px] p-6 flex flex-col justify-between"
+            >
+              <div>
+                <p className="text-[#a0a0a0] text-xs font-bold uppercase tracking-widest mb-1">Vocabulary Size</p>
+                <h3 className="text-4xl font-extrabold text-white">{words.length} <span className="text-sm text-[#00c3ff]">Words</span></h3>
+              </div>
+              <div className="mt-4 pt-4 border-t border-[#ffffff05]">
+                <p className="text-[10px] text-[#00ff88] font-bold uppercase">+{(stats?.recent_activity?.[0]?.count || 0)} reviews today</p>
+              </div>
+            </motion.div>
+
+            {/* Activity Mini Chart */}
+            <motion.div 
+              initial={{ opacity: 0, scale: 0.95 }}
+              animate={{ opacity: 1, scale: 1 }}
+              transition={{ delay: 0.1 }}
+              className="lg:col-span-2 bg-[#0e0c1d]/60 backdrop-blur-[10px] border border-[#00c3ff]/20 rounded-[25px] p-6"
+            >
+              <div className="flex justify-between items-center mb-2">
+                <p className="text-[#a0a0a0] text-xs font-bold uppercase tracking-widest">Weekly Activity</p>
+                <button onClick={() => navigate('/statistics')} className="text-[10px] text-[#00c3ff] hover:underline font-bold uppercase">View Detailed</button>
+              </div>
+              <div className="h-[80px] w-full">
+                <ResponsiveContainer width="100%" height="100%">
+                  <AreaChart data={activityData}>
+                    <Area type="monotone" dataKey="count" stroke="#00c3ff" fill="#00c3ff20" strokeWidth={2} />
+                    <XAxis dataKey="date" hide />
+                    <YAxis hide />
+                    <Tooltip 
+                      contentStyle={{ backgroundColor: '#071320', border: 'none', borderRadius: '8px', fontSize: '10px' }}
+                      labelStyle={{ display: 'none' }}
+                    />
+                  </AreaChart>
+                </ResponsiveContainer>
+              </div>
+            </motion.div>
+
+            {/* Accuracy Mini Card */}
+            <motion.div 
+              initial={{ opacity: 0, scale: 0.95 }}
+              animate={{ opacity: 1, scale: 1 }}
+              transition={{ delay: 0.2 }}
+              className="bg-[#0e0c1d]/60 backdrop-blur-[10px] border border-[#00c3ff]/20 rounded-[25px] p-6 flex flex-col justify-between"
+            >
+              <div>
+                <p className="text-[#a0a0a0] text-xs font-bold uppercase tracking-widest mb-1">Hangman Accuracy</p>
+                <h3 className="text-4xl font-extrabold text-[#00ff88]">
+                  {stats?.hangman_stats?.total > 0 
+                    ? Math.round((stats.hangman_stats.correct / stats.hangman_stats.total) * 100)
+                    : 0}%
+                </h3>
+              </div>
+              <div className="w-full bg-[#ffffff05] h-1.5 rounded-full mt-4 overflow-hidden">
+                <div 
+                  className="bg-[#00ff88] h-full rounded-full transition-all duration-1000" 
+                  style={{ width: `${stats?.hangman_stats?.total > 0 ? (stats.hangman_stats.correct / stats.hangman_stats.total) * 100 : 0}%` }}
+                />
+              </div>
+            </motion.div>
+
+          </div>
+        </header>
 
         {/* Renderizado  de categorías */}
         {Object.entries(categories).map(([catName, items]) => (

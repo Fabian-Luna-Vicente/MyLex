@@ -65,3 +65,27 @@ class VocabularyListResponse(VocabularyListInDBBase):
 
 # Resolve circular references
 WordResponse.model_rebuild()
+
+
+# --- Game Progress Schemas ---
+
+class ProgressUpsert(BaseModel):
+    word_id: int
+    game: str                        # 'random' | 'hangman' | ...
+    difficulty: Optional[str] = None  # only for 'random'
+    is_correct: Optional[bool] = None # only for non-random
+
+class ProgressBulkUpsert(BaseModel):
+    items: List[ProgressUpsert]
+
+class ProgressResponse(BaseModel):
+    id: int
+    user_id: str
+    word_id: int
+    game: str
+    difficulty: Optional[str] = None
+    is_correct: Optional[bool] = None
+    reviewed_at: datetime
+
+    class Config:
+        from_attributes = True

@@ -4,7 +4,7 @@ export const categories = {
             title: "Add Vocabulary",
             description: "Add new vocabulary to your lists.",
             img: "https://i.postimg.cc/3wxkyDWH/unnamed_2_removebg_preview.png",
-            onClick: "create-word/listId=0",
+            onClick: "create-word?listId=0",
         },
         {
             title: "Your Lists",
@@ -53,4 +53,12 @@ export const categories = {
             onClick: "WSkills",
         }
     ],
+    "Analytics & Progress": [
+        {
+            title: "Performance Stats",
+            description: "Detailed analytics of your learning journey.",
+            img: "https://i.postimg.cc/85zY8Gf4/stats-premium.png",
+            onClick: "statistics",
+        }
+    ]
 };
