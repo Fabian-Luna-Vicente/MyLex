@@ -1,8 +1,9 @@
-import { useSearchParams } from 'react-router-dom';
+import { useSearchParams, useNavigate } from 'react-router-dom';
 import { useState, useEffect } from 'react';
 import { googleImagesService } from '../services/googleImagesService';
 
 export const useCreateWord = (lists, addWord, fetchLists, searchDictionary, aiLoading) => {
+    const navigate = useNavigate();
     const [searchParams] = useSearchParams();
     const defaultListId = searchParams.get('listId') || 0;
     // --- Estados del Buscador de Diccionario ---
@@ -20,7 +21,7 @@ export const useCreateWord = (lists, addWord, fetchLists, searchDictionary, aiLo
     // --- Estado del Formulario Principal ---
     const [formData, setFormData] = useState({
         name: '',
-        meaning: '',
+        meaning: [],
         past: '',
         gerund: '',
         participle: '',
@@ -49,7 +50,6 @@ export const useCreateWord = (lists, addWord, fetchLists, searchDictionary, aiLo
     const handleSearch = async (e) => {
         e.preventDefault();
         if (!searchWord.trim()) return;
-
         setError('');
         try {
             const results = await searchDictionary({
@@ -59,12 +59,16 @@ export const useCreateWord = (lists, addWord, fetchLists, searchDictionary, aiLo
                 use_ai: useAiMode,
                 context: aiContext
             });
-
             if (results[0]?.error) {
                 setError(results[0].meaning || results[0].message);
                 setSearchResults([]);
             } else {
-                setSearchResults(results);
+                if (results.length > 0) {
+                    handleSelectResult(results[0]);
+                    setSearchResults([]);
+                } else {
+                    setSearchResults(results);
+                }
             }
         } catch (err) {
             setError("Failed to fetch definitions.");
@@ -72,10 +76,15 @@ export const useCreateWord = (lists, addWord, fetchLists, searchDictionary, aiLo
     };
 
     const handleSelectResult = (result) => {
+        // Separamos los significados devueltos por la IA por salto de línea
+        const meaningsArray = result.meaning
+            ? result.meaning.split('\n').map(m => m.trim()).filter(m => m)
+            : [];
+
         setFormData({
             ...formData,
             name: result.name || '',
-            meaning: result.meaning || '',
+            meaning: meaningsArray, // <-- Guardamos como Array
             word_types: result.type ? result.type.join(', ') : '',
             examples: result.examples ? result.examples.join('\n') : '',
             synonyms: result.synonyms ? result.synonyms.join(', ') : '',
@@ -85,14 +94,11 @@ export const useCreateWord = (lists, addWord, fetchLists, searchDictionary, aiLo
             participle: '',
             image: ''
         });
-        setImageQuery(result.name || ''); // Pre-poblar el buscador de imágenes
-        setImageResults([]); // Limpiar imágenes anteriores
+        setImageQuery(result.name || '');
+        setImageResults([]);
         setImagePage(1);
-
-        // Scroll suave hacia la sección de detalles
         document.getElementById('details-section').scrollIntoView({ behavior: 'smooth' });
     };
-
     // --- Handlers del Buscador de Imágenes (Google Custom Search API) ---
     const searchGoogleImages = async (isLoadMore = false) => {
         if (!imageQuery.trim()) return;
@@ -157,16 +163,15 @@ export const useCreateWord = (lists, addWord, fetchLists, searchDictionary, aiLo
             setError("Word name is required");
             return;
         }
-
         setSaving(true);
         setError('');
-
         const payload = {
             ...formData,
+            // Convertimos el array de significados de vuelta a un string separado por saltos de línea para la BD
+            meaning: Array.isArray(formData.meaning) ? formData.meaning.join('\n') : formData.meaning,
             word_types: formData.word_types.split(',').map(t => t.trim()).filter(t => t),
             examples: formData.examples.split('\n').map(e => e.trim()).filter(e => e)
         };
-
         try {
             await addWord(payload);
             navigate('/lists');

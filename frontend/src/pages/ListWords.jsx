@@ -1,5 +1,6 @@
 import { IoAddCircleSharp } from "react-icons/io5";
 import { CiPlay1 } from "react-icons/ci";
+import { FaImage } from "react-icons/fa"
 import { MdOutlineModeEdit, MdDeleteOutline, MdOutlineDriveFileMove } from "react-icons/md";
 import { BsXLg } from "react-icons/bs";
 import { GrPrevious, GrNext } from "react-icons/gr";
@@ -9,19 +10,19 @@ import WordDetailModal from '../components/WordDetailModal';
 import { AnimatePresence } from 'framer-motion';
 
 export default function ListWords() {
-  const { 
+  const {
     list, lists, loading, id, navigate,
-    showEditListMenu, setShowEditListMenu, 
-    showMoveMenu, setShowMoveMenu, 
-    showConfirmDelete, setShowConfirmDelete, 
+    showEditListMenu, setShowEditListMenu,
+    showMoveMenu, setShowMoveMenu,
+    showConfirmDelete, setShowConfirmDelete,
     showDetailModal, setShowDetailModal,
-    newTitle, setNewTitle, 
-    wordToMove, setWordToMove, 
-    wordToDelete, setWordToDelete, 
+    newTitle, setNewTitle,
+    wordToMove, setWordToMove,
+    wordToDelete, setWordToDelete,
     wordForDetail, setWordForDetail,
-    deleteMode, setDeleteMode, 
-    currentPage, setCurrentPage, 
-    itemsPerPage, 
+    deleteMode, setDeleteMode,
+    currentPage, setCurrentPage,
+    itemsPerPage,
     playSound,
     handleEditList, handleDeleteList, handleDeleteWord, handleMoveWord,
     openDetail
@@ -102,7 +103,7 @@ export default function ListWords() {
               >
                 {/* Cabecera de la tarjeta: Título y Tags */}
                 <div className="flex justify-between items-start mb-4 border-b border-[#00c3ff]/20 pb-3 flex-shrink-0">
-                  <h3 
+                  <h3
                     onClick={() => openDetail(word)}
                     className="text-[1.5rem] font-bold text-white transition-colors duration-300 group-hover:text-[#00c3ff] cursor-pointer"
                   >
@@ -123,26 +124,20 @@ export default function ListWords() {
                 {/* CONTENEDOR FLEXIBLE */}
                 <div className="flex-grow flex flex-col">
                   {/* Imagen */}
-                  {word.image && (
-                    <div className="w-full h-32 mb-4 rounded-xl overflow-hidden border border-[#00c3ff]/20 flex-shrink-0">
-                      <img src={word.image} alt={word.name} className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110" />
+                  {word.image ? (
+                    <img src={word.image} alt={word.name} className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110" />
+                  ) : (
+                    <div className="text-[#a0a0a0]/30 flex flex-col items-center">
+                      <FaImage size="{24}" className="mb-1" />
+                      <span className="text-xs italic">No Image</span>
                     </div>
                   )}
 
                   {/* Significado */}
                   {word.meaning && (
-                    <p className="text-[#a0a0a0] mb-4 whitespace-pre-wrap text-[0.95rem] leading-[1.4]">
+                    <p className="mt-4 text-[#a0a0a0] mb-4 text-[0.95rem] leading-[1.4] line-clamp-3" title={word.meaning}>
                       {word.meaning}
                     </p>
-                  )}
-
-                  {/* Conjugaciones */}
-                  {(word.past || word.gerund || word.participle) && (
-                    <div className="flex gap-2 mb-3 text-[10px] text-[#a0a0a0] font-medium italic overflow-x-auto custom-scrollbar pb-1">
-                      {word.past && <span className="bg-[#0e0c1d] px-2 py-1 rounded border border-[#00c3ff]/10 whitespace-nowrap">Past: {word.past}</span>}
-                      {word.gerund && <span className="bg-[#0e0c1d] px-2 py-1 rounded border border-[#00c3ff]/10 whitespace-nowrap">Gerund: {word.gerund}</span>}
-                      {word.participle && <span className="bg-[#0e0c1d] px-2 py-1 rounded border border-[#00c3ff]/10 whitespace-nowrap">Participle: {word.participle}</span>}
-                    </div>
                   )}
                 </div>
 
@@ -280,8 +275,8 @@ export default function ListWords() {
       {/* 4. Modal Detalle de Palabra */}
       <AnimatePresence>
         {showDetailModal && (
-          <WordDetailModal 
-            word={wordForDetail} 
+          <WordDetailModal
+            word={wordForDetail}
             onClose={() => setShowDetailModal(false)}
             onPlay={playSound}
             onEdit={(id) => navigate(`/word/edit/${id}`)}

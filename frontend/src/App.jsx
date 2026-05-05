@@ -16,6 +16,8 @@ import RandomGame from './pages/RandomGame';
 import HangmanGame from './pages/HangmanGame';
 import VisualMemoryGame from './pages/VisualMemoryGame';
 import SynAntGame from './pages/SynAntGame';
+import ListeningGame from './pages/ListeningGame';
+import WritingGame from './pages/WritingGame';
 
 function App() {
   return (
@@ -38,6 +40,8 @@ function App() {
               <Route path="/games/hangman" element={<ProtectedRoute><HangmanGame /></ProtectedRoute>} />
               <Route path="/games/visual-memory" element={<ProtectedRoute><VisualMemoryGame /></ProtectedRoute>} />
               <Route path="/games/syn-ant" element={<ProtectedRoute><SynAntGame /></ProtectedRoute>} />
+              <Route path="/games/listening" element={<ProtectedRoute><ListeningGame /></ProtectedRoute>} />
+              <Route path="/games/writing" element={<ProtectedRoute><WritingGame /></ProtectedRoute>} />
 
               {/* Redirect root to dashboard */}
               <Route path="/" element={<Navigate to="/dashboard" replace />} />

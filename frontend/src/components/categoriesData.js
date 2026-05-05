@@ -44,20 +44,20 @@ export const categories = {
             title: "Listening Practice",
             description: "Train your ear with audio games.",
             img: "https://i.postimg.cc/fbRV30kb/Gemini_Generated_Image_1bj7k1bj7k1bj7k1_removebg_preview.png",
-            onClick: "AllVoiceGame",
+            onClick: "games/listening",
         },
         {
             title: "Writing Skills",
             description: "Practice writing with AI feedback.",
             img: "https://i.postimg.cc/rpwDdtzV/unnamed_5_removebg_preview.png",
-            onClick: "WSkills",
+            onClick: "games/writing",
         }
     ],
     "Analytics & Progress": [
         {
             title: "Performance Stats",
             description: "Detailed analytics of your learning journey.",
-            img: "https://i.postimg.cc/85zY8Gf4/stats-premium.png",
+            img: "https://i.postimg.cc/GmmnTCs7/ac6500a5-c218-4ea7-8633-f26a599c7782-removebg-preview.png",
             onClick: "statistics",
         }
     ]

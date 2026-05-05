@@ -70,8 +70,7 @@ export const VocabularyProvider = ({ children }) => {
       setLoading(false);
     }
   }, []);
-
-  const fetchListDetails = async (id) => {
+  const fetchListDetails = useCallback(async (id) => {
     setLoading(true);
     try {
       const data = await vocabularyService.getListDetails(id);
@@ -82,8 +81,7 @@ export const VocabularyProvider = ({ children }) => {
     } finally {
       setLoading(false);
     }
-  };
-
+  }, []);
   const addList = async (listData) => {
     try {
       const data = await vocabularyService.addList(listData);
@@ -116,6 +114,18 @@ export const VocabularyProvider = ({ children }) => {
       throw error;
     }
   };
+  const fetchWordDetails = async (id) => {
+    setLoading(true);
+    try {
+      const data = await vocabularyService.getWordDetails(id);
+      return data;
+    } catch (error) {
+      console.error("Error fetching word details", error);
+      throw error;
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const handleMoveWord = async (wordId, targetListId) => {
     // TODO: Implement move logic when available in backend/hook
@@ -126,7 +136,7 @@ export const VocabularyProvider = ({ children }) => {
     <VocabularyContext.Provider value={{
       words, lists, loading,
       fetchWords, addWord, updateWord, deleteWord,
-      fetchLists, addList, deleteList, editList, fetchListDetails, handleMoveWord
+      fetchLists, addList, deleteList, editList, fetchListDetails, handleMoveWord, fetchWordDetails
     }}>
       {children}
     </VocabularyContext.Provider>

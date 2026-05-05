@@ -4,6 +4,7 @@ import { useAi } from '../hooks/useAi';
 import { GrPrevious } from "react-icons/gr";
 import { FaSearch, FaRobot, FaSave, FaImage, FaChevronDown } from "react-icons/fa";
 import { useCreateWord } from '../hooks/useCreateWord';
+import { MdDeleteOutline } from "react-icons/md";
 
 export default function CreateWord() {
   const navigate = useNavigate();
@@ -182,13 +183,62 @@ export default function CreateWord() {
             </div>
 
             {/* Row 3 & 4: Meaning and Examples */}
-            <div>
-              <label className="block text-xs font-bold text-[#00c3ff] uppercase tracking-widest mb-2">Meaning / Translation</label>
-              <textarea
-                value={formData.meaning}
-                onChange={(e) => setFormData({ ...formData, meaning: e.target.value })}
-                className="w-full bg-[#071320] border border-[#00c3ff]/30 rounded-[15px] px-4 py-3 text-white focus:outline-none focus:border-[#00c3ff] focus:ring-1 focus:ring-[#00c3ff] transition-all duration-300 min-h-[100px]"
-              />
+
+            <label className="block text-xs font-bold text-[#00c3ff] uppercase tracking-widest mb-2">Meanings / Translations</label>
+            <div className="space-y-3">
+              {/* Lista de significados extraídos */}
+              {Array.isArray(formData.meaning) && formData.meaning.map((m, i) => (
+                <div key={i} className="flex items-center gap-3 bg-[#071320] border border-[#00c3ff]/30 rounded-[15px] px-4 py-3 group">
+                  <p className="flex-grow text-white text-sm">{m}</p>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      const newMeanings = formData.meaning.filter((_, index) => index !== i);
+                      setFormData({ ...formData, meaning: newMeanings });
+                    }}
+                    className="text-[#a0a0a0] hover:text-red-500 transition-colors"
+                    title="Delete meaning"
+                  >
+                    <MdDeleteOutline size={22} />
+                  </button>
+                </div>
+              ))}
+
+              {/* Input para añadir más significados manualmente */}
+              <div className="flex flex-col sm:flex-row gap-3">
+                <input
+                  type="text"
+                  id="new-meaning-input"
+                  placeholder="Add another definition..."
+                  className="flex-grow bg-[#071320] border border-[#00c3ff]/30 rounded-[15px] px-4 py-3 text-white focus:outline-none focus:border-[#00c3ff] focus:ring-1 focus:ring-[#00c3ff] transition-all duration-300"
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter') {
+                      e.preventDefault();
+                      const val = e.target.value.trim();
+                      if (val) {
+                        const current = Array.isArray(formData.meaning) ? formData.meaning : [];
+                        setFormData({ ...formData, meaning: [...current, val] });
+                        e.target.value = '';
+                      }
+                    }
+                  }}
+                />
+                <button
+                  type="button"
+                  onClick={() => {
+                    const input = document.getElementById('new-meaning-input');
+                    const val = input.value.trim();
+                    if (val) {
+                      const current = Array.isArray(formData.meaning) ? formData.meaning : [];
+                      setFormData({ ...formData, meaning: [...current, val] });
+                      input.value = '';
+                    }
+                  }}
+                  className="px-6 py-3 bg-[#00c3ff]/20 text-[#00c3ff] rounded-[15px] font-bold border border-[#00c3ff]/50 hover:bg-[#00c3ff]/40 transition-all"
+                >
+                  Add
+                </button>
+              </div>
             </div>
             <div>
               <label className="block text-xs font-bold text-[#00c3ff] uppercase tracking-widest mb-2">Examples <span className="text-[#a0a0a0] lowercase font-normal">(one per line)</span></label>
