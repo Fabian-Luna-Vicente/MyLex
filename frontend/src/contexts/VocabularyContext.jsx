@@ -1,5 +1,6 @@
 import { createContext, useState, useCallback } from 'react';
 import { vocabularyService } from '../services/vocabularyService';
+import { progressService } from '../services/progressService';
 
 export const VocabularyContext = createContext();
 
@@ -70,6 +71,7 @@ export const VocabularyProvider = ({ children }) => {
       setLoading(false);
     }
   }, []);
+
   const fetchListDetails = useCallback(async (id) => {
     setLoading(true);
     try {
@@ -82,6 +84,7 @@ export const VocabularyProvider = ({ children }) => {
       setLoading(false);
     }
   }, []);
+
   const addList = async (listData) => {
     try {
       const data = await vocabularyService.addList(listData);
@@ -114,6 +117,7 @@ export const VocabularyProvider = ({ children }) => {
       throw error;
     }
   };
+
   const fetchWordDetails = async (id) => {
     setLoading(true);
     try {
@@ -127,6 +131,20 @@ export const VocabularyProvider = ({ children }) => {
     }
   };
 
+  // --- Games ---
+  const fetchWordsForGame = useCallback(async (listId, game) => {
+    setLoading(true);
+    try {
+      const data = await progressService.getWordsForGame(listId, game);
+      return data;
+    } catch (error) {
+      console.error("Error fetching words for game", error);
+      throw error;
+    } finally {
+      setLoading(false);
+    }
+  }, []);
+
   const handleMoveWord = async (wordId, targetListId) => {
     // TODO: Implement move logic when available in backend/hook
     console.log(`Moving word ${wordId} to list ${targetListId}`);
@@ -136,7 +154,8 @@ export const VocabularyProvider = ({ children }) => {
     <VocabularyContext.Provider value={{
       words, lists, loading,
       fetchWords, addWord, updateWord, deleteWord,
-      fetchLists, addList, deleteList, editList, fetchListDetails, handleMoveWord, fetchWordDetails
+      fetchLists, addList, deleteList, editList, fetchListDetails, handleMoveWord, fetchWordDetails,
+      fetchWordsForGame
     }}>
       {children}
     </VocabularyContext.Provider>
