@@ -13,11 +13,13 @@ export const useListWords = () => {
     const [showEditListMenu, setShowEditListMenu] = useState(false);
     const [showMoveMenu, setShowMoveMenu] = useState(false);
     const [showConfirmDelete, setShowConfirmDelete] = useState(false);
+    const [showDetailModal, setShowDetailModal] = useState(false);
 
     // --- ESTADOS TEMPORALES PARA ACCIONES ---
     const [newTitle, setNewTitle] = useState("");
     const [wordToMove, setWordToMove] = useState(null);
     const [wordToDelete, setWordToDelete] = useState(null);
+    const [wordForDetail, setWordForDetail] = useState(null);
     const [deleteMode, setDeleteMode] = useState(false);
 
     // --- PAGINACIÓN ---
@@ -86,18 +88,26 @@ export const useListWords = () => {
         console.log("Move word", wordToMove);
     };
 
+    const openDetail = (word) => {
+        setWordForDetail(word);
+        setShowDetailModal(true);
+    };
+
     return { 
         list, lists, loading, id, navigate,
         showEditListMenu, setShowEditListMenu, 
         showMoveMenu, setShowMoveMenu, 
         showConfirmDelete, setShowConfirmDelete, 
+        showDetailModal, setShowDetailModal,
         newTitle, setNewTitle, 
         wordToMove, setWordToMove, 
         wordToDelete, setWordToDelete, 
+        wordForDetail, setWordForDetail,
         deleteMode, setDeleteMode, 
         currentPage, setCurrentPage, 
         itemsPerPage, 
         playSound,
-        handleEditList, handleDeleteList, handleDeleteWord, handleMoveWord
+        handleEditList, handleDeleteList, handleDeleteWord, handleMoveWord,
+        openDetail
     };
 }

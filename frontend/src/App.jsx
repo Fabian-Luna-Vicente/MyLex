@@ -9,10 +9,13 @@ import AllLists from './pages/AllLists';
 import ListWords from './pages/ListWords';
 import VerifyEmail from './pages/VerifyEmail';
 import CreateWord from './pages/CreateWord';
+import EditWord from './pages/EditWord';
 import Statistics from './pages/Statistics';
 
 import RandomGame from './pages/RandomGame';
 import HangmanGame from './pages/HangmanGame';
+import VisualMemoryGame from './pages/VisualMemoryGame';
+import SynAntGame from './pages/SynAntGame';
 
 function App() {
   return (
@@ -28,10 +31,13 @@ function App() {
               <Route path="/lists" element={<ProtectedRoute><AllLists /></ProtectedRoute>} />
               <Route path="/list/:id" element={<ProtectedRoute><ListWords /></ProtectedRoute>} />
               <Route path="/create-word" element={<ProtectedRoute><CreateWord /></ProtectedRoute>} />
+              <Route path="/word/edit/:id" element={<ProtectedRoute><EditWord /></ProtectedRoute>} />
               <Route path="/statistics" element={<ProtectedRoute><Statistics /></ProtectedRoute>} />
               
               <Route path="/games/random" element={<ProtectedRoute><RandomGame /></ProtectedRoute>} />
               <Route path="/games/hangman" element={<ProtectedRoute><HangmanGame /></ProtectedRoute>} />
+              <Route path="/games/visual-memory" element={<ProtectedRoute><VisualMemoryGame /></ProtectedRoute>} />
+              <Route path="/games/syn-ant" element={<ProtectedRoute><SynAntGame /></ProtectedRoute>} />
 
               {/* Redirect root to dashboard */}
               <Route path="/" element={<Navigate to="/dashboard" replace />} />

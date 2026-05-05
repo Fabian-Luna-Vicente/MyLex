@@ -59,12 +59,14 @@ class ProgressRepository:
 
     def get_words_for_game(self, user_id: str, list_id: int, game: str) -> List[Word]:
         """
-        Returns words for the given list+game, applying spaced repetition ordering.
-
-        - random: All words ordered by priority (due for review first), then random. Limit 20.
-        - others (hangman, etc.): Exclude words answered correctly less than 2 days ago.
+        Returns words for the given list+game, applying a unified prioritization:
+        1. Words answered incorrectly (Mistakes)
+        2. Words answered correctly but more than 2 days ago (Due for review)
+        3. New words (Never played in this game)
+        
+        This applies to ALL games as requested.
         """
-        # Base: words in the list owned by the user
+        # Base query: words in the specific list owned by the user
         base_query = (
             self.db.query(Word)
             .join(list_word_association, list_word_association.c.word_id == Word.id)
@@ -76,70 +78,44 @@ class ProgressRepository:
             )
         )
 
-        if game == "random":
-            # Left join with progress to get difficulty+date
-            query = (
-                base_query
-                .outerjoin(
-                    WordProgress,
-                    (WordProgress.word_id == Word.id) &
-                    (WordProgress.user_id == user_id) &
-                    (WordProgress.game == "random"),
-                )
-                .add_columns(WordProgress.difficulty, WordProgress.reviewed_at)
-                .order_by(
-                    # Priority 1: words never reviewed OR due for review based on difficulty
-                    case(
-                        (WordProgress.difficulty.is_(None), 0),  # Never reviewed → highest priority
-                        (
-                            (WordProgress.difficulty == "easy") &
-                            (func.now() - WordProgress.reviewed_at > text("INTERVAL '7 days'")),
-                            0,
-                        ),
-                        (
-                            (WordProgress.difficulty == "normal") &
-                            (func.now() - WordProgress.reviewed_at > text("INTERVAL '3 days'")),
-                            0,
-                        ),
-                        (
-                            (WordProgress.difficulty == "hard") &
-                            (func.now() - WordProgress.reviewed_at > text("INTERVAL '2 days'")),
-                            0,
-                        ),
-                        (
-                            (WordProgress.difficulty == "ultrahard") &
-                            (func.now() - WordProgress.reviewed_at > text("INTERVAL '1 day'")),
-                            0,
-                        ),
-                        else_=1,  # Not due yet → lower priority (filler)
-                    ).asc(),
-                    func.random(),  # Randomize within each priority group
-                )
-                .limit(20)
+        # Left join with progress for the specific game
+        query = (
+            base_query
+            .outerjoin(
+                WordProgress,
+                (WordProgress.word_id == Word.id) &
+                (WordProgress.user_id == user_id) &
+                (WordProgress.game == game),
             )
-            # Extract just the Word objects
-            rows = query.all()
-            return [row[0] for row in rows]
+            .add_columns(WordProgress.is_correct, WordProgress.reviewed_at, WordProgress.id.label("progress_id"))
+            .order_by(
+                case(
+                    # Priority 1: Mistakes (is_correct is False)
+                    (WordProgress.is_correct == False, 0),
+                    
+                    # Priority 2: Correct but more than 2 days ago
+                    (
+                        (WordProgress.is_correct == True) &
+                        (func.now() - WordProgress.reviewed_at > text("INTERVAL '2 days'")),
+                        1
+                    ),
+                    
+                    # Priority 3: New words (No progress record)
+                    (WordProgress.id.is_(None), 2),
+                    
+                    # Everything else (Correctly answered recently)
+                    else_=3
+                ).asc(),
+                func.random() # Randomize within each priority group
+            )
+        )
 
-        else:
-            # For hangman and other games: exclude words answered correctly in the last 2 days
-            query = (
-                base_query
-                .outerjoin(
-                    WordProgress,
-                    (WordProgress.word_id == Word.id) &
-                    (WordProgress.user_id == user_id) &
-                    (WordProgress.game == game),
-                )
-                .filter(
-                    (WordProgress.id.is_(None)) |  # Never played
-                    (WordProgress.is_correct.is_(None)) |  # No result recorded
-                    (~WordProgress.is_correct) |  # Was wrong last time
-                    (func.now() - WordProgress.reviewed_at > text("INTERVAL '2 days'"))  # Answered correctly but >2 days ago
-                )
-                .order_by(func.random())
-            )
-            return query.all()
+        if game == "random":
+            query = query.limit(20) # Keep the limit for random repetition sessions
+        
+        rows = query.all()
+        # Extract just the Word objects
+        return [row[0] for row in rows]
 
     def get_progress_for_list(self, user_id: str, list_id: int) -> List[WordProgress]:
         """Returns all progress records for words in a specific list."""

@@ -30,13 +30,13 @@ export const categories = {
             title: "Visual Memory",
             description: "Match words with images.",
             img: "https://i.postimg.cc/C1vHBgwc/imgg.png",
-            onClick: "ImageGame",
+            onClick: "games/visual-memory",
         },
         {
             title: "Synonyms & Antonyms",
             description: "Challenge your word relations.",
             img: "https://i.postimg.cc/VNkJSb5k/unnamed_removebg_preview.png",
-            onClick: "SynAntGame",
+            onClick: "games/syn-ant",
         },
     ],
     "Skills & Media": [

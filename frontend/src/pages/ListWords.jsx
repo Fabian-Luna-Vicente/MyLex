@@ -5,6 +5,8 @@ import { BsXLg } from "react-icons/bs";
 import { GrPrevious, GrNext } from "react-icons/gr";
 import { useListWords } from '../hooks/useListWords';
 import { usePaginate } from '../hooks/usePaginate';
+import WordDetailModal from '../components/WordDetailModal';
+import { AnimatePresence } from 'framer-motion';
 
 export default function ListWords() {
   const { 
@@ -12,14 +14,17 @@ export default function ListWords() {
     showEditListMenu, setShowEditListMenu, 
     showMoveMenu, setShowMoveMenu, 
     showConfirmDelete, setShowConfirmDelete, 
+    showDetailModal, setShowDetailModal,
     newTitle, setNewTitle, 
     wordToMove, setWordToMove, 
     wordToDelete, setWordToDelete, 
+    wordForDetail, setWordForDetail,
     deleteMode, setDeleteMode, 
     currentPage, setCurrentPage, 
     itemsPerPage, 
     playSound,
-    handleEditList, handleDeleteList, handleDeleteWord, handleMoveWord
+    handleEditList, handleDeleteList, handleDeleteWord, handleMoveWord,
+    openDetail
   } = useListWords();
 
   const { currentItems, totalPages } = usePaginate(currentPage, itemsPerPage, list?.words || []);
@@ -97,7 +102,10 @@ export default function ListWords() {
               >
                 {/* Cabecera de la tarjeta: Título y Tags */}
                 <div className="flex justify-between items-start mb-4 border-b border-[#00c3ff]/20 pb-3 flex-shrink-0">
-                  <h3 className="text-[1.5rem] font-bold text-white transition-colors duration-300 group-hover:text-[#00c3ff]">
+                  <h3 
+                    onClick={() => openDetail(word)}
+                    className="text-[1.5rem] font-bold text-white transition-colors duration-300 group-hover:text-[#00c3ff] cursor-pointer"
+                  >
                     {word.name}
                   </h3>
                   <div className="flex flex-wrap gap-1 justify-end max-w-[40%]">
@@ -268,6 +276,18 @@ export default function ListWords() {
           </div>
         </div>
       )}
+
+      {/* 4. Modal Detalle de Palabra */}
+      <AnimatePresence>
+        {showDetailModal && (
+          <WordDetailModal 
+            word={wordForDetail} 
+            onClose={() => setShowDetailModal(false)}
+            onPlay={playSound}
+            onEdit={(id) => navigate(`/word/edit/${id}`)}
+          />
+        )}
+      </AnimatePresence>
 
     </div>
   );

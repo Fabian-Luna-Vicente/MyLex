@@ -40,7 +40,7 @@ class AIService:
                     "language": "{language}",
                     "meaning": "Definición contextualizada.\\nSegunda definición.",
                     "type": ["Noun"],
-                    "example": ["Ejemplo 1", "Ejemplo 2", "Ejemplo 3"],
+                    "examples": ["Ejemplo 1", "Ejemplo 2", "Ejemplo 3"],
                     "synonyms": ["sinónimo1", "sinónimo2"],
                     "antonyms": [],
                     "image": ""
@@ -118,7 +118,7 @@ class AIService:
                     return parsed["result"]
                 return [parsed]
             except:
-                return [{"name": clean_word, "meaning": "Error parsing AI", "example": [], "error": True}]
+                return [{"name": clean_word, "meaning": "Error parsing AI", "examples": [], "error": True}]
         
         else:
             # Traditional Dictionary API
@@ -156,7 +156,7 @@ class AIService:
                                     "name": entry.get("word"),
                                     "meaning": "\n".join(all_meanings), 
                                     "type": list(all_types),
-                                    "example": all_examples[:4],
+                                    "examples": all_examples[:4],
                                     "synonyms": list(all_synonyms)[:6],
                                     "antonyms": list(all_antonyms)[:6],
                                     "image": "",
@@ -172,7 +172,7 @@ class AIService:
                 return [{
                     "name": clean_word, 
                     "meaning": "⚠️ Traditional dictionary is only available for English. Please enable 'AI Mode'.",
-                    "example": [],
+                    "examples": [],
                     "error": True
                 }]
 

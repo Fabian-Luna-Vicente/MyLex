@@ -77,7 +77,7 @@ export const useCreateWord = (lists, addWord, fetchLists, searchDictionary, aiLo
             name: result.name || '',
             meaning: result.meaning || '',
             word_types: result.type ? result.type.join(', ') : '',
-            examples: result.example ? result.example.join('\n') : '',
+            examples: result.examples ? result.examples.join('\n') : '',
             synonyms: result.synonyms ? result.synonyms.join(', ') : '',
             antonyms: result.antonyms ? result.antonyms.join(', ') : '',
             past: '',
