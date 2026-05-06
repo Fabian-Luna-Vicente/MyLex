@@ -4,13 +4,11 @@ import httpx
 from fastapi import HTTPException
 from groq import AsyncGroq
 from app.schemas.ai import DictionaryRequest, GrammarRequest, CorrectorRequest
-
-# Using GROQ API
-GROQ_API_KEY = os.getenv("GROQ_API_KEY", "YOUR_GROQ_API_KEY")
+from app.core.config import settings
 
 class AIService:
     def __init__(self):
-        self.client = AsyncGroq(api_key=GROQ_API_KEY)
+        self.client = AsyncGroq(api_key=settings.GROQ_API_KEY)
         self.model = "llama-3.3-70b-versatile"
 
     def _get_prompt(self, context_type: str, language: str, target_lang: str) -> str:
@@ -199,23 +197,26 @@ class AIService:
 
     async def correct_text(self, request: CorrectorRequest):
         prompt = f""" 
-        El estudiante escribió: "{request.userText}".
+        El usuario escribió: "{request.userText}".
         Debía usar obligatoriamente estas palabras: {", ".join(request.targetWords)}.
-        Contexto de la tarea: {request.context}.
+        Contexto de la tarea: "Dirígete directamente a el usuario, no hables de 'el estudiante'. Actúa como un profesor de inglés. Evalúa mi texto y verifica estrictamente que haya incluido todas las palabras objetivo. Sé flexible y aprueba el uso si ha usado formas gramaticales válidas de estas palabras (por ejemplo, conjugaciones en pasado/gerundio/participio si es un verbo, o plurales si es un sustantivo). Si falta alguna, dile."
         
         1. Proporciona la versión corregida del texto.
         2. Explica brevemente los errores cometidos.
         3. Confirma si usó las palabras requeridas correctamente.
         """
         sys_prompt = self._get_prompt("corrector", "auto", "es")
-        
+        print("sys_prompt", sys_prompt)
+        print("prompt", prompt)
         resp_str = await self._call_llm(prompt, sys_prompt, json_format=True, temp=0.6)
+        print("resp_str", resp_str)
         try:
-            parsed = json.loads(resp_str)
+            raw_response = resp_str.replace("```json", "").replace("```", "").strip()
+            parsed = json.loads(raw_response)
+            print("parsed", parsed)
             return {
                 "status": True,
-                "response": parsed,
-                "context": request.context
+                "response": parsed
             }
         except Exception as e:
             return {

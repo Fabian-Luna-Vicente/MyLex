@@ -5,11 +5,11 @@ import { useAi } from './useAi';
 export const useWritingGame = () => {
     const { fetchWordsForGame, lists, fetchLists } = useVocabulary();
     const { correctWriting, loading: aiLoading } = useAi();
-    
+
     const [loading, setLoading] = useState(false);
     const [showGame, setShowGame] = useState(false);
     const [selectedListId, setSelectedListId] = useState('');
-    
+
     const [shuffledWords, setShuffledWords] = useState([]);
     const [index, setIndex] = useState(0);
     const [text, setText] = useState("");
@@ -29,7 +29,7 @@ export const useWritingGame = () => {
                 setLoading(false);
                 return;
             }
-            
+
             setShuffledWords(words);
             setIndex(0);
             setText("");
@@ -45,7 +45,7 @@ export const useWritingGame = () => {
     const handleCheck = async () => {
         if (!text.trim()) return;
         setAiError(null);
-        
+
         const currentWords = [
             shuffledWords[index]?.name,
             shuffledWords[index + 1]?.name,
@@ -56,16 +56,19 @@ export const useWritingGame = () => {
             const result = await correctWriting({
                 userText: text,
                 targetWords: currentWords,
-                context: "Estudiante practicando redacción en inglés usando palabras específicas."
             });
-            
-            if (result.status) {
+
+            if (result.status === true) {
                 setAiFeedback(result.response);
-            } else {
-                setAiError(result.message);
+            }
+            else if (result.corrected_text) {
+                setAiFeedback(result);
+            }
+            else {
+                setAiError(result.message || "Error procesando la corrección");
             }
         } catch (error) {
-            setAiError("Failed to connect to AI teacher.");
+            setAiError(error.response?.data?.detail || "Failed to connect to AI teacher.");
         }
     };
 
@@ -76,7 +79,7 @@ export const useWritingGame = () => {
                 game: 'writing',
                 is_correct: true // If they wrote something and continued, we mark as reviewed/correct
             }));
-            
+
             const { axiosInstance } = await import('../services/api');
             await axiosInstance.default.post('/api/progress/bulk', { items });
         } catch (error) {
@@ -85,6 +88,16 @@ export const useWritingGame = () => {
     };
 
     const nextLevel = async () => {
+        if (!aiFeedback) {
+            alert("Please check your grammar first by clicking 'Check Grammar'.");
+            return;
+        }
+
+        if (!aiFeedback.words_used_correctly) {
+            alert("You must use all the required words correctly (in any of their forms) before continuing.");
+            return;
+        }
+
         if (text.length < 5) {
             alert("Please write a longer sentence before continuing.");
             return;

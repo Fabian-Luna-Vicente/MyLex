@@ -115,6 +115,9 @@ export default function Statistics() {
               <h2 className="text-lg font-bold flex items-center gap-2">
                 <FaCalendarAlt className="text-[#00c3ff]" /> Recent Activity (7 Days)
               </h2>
+              <div className="bg-[#00c3ff]/10 px-4 py-1 rounded-full text-[#00c3ff] text-xs font-bold uppercase tracking-widest">
+                Streak: {overall?.streak || 0} Days
+              </div>
             </div>
             <div className="h-[250px] w-full">
               <ResponsiveContainer width="100%" height="100%">
@@ -199,6 +202,10 @@ export default function Statistics() {
                 <option value="">All Games</option>
                 <option value="random">Random Repetition</option>
                 <option value="hangman">Hangman</option>
+                <option value="visual-memory">Visual Memory</option>
+                <option value="syn-ant">Synonyms & Antonyms</option>
+                <option value="listening">Listening Practice</option>
+                <option value="writing">Writing Skills</option>
               </select>
             </div>
 
@@ -255,6 +262,30 @@ export default function Statistics() {
 
           </div>
         </section>
+
+        {/* --- FILTER SUMMARY --- */}
+        {!loading && stats.length > 0 && (
+          <section className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-10">
+            <div className="bg-[#0e0c1d]/60 border border-[#00c3ff]/10 p-4 rounded-2xl flex flex-col items-center">
+              <span className="text-[10px] text-[#a0a0a0] font-bold uppercase tracking-widest mb-1">Total Played</span>
+              <span className="text-2xl font-black text-white">{stats.length}</span>
+            </div>
+            <div className="bg-[#0e0c1d]/60 border border-[#00ff88]/10 p-4 rounded-2xl flex flex-col items-center">
+              <span className="text-[10px] text-[#a0a0a0] font-bold uppercase tracking-widest mb-1">Avg Accuracy</span>
+              <span className="text-2xl font-black text-[#00ff88]">
+                {Math.round((stats.filter(s => s.is_correct).length / stats.filter(s => s.is_correct !== null).length || 0) * 100)}%
+              </span>
+            </div>
+            <div className="bg-[#0e0c1d]/60 border border-[#ff4d4d]/10 p-4 rounded-2xl flex flex-col items-center">
+              <span className="text-[10px] text-[#a0a0a0] font-bold uppercase tracking-widest mb-1">Mistakes</span>
+              <span className="text-2xl font-black text-red-500">{stats.filter(s => s.is_correct === false).length}</span>
+            </div>
+            <div className="bg-[#0e0c1d]/60 border border-[#00c3ff]/10 p-4 rounded-2xl flex flex-col items-center">
+              <span className="text-[10px] text-[#a0a0a0] font-bold uppercase tracking-widest mb-1">Active Words</span>
+              <span className="text-2xl font-black text-[#00c3ff]">{new Set(stats.map(s => s.word_id)).size}</span>
+            </div>
+          </section>
+        )}
 
         {/* --- DETAILED DATA TABLE --- */}
         <section className="bg-[#0e0c1d]/60 backdrop-blur-xl border border-[#ffffff10] rounded-[30px] overflow-hidden shadow-xl">

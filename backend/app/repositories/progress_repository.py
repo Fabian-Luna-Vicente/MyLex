@@ -130,6 +130,40 @@ class ProgressRepository:
             .all()
         )
 
+    def _get_user_streak(self, user_id: str) -> int:
+        """Calculates consecutive days of activity (adding words or playing games)."""
+        # Get all unique days of activity
+        query = text("""
+            WITH activity_dates AS (
+                SELECT DISTINCT date_trunc('day', created_at) as activity_date FROM words WHERE user_id = :user_id
+                UNION
+                SELECT DISTINCT date_trunc('day', reviewed_at) as activity_date FROM word_progress WHERE user_id = :user_id
+            )
+            SELECT activity_date FROM activity_dates ORDER BY activity_date DESC
+        """)
+        
+        result = self.db.execute(query, {"user_id": user_id}).fetchall()
+        if not result:
+            return 0
+        
+        # In Python, activity_date from date_trunc is a datetime.
+        # We want to check consecutive days.
+        activity_days = [r[0].date() for r in result]
+        today = datetime.now(timezone.utc).date()
+        
+        # Check if they had activity today or yesterday (to continue a streak)
+        if activity_days[0] < today and (today - activity_days[0]).days > 1:
+            return 0
+            
+        streak = 1
+        for i in range(1, len(activity_days)):
+            if (activity_days[i-1] - activity_days[i]).days == 1:
+                streak += 1
+            else:
+                break
+        
+        return streak
+
     def get_overall_stats(self, user_id: str):
         """
         Aggregates progress data for dashboard summary.
@@ -145,14 +179,16 @@ class ProgressRepository:
             .all()
         )
 
-        # 2. Accuracy for other games
-        hangman_stats = (
+        # 2. Accuracy for all games
+        game_stats = (
             self.db.query(
-                func.count(WordProgress.id),
-                func.sum(case((WordProgress.is_correct == True, 1), else_=0))
+                WordProgress.game,
+                func.count(WordProgress.id).label("total"),
+                func.sum(case((WordProgress.is_correct == True, 1), else_=0)).label("correct")
             )
-            .filter(WordProgress.user_id == user_id, WordProgress.game == "hangman")
-            .first()
+            .filter(WordProgress.user_id == user_id)
+            .group_by(WordProgress.game)
+            .all()
         )
 
         # 3. Activity last 7 days
@@ -170,13 +206,22 @@ class ProgressRepository:
             .all()
         )
 
+        # 4. Total vocabulary size
+        total_words = self.db.query(func.count(Word.id)).filter(Word.user_id == user_id).scalar()
+
         return {
             "random_distribution": {d: c for d, c in random_dist},
-            "hangman_stats": {
-                "total": hangman_stats[0] or 0,
-                "correct": int(hangman_stats[1] or 0)
-            },
-            "recent_activity": [{"date": a[0], "count": a[1]} for a in activity]
+            "game_accuracy": [
+                {
+                    "game": g[0],
+                    "total": g[1],
+                    "correct": int(g[2] or 0),
+                    "accuracy": round((int(g[2] or 0) / g[1] * 100), 1) if g[1] > 0 else 0
+                } for g in game_stats if g[0] != 'random'
+            ],
+            "recent_activity": [{"date": a[0], "count": a[1]} for a in activity],
+            "streak": self._get_user_streak(user_id),
+            "total_vocabulary": total_words
         }
 
     def get_detailed_stats(

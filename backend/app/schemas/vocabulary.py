@@ -86,6 +86,7 @@ class ProgressResponse(BaseModel):
     difficulty: Optional[str] = None
     is_correct: Optional[bool] = None
     reviewed_at: datetime
+    word: Optional[WordInDBBase] = None
 
     class Config:
         from_attributes = True

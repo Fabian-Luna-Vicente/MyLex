@@ -3,11 +3,11 @@ import { useVocabulary } from './useVocabulary';
 
 export const useListeningGame = () => {
     const { fetchWordsForGame, lists, fetchLists } = useVocabulary();
-    
+
     const [loading, setLoading] = useState(false);
     const [showGame, setShowGame] = useState(false);
     const [selectedListId, setSelectedListId] = useState('');
-    
+
     const [shuffledWords, setShuffledWords] = useState([]);
     const [index, setIndex] = useState(0);
     const [choices, setChoices] = useState([]);
@@ -57,16 +57,15 @@ export const useListeningGame = () => {
                 setLoading(false);
                 return;
             }
-            
+
             setShuffledWords(words);
             setIndex(0);
             setScore({ correct: 0, wrong: 0 });
             setGameStatus('playing');
             generateChoices(words, 0);
             setShowGame(true);
-            
-            // Auto play the first word
-            setTimeout(() => playAudio(words[0].name), 500);
+            const examples = words[0].examples.map((e, i) => "Example " + (i + 1) + ": " + e.translation).join("\n");
+            setTimeout(() => playAudio(words[0].name + ". " + examples), 500);
 
         } catch (error) {
             console.error("Error starting game", error);
@@ -90,7 +89,7 @@ export const useListeningGame = () => {
         }
 
         const newProgress = { word_id: correctWord.id, game: 'listening', is_correct: isCorrect };
-        
+
         setPendingProgress(prev => {
             const updated = [...prev, newProgress];
             if (updated.length >= 5) {

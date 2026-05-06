@@ -21,6 +21,5 @@ class GrammarRequest(BaseModel):
 # --- Corrector / Writing Schemas ---
 
 class CorrectorRequest(BaseModel):
-    context: str
     userText: str
     targetWords: List[str] = []

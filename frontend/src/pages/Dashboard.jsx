@@ -7,7 +7,64 @@ import { progressService } from '../services/progressService';
 import { 
   AreaChart, Area, ResponsiveContainer, XAxis, YAxis, Tooltip 
 } from 'recharts';
-import { motion } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
+
+const AccuracyCarousel = ({ accuracies }) => {
+  const [index, setIndex] = useState(0);
+
+  useEffect(() => {
+    if (accuracies.length <= 1) return;
+    const timer = setInterval(() => {
+      setIndex((prev) => (prev + 1) % accuracies.length);
+    }, 4000);
+    return () => clearInterval(timer);
+  }, [accuracies.length]);
+
+  if (accuracies.length === 0) {
+    return (
+      <div className="h-full flex flex-col justify-center">
+        <p className="text-[#a0a0a0] text-xs font-bold uppercase tracking-widest mb-1">Game Accuracy</p>
+        <h3 className="text-4xl font-extrabold text-[#00ff88]">0%</h3>
+        <p className="text-[10px] text-[#a0a0a0] mt-2">No games played yet</p>
+      </div>
+    );
+  }
+
+  const current = accuracies[index];
+
+  return (
+    <div className="h-full flex flex-col justify-between relative">
+      <AnimatePresence mode="wait">
+        <motion.div
+          key={current.game}
+          initial={{ opacity: 0, x: 20 }}
+          animate={{ opacity: 1, x: 0 }}
+          exit={{ opacity: 0, x: -20 }}
+          className="w-full"
+        >
+          <p className="text-[#a0a0a0] text-[10px] font-bold uppercase tracking-widest mb-1">
+            {current.game.replace('-', ' ')} Accuracy
+          </p>
+          <h3 className="text-4xl font-extrabold text-[#00ff88]">
+            {Math.round(current.accuracy)}%
+          </h3>
+          <div className="w-full bg-[#ffffff05] h-1.5 rounded-full mt-4 overflow-hidden">
+            <motion.div
+              initial={{ width: 0 }}
+              animate={{ width: `${current.accuracy}%` }}
+              className="bg-[#00ff88] h-full rounded-full transition-all duration-1000"
+            />
+          </div>
+        </motion.div>
+      </AnimatePresence>
+      <div className="flex gap-1 mt-4">
+        {accuracies.map((_, i) => (
+          <div key={i} className={`h-1 w-3 rounded-full transition-all ${i === index ? 'bg-[#00c3ff]' : 'bg-[#ffffff10]'}`} />
+        ))}
+      </div>
+    </div>
+  );
+};
 
 export default function Dashboard() {
   const { user, logout } = useAuth();
@@ -68,18 +125,23 @@ export default function Dashboard() {
           {/* Quick Stats Summary */}
           <div className="grid grid-cols-1 lg:grid-cols-4 gap-6 mt-12 text-left">
             
-            {/* Total Mastery / Words card */}
+            {/* User Streak card */}
             <motion.div 
               initial={{ opacity: 0, scale: 0.95 }}
               animate={{ opacity: 1, scale: 1 }}
               className="bg-[#0e0c1d]/60 backdrop-blur-[10px] border border-[#00c3ff]/20 rounded-[25px] p-6 flex flex-col justify-between"
             >
               <div>
-                <p className="text-[#a0a0a0] text-xs font-bold uppercase tracking-widest mb-1">Vocabulary Size</p>
-                <h3 className="text-4xl font-extrabold text-white">{words.length} <span className="text-sm text-[#00c3ff]">Words</span></h3>
+                <p className="text-[#a0a0a0] text-xs font-bold uppercase tracking-widest mb-1">Learning Streak</p>
+                <h3 className="text-4xl font-extrabold text-white">
+                  {stats?.streak || 0} <span className="text-sm text-[#00c3ff]">Days</span>
+                </h3>
               </div>
               <div className="mt-4 pt-4 border-t border-[#ffffff05]">
-                <p className="text-[10px] text-[#00ff88] font-bold uppercase">+{(stats?.recent_activity?.[0]?.count || 0)} reviews today</p>
+                <p className="text-[10px] text-[#00ff88] font-bold uppercase flex items-center gap-2">
+                  <span className="w-2 h-2 rounded-full bg-[#00ff88] animate-pulse"></span>
+                  {(stats?.streak || 0) > 0 ? "You're on fire!" : "Start your streak today!"}
+                </p>
               </div>
             </motion.div>
 
@@ -109,27 +171,14 @@ export default function Dashboard() {
               </div>
             </motion.div>
 
-            {/* Accuracy Mini Card */}
+            {/* Game Accuracy Carousel Card */}
             <motion.div 
               initial={{ opacity: 0, scale: 0.95 }}
               animate={{ opacity: 1, scale: 1 }}
               transition={{ delay: 0.2 }}
-              className="bg-[#0e0c1d]/60 backdrop-blur-[10px] border border-[#00c3ff]/20 rounded-[25px] p-6 flex flex-col justify-between"
+              className="bg-[#0e0c1d]/60 backdrop-blur-[10px] border border-[#00c3ff]/20 rounded-[25px] p-6 flex flex-col justify-between overflow-hidden"
             >
-              <div>
-                <p className="text-[#a0a0a0] text-xs font-bold uppercase tracking-widest mb-1">Hangman Accuracy</p>
-                <h3 className="text-4xl font-extrabold text-[#00ff88]">
-                  {stats?.hangman_stats?.total > 0 
-                    ? Math.round((stats.hangman_stats.correct / stats.hangman_stats.total) * 100)
-                    : 0}%
-                </h3>
-              </div>
-              <div className="w-full bg-[#ffffff05] h-1.5 rounded-full mt-4 overflow-hidden">
-                <div 
-                  className="bg-[#00ff88] h-full rounded-full transition-all duration-1000" 
-                  style={{ width: `${stats?.hangman_stats?.total > 0 ? (stats.hangman_stats.correct / stats.hangman_stats.total) * 100 : 0}%` }}
-                />
-              </div>
+              <AccuracyCarousel accuracies={stats?.game_accuracy || []} />
             </motion.div>
 
           </div>
