@@ -1,12 +1,12 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { 
-  LineChart, Line, AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, 
-  ResponsiveContainer, PieChart, Pie, Cell, BarChart, Bar, Legend 
+import {
+  LineChart, Line, AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip,
+  ResponsiveContainer, PieChart, Pie, Cell, BarChart, Bar, Legend
 } from 'recharts';
 import { motion, AnimatePresence } from 'framer-motion';
 import { GrPrevious } from 'react-icons/gr';
-import { FaFilter, FaCalendarAlt, FaGamepad, FaListUl, FaTags } from 'react-icons/fa';
+import { FaFilter, FaCalendarAlt, FaGamepad, FaListUl, FaTags, FaCheckCircle, FaTimesCircle } from 'react-icons/fa';
 import { progressService } from '../services/progressService';
 import { useVocabulary } from '../hooks/useVocabulary';
 
@@ -15,11 +15,11 @@ const COLORS = ['#00c3ff', '#00ff88', '#ffcc00', '#ff4d4d', '#a0a0a0'];
 export default function Statistics() {
   const navigate = useNavigate();
   const { lists, fetchLists } = useVocabulary();
-  
+
   const [loading, setLoading] = useState(true);
   const [stats, setStats] = useState([]);
   const [overall, setOverall] = useState(null);
-  
+
   // Filters
   const [filters, setFilters] = useState({
     game: '',
@@ -79,7 +79,7 @@ export default function Statistics() {
 
   return (
     <div className="min-h-screen bg-[#071320] text-white font-sans pb-20 overflow-x-hidden">
-      
+
       {/* Background Decor */}
       <div className="fixed top-0 left-0 w-full h-full pointer-events-none z-0">
         <div className="absolute top-[-10%] right-[-10%] w-[50%] h-[50%] bg-[#00c3ff]/5 blur-[120px] rounded-full"></div>
@@ -101,12 +101,12 @@ export default function Statistics() {
       </header>
 
       <main className="relative z-10 max-w-7xl mx-auto px-6 py-10">
-        
+
         {/* --- OVERALL SUMMARY --- */}
         <section className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-10">
-          
+
           {/* Recent Activity Line Chart */}
-          <motion.div 
+          <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             className="lg:col-span-2 bg-[#0e0c1d]/60 backdrop-blur-xl border border-[#00c3ff]/20 rounded-[30px] p-6 shadow-xl"
@@ -124,14 +124,14 @@ export default function Statistics() {
                 <AreaChart data={activityData}>
                   <defs>
                     <linearGradient id="colorCount" x1="0" y1="0" x2="0" y2="1">
-                      <stop offset="5%" stopColor="#00c3ff" stopOpacity={0.3}/>
-                      <stop offset="95%" stopColor="#00c3ff" stopOpacity={0}/>
+                      <stop offset="5%" stopColor="#00c3ff" stopOpacity={0.3} />
+                      <stop offset="95%" stopColor="#00c3ff" stopOpacity={0} />
                     </linearGradient>
                   </defs>
                   <CartesianGrid strokeDasharray="3 3" stroke="#ffffff10" vertical={false} />
                   <XAxis dataKey="date" stroke="#a0a0a0" fontSize={12} tickLine={false} axisLine={false} />
                   <YAxis stroke="#a0a0a0" fontSize={12} tickLine={false} axisLine={false} />
-                  <Tooltip 
+                  <Tooltip
                     contentStyle={{ backgroundColor: '#0e0c1d', border: '1px solid #00c3ff30', borderRadius: '12px' }}
                     itemStyle={{ color: '#00c3ff' }}
                   />
@@ -142,7 +142,7 @@ export default function Statistics() {
           </motion.div>
 
           {/* Random Mastery Distribution Pie Chart */}
-          <motion.div 
+          <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.1 }}
@@ -163,7 +163,7 @@ export default function Statistics() {
                       <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
                     ))}
                   </Pie>
-                  <Tooltip 
+                  <Tooltip
                     contentStyle={{ backgroundColor: '#0e0c1d', border: '1px solid #00c3ff30', borderRadius: '12px' }}
                   />
                 </PieChart>
@@ -186,24 +186,24 @@ export default function Statistics() {
           <div className="flex items-center gap-3 mb-6 text-[#00c3ff]">
             <FaFilter /> <h2 className="font-bold uppercase tracking-[2px] text-sm">Filter Detailed Data</h2>
           </div>
-          
+
           <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-5 gap-4">
-            
+
             <div className="space-y-2">
               <label className="text-[10px] uppercase font-bold text-[#a0a0a0] ml-2 flex items-center gap-1">
                 <FaGamepad size={10} /> Game
               </label>
-              <select 
-                name="game" 
-                value={filters.game} 
+              <select
+                name="game"
+                value={filters.game}
                 onChange={handleFilterChange}
                 className="w-full bg-[#071320] border border-[#00c3ff]/30 rounded-xl px-4 py-2.5 text-sm focus:border-[#00c3ff] outline-none transition-all"
               >
                 <option value="">All Games</option>
                 <option value="random">Random Repetition</option>
                 <option value="hangman">Hangman</option>
-                <option value="visual-memory">Visual Memory</option>
-                <option value="syn-ant">Synonyms & Antonyms</option>
+                <option value="visual_memory">Visual Memory</option>
+                <option value="syn_ant">Synonyms & Antonyms</option>
                 <option value="listening">Listening Practice</option>
                 <option value="writing">Writing Skills</option>
               </select>
@@ -213,9 +213,9 @@ export default function Statistics() {
               <label className="text-[10px] uppercase font-bold text-[#a0a0a0] ml-2 flex items-center gap-1">
                 <FaListUl size={10} /> List
               </label>
-              <select 
-                name="list_id" 
-                value={filters.list_id} 
+              <select
+                name="list_id"
+                value={filters.list_id}
                 onChange={handleFilterChange}
                 className="w-full bg-[#071320] border border-[#00c3ff]/30 rounded-xl px-4 py-2.5 text-sm focus:border-[#00c3ff] outline-none transition-all"
               >
@@ -228,11 +228,11 @@ export default function Statistics() {
               <label className="text-[10px] uppercase font-bold text-[#a0a0a0] ml-2 flex items-center gap-1">
                 <FaTags size={10} /> Word Type
               </label>
-              <input 
-                type="text" 
-                name="word_type" 
-                placeholder="Verb, Noun..." 
-                value={filters.word_type} 
+              <input
+                type="text"
+                name="word_type"
+                placeholder="Verb, Noun..."
+                value={filters.word_type}
                 onChange={handleFilterChange}
                 className="w-full bg-[#071320] border border-[#00c3ff]/30 rounded-xl px-4 py-2.5 text-sm focus:border-[#00c3ff] outline-none transition-all"
               />
@@ -242,17 +242,17 @@ export default function Statistics() {
               <label className="text-[10px] uppercase font-bold text-[#a0a0a0] ml-2 flex items-center gap-1">
                 <FaCalendarAlt size={10} /> Start Date
               </label>
-              <input 
-                type="date" 
-                name="start_date" 
-                value={filters.start_date} 
+              <input
+                type="date"
+                name="start_date"
+                value={filters.start_date}
                 onChange={handleFilterChange}
                 className="w-full bg-[#071320] border border-[#00c3ff]/30 rounded-xl px-4 py-2.5 text-sm focus:border-[#00c3ff] outline-none transition-all [color-scheme:dark]"
               />
             </div>
 
             <div className="flex items-end">
-              <button 
+              <button
                 onClick={applyFilters}
                 className="w-full py-2.5 bg-[#00c3ff] text-black font-bold rounded-xl hover:bg-[#00ff88] transition-all hover:shadow-[0_0_20px_rgba(0,255,136,0.4)] active:scale-95"
               >
@@ -338,11 +338,10 @@ export default function Statistics() {
                       </td>
                       <td className="px-6 py-4">
                         {row.game === 'random' ? (
-                          <span className={`text-[11px] font-bold uppercase ${
-                            row.difficulty === 'easy' ? 'text-yellow-400' : 
+                          <span className={`text-[11px] font-bold uppercase ${row.difficulty === 'easy' ? 'text-yellow-400' :
                             row.difficulty === 'normal' ? 'text-orange-400' :
-                            row.difficulty === 'hard' ? 'text-red-400' : 'text-red-700'
-                          }`}>
+                              row.difficulty === 'hard' ? 'text-red-400' : 'text-red-700'
+                            }`}>
                             {row.difficulty}
                           </span>
                         ) : (

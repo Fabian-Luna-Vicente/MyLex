@@ -1,6 +1,7 @@
 import { useState, useCallback } from 'react';
 import { useVocabulary } from './useVocabulary';
 import { useAi } from './useAi';
+import { progressService } from '../services/progressService';
 
 export const useWritingGame = () => {
     const { fetchWordsForGame, lists, fetchLists } = useVocabulary();
@@ -79,9 +80,7 @@ export const useWritingGame = () => {
                 game: 'writing',
                 is_correct: true // If they wrote something and continued, we mark as reviewed/correct
             }));
-
-            const { axiosInstance } = await import('../services/api');
-            await axiosInstance.default.post('/api/progress/bulk', { items });
+            await progressService.saveBulkProgress(items);
         } catch (error) {
             console.error("Failed to save writing progress", error);
         }

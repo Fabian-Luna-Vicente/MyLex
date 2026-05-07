@@ -1,5 +1,6 @@
 import { useState, useCallback } from 'react';
 import { useVocabulary } from './useVocabulary';
+import { progressService } from '../services/progressService';
 
 export const useListeningGame = () => {
     const { fetchWordsForGame, lists, fetchLists } = useVocabulary();
@@ -64,7 +65,7 @@ export const useListeningGame = () => {
             setGameStatus('playing');
             generateChoices(words, 0);
             setShowGame(true);
-            const examples = words[0].examples.map((e, i) => "Example " + (i + 1) + ": " + e.translation).join("\n");
+            const examples = words[0].examples.map((e, i) => "Example " + (i + 1) + ": " + e).join("\n");
             setTimeout(() => playAudio(words[0].name + ". " + examples), 500);
 
         } catch (error) {
@@ -120,8 +121,7 @@ export const useListeningGame = () => {
 
     const saveBulkProgress = async (progressArray) => {
         try {
-            const { axiosInstance } = await import('../services/api');
-            await axiosInstance.default.post('/api/progress/bulk', { items: progressArray });
+            await progressService.saveBulkProgress(progressArray);
         } catch (error) {
             console.error("Failed to save bulk progress", error);
         }

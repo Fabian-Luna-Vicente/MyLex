@@ -4,8 +4,8 @@ import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { categories } from "../components/categoriesData";
 import { progressService } from '../services/progressService';
-import { 
-  AreaChart, Area, ResponsiveContainer, XAxis, YAxis, Tooltip 
+import {
+  AreaChart, Area, ResponsiveContainer, XAxis, YAxis, Tooltip
 } from 'recharts';
 import { motion, AnimatePresence } from 'framer-motion';
 
@@ -43,7 +43,7 @@ const AccuracyCarousel = ({ accuracies }) => {
           className="w-full"
         >
           <p className="text-[#a0a0a0] text-[10px] font-bold uppercase tracking-widest mb-1">
-            {current.game.replace('-', ' ')} Accuracy
+            {current.game.replace('_', ' ')} · {current.list_name}
           </p>
           <h3 className="text-4xl font-extrabold text-[#00ff88]">
             {Math.round(current.accuracy)}%
@@ -112,9 +112,9 @@ export default function Dashboard() {
       </div>
 
       <div className="w-full max-w-[1400px] mx-auto relative z-10 px-5 pb-12">
-        
+
         <header className="text-center mb-12">
-          <motion.h1 
+          <motion.h1
             initial={{ opacity: 0, y: -20 }}
             animate={{ opacity: 1, y: 0 }}
             className="text-[2.5rem] md:text-5xl font-bold text-white drop-shadow-[0_0_10px_rgba(0,195,255,0.5)] mb-4"
@@ -124,9 +124,9 @@ export default function Dashboard() {
 
           {/* Quick Stats Summary */}
           <div className="grid grid-cols-1 lg:grid-cols-4 gap-6 mt-12 text-left">
-            
+
             {/* User Streak card */}
-            <motion.div 
+            <motion.div
               initial={{ opacity: 0, scale: 0.95 }}
               animate={{ opacity: 1, scale: 1 }}
               className="bg-[#0e0c1d]/60 backdrop-blur-[10px] border border-[#00c3ff]/20 rounded-[25px] p-6 flex flex-col justify-between"
@@ -146,7 +146,7 @@ export default function Dashboard() {
             </motion.div>
 
             {/* Activity Mini Chart */}
-            <motion.div 
+            <motion.div
               initial={{ opacity: 0, scale: 0.95 }}
               animate={{ opacity: 1, scale: 1 }}
               transition={{ delay: 0.1 }}
@@ -162,7 +162,7 @@ export default function Dashboard() {
                     <Area type="monotone" dataKey="count" stroke="#00c3ff" fill="#00c3ff20" strokeWidth={2} />
                     <XAxis dataKey="date" hide />
                     <YAxis hide />
-                    <Tooltip 
+                    <Tooltip
                       contentStyle={{ backgroundColor: '#071320', border: 'none', borderRadius: '8px', fontSize: '10px' }}
                       labelStyle={{ display: 'none' }}
                     />
@@ -172,7 +172,7 @@ export default function Dashboard() {
             </motion.div>
 
             {/* Game Accuracy Carousel Card */}
-            <motion.div 
+            <motion.div
               initial={{ opacity: 0, scale: 0.95 }}
               animate={{ opacity: 1, scale: 1 }}
               transition={{ delay: 0.2 }}

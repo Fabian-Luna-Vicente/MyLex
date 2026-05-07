@@ -70,7 +70,7 @@ export const useEditWord = (id, lists, updateWord, fetchLists, fetchWordDetails,
             const results = await searchDictionary({
                 word: searchWord,
                 language: 'en',
-                t_lang: 'es',
+                t_lang: 'en', // Cambiado a 'en' para definiciones en el mismo idioma
                 use_ai: useAiMode,
                 context: aiContext
             });
@@ -78,6 +78,17 @@ export const useEditWord = (id, lists, updateWord, fetchLists, fetchWordDetails,
         } catch (err) {
             setError("Failed to fetch definitions.");
         }
+    };
+
+    const toggleWordType = (type) => {
+        setFormData(prev => {
+            const types = prev.word_types.split(',').map(t => t.trim()).filter(t => t);
+            if (types.includes(type.toLowerCase())) {
+                return { ...prev, word_types: types.filter(t => t !== type.toLowerCase()).join(', ') };
+            } else {
+                return { ...prev, word_types: [...types, type.toLowerCase()].join(', ') };
+            }
+        });
     };
 
     const handleSelectResult = (result) => {
@@ -139,6 +150,6 @@ export const useEditWord = (id, lists, updateWord, fetchLists, fetchWordDetails,
         setAiContext, handleSubmit, handleSelectResult, handleSearch, toggleListSelection,
         error, formData, setFormData, imageQuery, setImageQuery, imageResults,
         isSearchingImages, imagePage, setImagePage, handleImageSearchSubmit,
-        saving, loadingWord
+        saving, loadingWord, toggleWordType
     };
 };

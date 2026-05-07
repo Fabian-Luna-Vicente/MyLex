@@ -1,4 +1,4 @@
-from sqlalchemy.orm import Session
+from sqlalchemy.orm import Session,joinedload
 from sqlalchemy.dialects.postgresql import insert as pg_insert
 from sqlalchemy import func, case, text
 from datetime import datetime, timezone
@@ -179,15 +179,19 @@ class ProgressRepository:
             .all()
         )
 
-        # 2. Accuracy for all games
+        # 2. Accuracy for all games per list
         game_stats = (
             self.db.query(
                 WordProgress.game,
+                VocabularyList.name.label("list_name"),
                 func.count(WordProgress.id).label("total"),
                 func.sum(case((WordProgress.is_correct == True, 1), else_=0)).label("correct")
             )
+            .join(Word, Word.id == WordProgress.word_id)
+            .join(list_word_association, list_word_association.c.word_id == Word.id)
+            .join(VocabularyList, VocabularyList.id == list_word_association.c.list_id)
             .filter(WordProgress.user_id == user_id)
-            .group_by(WordProgress.game)
+            .group_by(WordProgress.game, VocabularyList.name)
             .all()
         )
 
@@ -214,9 +218,10 @@ class ProgressRepository:
             "game_accuracy": [
                 {
                     "game": g[0],
-                    "total": g[1],
-                    "correct": int(g[2] or 0),
-                    "accuracy": round((int(g[2] or 0) / g[1] * 100), 1) if g[1] > 0 else 0
+                    "list_name": g[1],
+                    "total": g[2],
+                    "correct": int(g[3] or 0),
+                    "accuracy": round((int(g[3] or 0) / g[2] * 100), 1) if g[2] > 0 else 0
                 } for g in game_stats if g[0] != 'random'
             ],
             "recent_activity": [{"date": a[0], "count": a[1]} for a in activity],
@@ -238,6 +243,7 @@ class ProgressRepository:
         """
         query = (
             self.db.query(WordProgress)
+            .options(joinedload(WordProgress.word))
             .join(Word, Word.id == WordProgress.word_id)
             .filter(WordProgress.user_id == user_id)
         )

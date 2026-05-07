@@ -17,7 +17,7 @@ export default function CreateWord() {
     setAiContext, handleSubmit, handleSelectResult, handleSearch, setSelectedListId,
     selectedListId, error, formData, setFormData, imageQuery, setImageQuery, imageResults,
     isSearchingImages, imagePage, setImagePage, searchGoogleImages, handleImageSearchSubmit,
-    handleLoadMoreImages, toggleListSelection, saving, setSaving } = useCreateWord(lists, addWord, fetchLists, searchDictionary, aiLoading);
+    handleLoadMoreImages, toggleListSelection, toggleWordType, saving, setSaving } = useCreateWord(lists, addWord, fetchLists, searchDictionary, aiLoading);
 
   return (
     <div className="min-h-screen bg-[#071320] text-white p-6 md:p-12 font-sans relative z-[1] overflow-hidden">
@@ -148,6 +148,25 @@ export default function CreateWord() {
                   placeholder="e.g. noun, verb"
                   className="w-full bg-[#071320] border border-[#00c3ff]/30 rounded-[15px] px-4 py-3 text-white focus:outline-none focus:border-[#00c3ff] focus:ring-1 focus:ring-[#00c3ff] transition-all duration-300"
                 />
+                <div className="flex flex-wrap gap-2 mt-3">
+                  {['Verb', 'Noun', 'Adjective', 'Adverb', 'Phrasal Verb', 'Expression'].map(type => {
+                    const isSelected = formData.word_types.split(',').map(t => t.trim().toLowerCase()).includes(type.toLowerCase());
+                    return (
+                      <button
+                        key={type}
+                        type="button"
+                        onClick={() => toggleWordType(type)}
+                        className={`text-[10px] font-bold uppercase tracking-wider px-3 py-1.5 rounded-full border transition-all duration-300 ${
+                          isSelected 
+                            ? 'bg-[#00c3ff] border-[#00c3ff] text-[#071320] shadow-[0_0_10px_rgba(0,195,255,0.4)]' 
+                            : 'bg-transparent border-[#00c3ff]/30 text-[#a0a0a0] hover:border-[#00c3ff] hover:text-[#00c3ff]'
+                        }`}
+                      >
+                        {type}
+                      </button>
+                    );
+                  })}
+                </div>
               </div>
             </div>
 

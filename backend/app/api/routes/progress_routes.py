@@ -72,7 +72,7 @@ def get_overall_stats(
     return service.get_overall_stats(current_user.id)
 
 
-@router.get("/stats/detailed")
+@router.get("/stats/detailed",response_model=List[ProgressResponse])
 def get_detailed_stats(
     game: str = None,
     list_id: int = None,
