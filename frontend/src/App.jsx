@@ -18,6 +18,18 @@ import VisualMemoryGame from './pages/VisualMemoryGame';
 import SynAntGame from './pages/SynAntGame';
 import ListeningGame from './pages/ListeningGame';
 import WritingGame from './pages/WritingGame';
+import Navbar from './components/Navbar';
+
+function Layout({ children }) {
+  return (
+    <>
+      <Navbar />
+      <div className="pt-24 min-h-screen">
+        {children}
+      </div>
+    </>
+  );
+}
 
 function App() {
   return (
@@ -28,20 +40,20 @@ function App() {
             <Routes>
               <Route path="/login" element={<Login />} />
               <Route path="/verify-email" element={<VerifyEmail />} />
-              
-              <Route path="/dashboard" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
-              <Route path="/lists" element={<ProtectedRoute><AllLists /></ProtectedRoute>} />
-              <Route path="/list/:id" element={<ProtectedRoute><ListWords /></ProtectedRoute>} />
-              <Route path="/create-word" element={<ProtectedRoute><CreateWord /></ProtectedRoute>} />
-              <Route path="/word/edit/:id" element={<ProtectedRoute><EditWord /></ProtectedRoute>} />
-              <Route path="/statistics" element={<ProtectedRoute><Statistics /></ProtectedRoute>} />
-              
-              <Route path="/games/random" element={<ProtectedRoute><RandomGame /></ProtectedRoute>} />
-              <Route path="/games/hangman" element={<ProtectedRoute><HangmanGame /></ProtectedRoute>} />
-              <Route path="/games/visual-memory" element={<ProtectedRoute><VisualMemoryGame /></ProtectedRoute>} />
-              <Route path="/games/syn-ant" element={<ProtectedRoute><SynAntGame /></ProtectedRoute>} />
-              <Route path="/games/listening" element={<ProtectedRoute><ListeningGame /></ProtectedRoute>} />
-              <Route path="/games/writing" element={<ProtectedRoute><WritingGame /></ProtectedRoute>} />
+
+              <Route path="/dashboard" element={<ProtectedRoute><Layout><Dashboard /></Layout></ProtectedRoute>} />
+              <Route path="/lists" element={<ProtectedRoute><Layout><AllLists /></Layout></ProtectedRoute>} />
+              <Route path="/list/:id" element={<ProtectedRoute><Layout><ListWords /></Layout></ProtectedRoute>} />
+              <Route path="/create-word" element={<ProtectedRoute><Layout><CreateWord /></Layout></ProtectedRoute>} />
+              <Route path="/word/edit/:id" element={<ProtectedRoute><Layout><EditWord /></Layout></ProtectedRoute>} />
+              <Route path="/statistics" element={<ProtectedRoute><Layout><Statistics /></Layout></ProtectedRoute>} />
+
+              <Route path="/games/random" element={<ProtectedRoute><Layout><RandomGame /></Layout></ProtectedRoute>} />
+              <Route path="/games/hangman" element={<ProtectedRoute><Layout><HangmanGame /></Layout></ProtectedRoute>} />
+              <Route path="/games/visual-memory" element={<ProtectedRoute><Layout><VisualMemoryGame /></Layout></ProtectedRoute>} />
+              <Route path="/games/syn-ant" element={<ProtectedRoute><Layout><SynAntGame /></Layout></ProtectedRoute>} />
+              <Route path="/games/listening" element={<ProtectedRoute><Layout><ListeningGame /></Layout></ProtectedRoute>} />
+              <Route path="/games/writing" element={<ProtectedRoute><Layout><WritingGame /></Layout></ProtectedRoute>} />
 
               {/* Redirect root to dashboard */}
               <Route path="/" element={<Navigate to="/dashboard" replace />} />
