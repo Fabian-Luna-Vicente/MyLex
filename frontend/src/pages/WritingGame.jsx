@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { useWritingGame } from '../hooks/useWritingGame';
 import { GrPrevious, GrLinkNext } from 'react-icons/gr';
 import { MdNotStarted } from 'react-icons/md';
-import { FaRobot, FaCheckCircle, FaExclamationCircle } from 'react-icons/fa';
+import { FaPenNib, FaCheckCircle, FaExclamationCircle } from 'react-icons/fa';
 import { motion, AnimatePresence } from 'framer-motion';
 
 export default function WritingGame() {
@@ -133,7 +133,7 @@ export default function WritingGame() {
                     {aiLoading ? (
                       <><div className="h-4 w-4 animate-spin rounded-full border-2 border-[#00c3ff] border-t-transparent" /> AI Thinking...</>
                     ) : (
-                      <><FaRobot size={20} /> Check Grammar</>
+                      <><FaPenNib size={20} /> Check Grammar</>
                     )}
                   </button>
 
@@ -158,41 +158,50 @@ export default function WritingGame() {
 
               {aiFeedback && (
                 <motion.div
-                  initial={{ opacity: 0, height: 0 }}
-                  animate={{ opacity: 1, height: 'auto' }}
-                  className="bg-gradient-to-br from-[#0e0c1d] to-[#071320] border border-[#00c3ff]/30 rounded-[30px] p-8 shadow-[0_10px_30px_rgba(0,195,255,0.15)] relative overflow-hidden"
+                  initial={{ opacity: 0, y: 15 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  className="mt-8 bg-[#0e0c1d]/60 backdrop-blur-xl border border-[#00c3ff]/20 rounded-[24px] p-6 shadow-2xl"
                 >
-                  <div className="absolute top-0 right-0 p-4 opacity-10">
-                    <FaRobot size={100} />
+                  <div className="flex items-center gap-3 mb-5 border-b border-[#ffffff10] pb-4">
+                    <div className="p-1.5 bg-[#00c3ff]/10 rounded-xl shadow-[0_0_10px_rgba(0,195,255,0.2)] flex items-center justify-center w-9 h-9">
+                      <img
+                        src="/mi-logo.png"
+                        alt="AI Logo"
+                        className="w-full h-full object-contain drop-shadow-[0_0_5px_rgba(0,195,255,0.5)]"
+                      />
+                    </div>
+                    <h3 className="text-white font-bold text-sm tracking-widest uppercase">
+                      AI <span className="text-[#00c3ff]">Feedback</span>
+                    </h3>
                   </div>
 
-                  <h3 className="text-[#00c3ff] font-black uppercase tracking-widest mb-6 flex items-center gap-3 text-sm">
-                    <FaRobot /> AI Teacher Feedback
-                  </h3>
-
-                  <div className="space-y-6 relative z-10">
+                  <div className="space-y-5">
                     <div>
-                      <h4 className="text-[10px] text-[#a0a0a0] uppercase tracking-widest mb-2">Corrected Version</h4>
-                      <p className="text-lg text-white italic border-l-4 border-[#00ff88]/50 pl-4 py-1">
-                        "{aiFeedback.corrected_text}"
+                      <h4 className="text-[10px] text-[#a0a0a0] uppercase tracking-widest mb-1.5 font-bold">
+                        Correction
+                      </h4>
+                      <p className="text-lg text-white font-medium bg-[#071320]/50 p-4 rounded-xl border border-[#ffffff05]">
+                        {aiFeedback.corrected_text}
                       </p>
                     </div>
 
                     <div>
-                      <h4 className="text-[10px] text-[#a0a0a0] uppercase tracking-widest mb-2">Explanation</h4>
-                      <p className="text-[#e0e0e0] leading-relaxed">
+                      <h4 className="text-[10px] text-[#a0a0a0] uppercase tracking-widest mb-1.5 font-bold">
+                        Explanation
+                      </h4>
+                      <p className="text-sm text-[#c0c0c0] leading-relaxed">
                         {aiFeedback.explanation}
                       </p>
                     </div>
 
-                    <div className="flex items-center gap-2 mt-4 pt-4 border-t border-[#ffffff05]">
+                    <div className="flex items-center pt-4 border-t border-[#ffffff10]">
                       {aiFeedback.words_used_correctly ? (
-                        <span className="flex items-center gap-2 text-[#00ff88] text-sm font-bold uppercase tracking-wider">
-                          <FaCheckCircle /> Required words used correctly
+                        <span className="flex items-center gap-2 text-[#00ff88] text-xs font-bold uppercase tracking-wider">
+                          <FaCheckCircle size={14} /> Required words used correctly
                         </span>
                       ) : (
-                        <span className="flex items-center gap-2 text-red-400 text-sm font-bold uppercase tracking-wider">
-                          <FaExclamationCircle /> Missing or incorrect usage of required words
+                        <span className="flex items-center gap-2 text-red-400 text-xs font-bold uppercase tracking-wider">
+                          <FaExclamationCircle size={14} /> Missing or incorrect usage
                         </span>
                       )}
                     </div>

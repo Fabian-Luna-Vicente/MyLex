@@ -1,0 +1,629 @@
+EC-AddListOverlay/* LyricsAndWords.css - Estilos para ElementCard */
+
+/* --- Z-INDEX MANAGEMENT (NUEVO) --- */
+/* El menú flotante debe ser el MÁS alto */
+.EC-ListPopupPositioner {
+    position: absolute;
+    /* Ajusta este valor según la altura real de tu footer (~70px suele estar bien) */
+    bottom: 80px; 
+    left: 50%;
+    transform: translateX(-50%); /* Centrado horizontal perfecto */
+    z-index: 100; /* Asegura que flote sobre el contenido */
+    
+    /* Efecto de aparición */
+    animation: slideUpPopup 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+    
+    /* Sombra para que destaque sobre el texto de fondo */
+    box-shadow: 0 -5px 20px rgba(0, 0, 0, 0.5);
+    border-radius: 12px;
+}
+
+@keyframes slideUpPopup {
+    from {
+        opacity: 0;
+        transform: translate(-50%, 20px);
+    }
+    to {
+        opacity: 1;
+        transform: translate(-50%, 0);
+    }
+}
+.EC-AddListOverlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.85); /* Fondo oscuro semitransparente */
+    backdrop-filter: blur(5px);
+    z-index: 20; /* Por encima de todo el contenido de la tarjeta */
+    
+    display: flex;
+    justify-content: center;
+    align-items: center; /* Centrado perfecto */
+    
+    opacity: 0;
+    animation: fadeInOverlay 0.2s forwards;
+}
+.floating-fab-container {
+    z-index: 2147483647 !important; /* Max 32-bit int */
+}
+
+/* Overlay oscuro (Fondo bloqueante) */
+.ElementCardOverlay {
+    position: fixed; /* Fixed para bloquear toda la pantalla */
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background-color: rgba(0, 0, 0, 0.7); /* Ligeramente más oscuro para foco */
+    backdrop-filter: blur(8px);
+    display: flex;
+    justify-content: center;
+    align-items: center; /* Centrado vertical y horizontal */
+    
+    /* CAMBIO: Z-Index justo debajo del FAB */
+    z-index: 214748364 !important; 
+    
+    padding: 1rem;
+    overflow-y: hidden; /* El overlay no scrollea, solo el contenedor */
+}
+
+/* Contenedor Principal de la Tarjeta */
+.ElementCardContainer {
+    background-color: #072138;
+    border: 2px solid #00c3ff32;
+    border-radius: 15px;
+    
+    width: 100%;
+    max-width: 500px; 
+    max-height: 90vh; 
+    
+    display: flex;
+    flex-direction: column;
+    overflow: hidden; 
+    position: relative;
+    box-shadow: 0 0 20px rgba(0, 195, 255, 0.2);
+    
+    /* --- CORRECCIÓN DEL SALTO --- */
+    margin: auto; /* Fuerza el centrado absoluto dentro del flex padre */
+    will-change: transform, opacity; /* Prepara al navegador para la animación */
+    animation: fadeInScale 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275); /* Efecto rebote suave */
+}
+/* --- BARRA DE NAVEGACIÓN TIPO PESTAÑAS --- */
+.EC-WordNav {
+    background-color: transparent; /* Fondo transparente para ver las pestañas flotar */
+    padding: 10px 10px 0 10px; /* Padding solo arriba y lados, abajo pegado al footer */
+    display: flex;
+    gap: 4px; /* Las pestañas suelen ir juntas */
+    white-space: nowrap;
+    
+    /* Línea base para que parezcan apoyadas */
+    border-bottom: 2px solid rgba(0, 195, 255, 0.3);
+    
+    /* Scrollbar fina */
+    scrollbar-width: thin;
+    scrollbar-color: #007ea7 transparent;
+}
+.EC-WordNav::-webkit-scrollbar {
+    height: 4px;
+}
+.EC-WordNav::-webkit-scrollbar-thumb {
+    background: #007ea7;
+    border-radius: 4px;
+}
+/* Estilo PESTAÑA (Browser Tab) */
+.EC-WordNavItem {
+    background: rgba(7, 33, 56, 0.5); /* Oscuro transparente */
+    border: 1px solid rgba(0, 195, 255, 0.3);
+    border-bottom: none; /* Sin borde abajo para conectar */
+    color: #8899a6;
+    
+    /* Tamaño compacto y legible */
+    padding: 8px 16px; 
+    font-size: 0.9rem;
+    max-width: 150px; /* Ancho máximo por pestaña */
+    overflow: hidden;
+    text-overflow: ellipsis;
+    
+    border-radius: 8px 8px 0 0; /* Solo bordes superiores redondos */
+    cursor: pointer;
+    transition: all 0.2s ease;
+    flex-shrink: 0;
+    position: relative;
+    top: 2px; /* Ligeramente bajado para tocar la línea */
+}
+
+.EC-WordNavItem:hover {
+    background: rgba(0, 195, 255, 0.1);
+    color: #00c3ff;
+}
+
+.EC-WordNavItem.active {
+    background: rgba(0, 195, 255, 0.15); /* Fondo activo sutil */
+    color: #00c3ff;
+    font-weight: bold;
+    border-color: #00c3ff;
+    border-top: 2px solid #00c3ff; /* Línea superior destacada */
+    
+    /* Truco visual: conectar con el footer/borde */
+    padding-bottom: 10px; 
+    margin-bottom: -2px; 
+    z-index: 2; 
+    box-shadow: 0 -5px 10px rgba(0, 195, 255, 0.1);
+}
+
+/* Scrollbar estilo Chrome/Edge mejorado */
+.EC-WordNav::-webkit-scrollbar {
+    height: 10px; /* Barra un poco más alta para que sea fácil de clicar */
+}
+.EC-WordNav::-webkit-scrollbar-track {
+    background: rgba(0, 0, 0, 0.3);
+    border-radius: 10px;
+    margin: 0 10px;
+}
+.EC-WordNav::-webkit-scrollbar-thumb {
+    background-color: #007ea7;
+    border-radius: 10px;
+    border: 2px solid rgba(0,0,0,0.2); /* Borde para separarlo del track */
+}
+.EC-WordNav::-webkit-scrollbar-thumb:hover {
+    background-color: #00c3ff;
+}
+
+/* Header del Modal (Título y Botón Cerrar) */
+.EC-Header {
+    height: 40px;
+    background-color: rgba(14, 12, 29, 0.95);
+    padding: 1rem;
+    display: flex;
+    align-items: center; /* Alineación vertical */
+    border-bottom: 1px solid #00c3ff;
+    z-index: 10;
+    justify-content: space-between;
+    /* Quitamos sticky porque ahora el contenedor es flex */
+}
+
+.EC-CloseBtn {
+    background: transparent;
+    border: 1px solid #ff4757;
+    color: #ff4757;
+    width: 35px;
+    height: 35px;
+    border-radius: 50%;
+    font-weight: bold;
+    cursor: pointer;
+    font-size: 1.2rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: 0.2s;
+    margin-right: 0; /* Quitamos margen derecho porque ahora está en un div flex */
+    flex-shrink: 0;
+}
+
+.EC-CloseBtn:hover {
+    background: #ff4757;
+    color: white;
+}
+
+.EC-Title {
+    color: #00c3ff;
+    font-size: 1.5rem;
+    font-weight: bold;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    text-transform: capitalize;
+    flex-grow: 1;
+    text-align: right; /* Título a la derecha o centro */
+    margin-left: 15px;
+}
+
+/* Contenido Scrolleable */
+.EC-Content {
+    flex: 1; /* Ocupa el espacio restante */
+    overflow-y: auto;
+    padding: 1.5rem;
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+    
+    /* Scrollbar */
+    scrollbar-width: thin;
+    scrollbar-color: #007ea7 rgba(14, 12, 29, 0.5);
+}
+
+/* Scrollbar Webkit para contenido */
+.EC-Content::-webkit-scrollbar {
+    width: 8px;
+}
+.EC-Content::-webkit-scrollbar-track {
+    background: rgba(14, 12, 29, 0.5);
+}
+.EC-Content::-webkit-scrollbar-thumb {
+    background-color: #007ea7;
+    border-radius: 4px;
+}
+
+/* Sección de Tipo (Noun, Verb...) */
+.EC-Type {
+    background: rgba(0, 195, 255, 0.1);
+    color: #00c3ff;
+    padding: 5px 15px;
+    border-radius: 20px;
+    font-weight: bold;
+    align-self: center;
+    border: 1px solid rgba(0, 195, 255, 0.3);
+    text-transform: uppercase;
+    font-size: 0.9rem;
+    margin-bottom: 0.5rem;
+}
+
+/* Sección de Imagen y Significado */
+.EC-MediaSection {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+
+.EC-Images {
+    display: flex;
+    gap: 10px;
+    overflow-x: auto;
+    padding-bottom: 10px;
+}
+
+.EC-Images img {
+    width: 100%;
+    max-height: 200px;
+    object-fit: cover;
+    border-radius: 10px;
+    border: 1px solid #00c3ff;
+}
+
+.EC-Meaning {
+    background: rgba(0, 0, 0, 0.3);
+    padding: 1rem;
+    border-radius: 10px;
+    border-left: 4px solid #00c3ff;
+    color: #dfe6e9;
+    line-height: 1.5;
+}
+
+.EC-Meaning h4 {
+    color: #00c3ff;
+    margin-bottom: 0.5rem;
+    font-size: 1.1rem;
+}
+
+/* Sección de Sinónimos/Antónimos */
+.EC-SynAnt {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.EC-TagBox {
+    padding: 8px 12px;
+    border-radius: 8px;
+    font-size: 0.95rem;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.EC-TagBox.Syn {
+    background: rgba(0, 255, 170, 0.1);
+    border: 1px solid #00ffaa;
+    color: #00ffaa;
+}
+
+.EC-TagBox.Ant {
+    background: rgba(255, 71, 87, 0.1);
+    border: 1px solid #ff4757;
+    color: #ff4757;
+}
+
+/* Tabla de Tiempos Verbales */
+.EC-TableContainer {
+    overflow-x: auto;
+}
+
+.EC-Table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 0.5rem;
+}
+
+.EC-Table th, .EC-Table td {
+    border: 1px solid rgba(0, 195, 255, 0.3);
+    padding: 8px;
+    text-align: center;
+    color: white;
+}
+
+.EC-Table th {
+    background: rgba(0, 195, 255, 0.2);
+    color: #00c3ff;
+}
+
+/* Ejemplos */
+.EC-Examples {
+    background: rgba(255, 255, 255, 0.05);
+    padding: 1rem;
+    border-radius: 10px;
+}
+
+.EC-Examples h4 {
+    color: #00c3ff;
+    margin-bottom: 0.8rem;
+}
+
+.EC-Examples ul {
+    list-style: none;
+    padding: 0;
+}
+
+.EC-Examples li {
+    margin-bottom: 0.8rem;
+    display: flex;
+    gap: 10px;
+    color: #dcdde1;
+    line-height: 1.4;
+}
+
+.EC-Examples li svg {
+    color: #00c3ff;
+    flex-shrink: 0;
+    margin-top: 3px;
+}
+
+/* --- FOOTER CON CENTRADO PERFECTO --- */
+.EC-Footer {
+    background: rgba(14, 12, 29, 0.98);
+    padding: 1rem;
+    position: relative; /* Necesario para posicionar las flechas */
+    display: flex;
+    justify-content: center; /* Centra el contenido principal (Botón Añadir) */
+    align-items: center;
+    border-top: 1px solid #00c3ff; /* Línea neón superior */
+    min-height: 30px; /* Altura mínima para asegurar espacio */
+}
+
+/* Flechas de navegación (Posición Absoluta) */
+.EC-NavBtn {
+    position: absolute; /* Sacadas del flujo para no empujar el centro */
+    top: 50%;
+    transform: translateY(-50%);
+    
+    background: transparent;
+    border: 1px solid rgba(0, 195, 255, 0.5);
+    color: #00c3ff;
+    width: 35px;
+    height: 35px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.1rem;
+    cursor: pointer;
+    transition: 0.2s;
+    z-index: 5;
+}
+
+/* Posiciones específicas */
+.EC-Footer .EC-NavBtn:first-of-type {
+    left: 20px; /* Flecha izquierda */
+}
+
+.EC-Footer .EC-NavBtn:last-of-type {
+    right: 20px; /* Flecha derecha */
+}
+
+.EC-NavBtn:hover {
+    background: #00c3ff;
+    color: #072138;
+    box-shadow: 0 0 10px #00c3ff;
+}
+/* Botón Central (Añadir) */
+.EC-AddBtn {
+    /* Flujo normal (Flex center del padre lo pone en medio) */
+    background: #00c3ff;
+    color: #072138;
+    width: 45px; /* Un poco más compacto */
+    height: 45px;
+    border-radius: 50%;
+    border: none;
+    font-size: 1.4rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    box-shadow: 0 0 15px rgba(0, 195, 255, 0.4);
+    transition: transform 0.2s;
+    z-index: 10; /* Encima de todo */
+}
+
+.EC-AddBtn:hover {
+    transform: scale(1.1);
+    box-shadow: 0 0 25px rgba(0, 195, 255, 0.7);
+}
+
+@keyframes fadeInScale {
+    0% { 
+        opacity: 0; 
+        transform: scale(0.95); /* Empezar un poco más grande evita saltos bruscos */
+    }
+    100% { 
+        opacity: 1; 
+        transform: scale(1); 
+    }
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+/* Responsive */
+@media (max-width: 600px) {
+    .ElementCardContainer {
+        width: 95%;
+        max-height: 85vh;
+    }
+    
+    .EC-Header {
+        padding: 0.8rem;
+    }
+    
+    .EC-Title {
+        font-size: 1.2rem;
+    }
+}
+
+/* --- AddWordToList Styles (Se mantienen igual) --- */
+.AddToListCard {
+    box-shadow: 0 0 30px rgba(0, 195, 255, 0.3);
+    transform: scale(0.9);
+    animation: popIn 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+}
+@keyframes popIn {
+    to { transform: scale(1); }
+}
+
+/* Botón cerrar específico para este sub-menú (opcional) */
+.EC-CloseListBtn {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    background: transparent;
+    border: none;
+    color: #ff4757;
+    font-size: 1.5rem;
+    cursor: pointer;
+}
+.AddToListCard h4 {
+color: #00c3ff;
+    background-color: #0000005e;
+    text-transform: uppercase;
+    text-align: center;
+    letter-spacing: 1px;
+    margin-bottom: .8rem;
+    font-size: 1.1rem;
+    margin-top: 10px;
+    padding: 10px;
+}
+
+.ListScrollArea {
+  width: 100%;
+  max-height: 150px;
+  overflow-y: auto;
+  margin-bottom: 1rem;
+  background: rgba(0, 0, 0, 0.3);
+  border-radius: 5px;
+  border: 1px solid rgba(0, 195, 255, 0.1);
+  padding: 5px;
+  scrollbar-width: thin;
+  scrollbar-color: #007ea7 rgba(14, 12, 29, 0.5);
+}
+
+.ListScrollArea::-webkit-scrollbar {
+    width: 8px;
+}
+.ListScrollArea::-webkit-scrollbar-track {
+    background: rgba(14, 12, 29, 0.5);
+    border-radius: 10px;
+}
+.ListScrollArea::-webkit-scrollbar-thumb {
+    background-color: #007ea7;
+    border-radius: 10px;
+    border: 1px solid rgba(0, 0, 0, 0.3);
+}
+.ListScrollArea::-webkit-scrollbar-thumb:hover {
+    background-color: #00c3ff;
+    box-shadow: 0 0 10px #00c3ff;
+}
+
+.ListOption {
+  display: flex;
+  align-items: center;
+  padding: 8px;
+  cursor: pointer;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+  transition: background 0.2s;
+  color: white;
+}
+
+.ListOption:hover {
+  background-color: rgba(0, 195, 255, 0.1);
+}
+
+.ListOption:last-child {
+  border-bottom: none;
+}
+
+.ListOption input[type="checkbox"] {
+  appearance: none;
+  -webkit-appearance: none;
+  width: 16px;
+  height: 16px;
+  border: 1px solid #00c3ff;
+  border-radius: 3px;
+  margin-right: 10px;
+  display: grid;
+  place-content: center;
+  cursor: pointer;
+  background: transparent;
+}
+
+.ListOption input[type="checkbox"]::before {
+  content: "";
+  width: 10px;
+  height: 10px;
+  transform: scale(0);
+  transition: 120ms transform ease-in-out;
+  background-color: #00c3ff;
+  transform-origin: center;
+  clip-path: polygon(14% 44%, 0 65%, 50% 100%, 100% 16%, 80% 0%, 43% 62%);
+}
+
+.ListOption input[type="checkbox"]:checked::before {
+  transform: scale(1);
+}
+
+.ListOption span {
+  font-size: 0.9rem;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.BtnSendList {
+  background: #00c3ff;
+  color: #072138;
+  border: none;
+  width: 100%;
+  padding: 10px;
+  border-radius: 5px;
+  font-weight: bold;
+  cursor: pointer;
+  transition: transform 0.2s, box-shadow 0.2s;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 8px;
+}
+
+.BtnSendList:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 0 15px rgba(0, 195, 255, 0.5);
+}
+
+.BtnSendList:disabled {
+  background: #555;
+  color: #888;
+  cursor: not-allowed;
+  transform: none;
+  box-shadow: none;
+}

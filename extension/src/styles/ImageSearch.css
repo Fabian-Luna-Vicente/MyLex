@@ -1,0 +1,133 @@
+/* ImageSearch.css Refactorizado */
+
+.ImpSeaLink {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+}
+
+/* --- BARRA DE BÚSQUEDA --- */
+.searchbar {
+  display: flex;
+  align-items: center;
+  width: 100%;
+  height: 45px;
+  background: #0a2a4a; /* Fondo oscuro del tema */
+  border: 1px solid #00c3ff;
+  border-radius: 0.5rem;
+  padding: 0 10px;
+  box-shadow: 0 0 5px rgba(0, 195, 255, 0.2);
+  transition: box-shadow 0.3s;
+}
+
+.searchbar:focus-within {
+  box-shadow: 0 0 10px rgba(0, 195, 255, 0.337);
+}
+
+.searchbar-wrapper {
+  display: flex;
+  width: 100%;
+  align-items: center;
+  gap: 10px;
+}
+
+/* Icono Lupa */
+.search-icon-wrapper {
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  color: #00c3ff;
+}
+
+.search-icon svg {
+  fill: #00c3ff;
+  width: 20px;
+  height: 20px;
+  transition: transform 0.2s;
+}
+
+.search-icon-wrapper:hover svg {
+  transform: scale(1.1);
+}
+
+/* Input de texto */
+.searchbar-center {
+  flex: 1;
+}
+
+.searchbar-input {
+  width: 100%;
+  background: transparent;
+  border: none;
+  color: #fff;
+  font-size: 1rem;
+  outline: none;
+}
+
+.searchbar-input::placeholder {
+  color: rgba(255, 255, 255, 0.5);
+}
+
+/* Botones derecha (Ocultar/Ver) */
+.searchbar-right {
+  display: flex;
+  align-items: center;
+  color: #00c3ff;
+  cursor: pointer;
+  font-size: 1.5rem;
+}
+
+.searchbar-right svg {
+  transition: color 0.2s;
+}
+
+.searchbar-right:hover svg {
+  color: #fff;
+}
+
+/* --- RESULTADOS DE IMÁGENES (GRID RESPONSIVE) --- */
+.ImagesGoogle {
+  display: grid;
+  /* Esto crea columnas automáticas de mínimo 80px */
+  grid-template-columns: repeat(auto-fill, minmax(80px, 1fr));
+  gap: 8px;
+  width: 100%;
+  max-height: 250px; /* Altura máxima con scroll */
+  overflow-y: auto;
+  margin-top: 10px;
+  padding: 5px;
+  background: rgba(0, 0, 0, 0.2);
+  border-radius: 5px;
+  border: 1px solid rgba(0, 195, 255, 0.1);
+}
+
+.ImagesGoogle img {
+  width: 100%;
+  aspect-ratio: 1 / 1; /* Mantiene las imágenes cuadradas */
+  object-fit: cover;   /* Recorta la imagen para llenar el cuadrado sin deformar */
+  border-radius: 5px;
+  cursor: pointer;
+  border: 1px solid transparent;
+  transition: all 0.2s;
+}
+
+.ImagesGoogle img:hover {
+  border-color: #00c3ff;
+  transform: scale(1.05);
+  z-index: 10;
+  box-shadow: 0 0 10px rgba(0, 195, 255, 0.5);
+}
+
+/* --- SCROLLBAR --- */
+.ImagesGoogle::-webkit-scrollbar {
+  width: 6px;
+}
+.ImagesGoogle::-webkit-scrollbar-track {
+  background: rgba(0,0,0,0.3);
+}
+.ImagesGoogle::-webkit-scrollbar-thumb {
+  background: #00c3ff;
+  border-radius: 3px;
+}

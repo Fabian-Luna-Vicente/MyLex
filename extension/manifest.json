@@ -1,0 +1,33 @@
+{
+    "manifest_version": 3,
+    "name": "MyLex Assistant",
+    "version": "1.0.0",
+    "description": "Tu asistente inteligente de vocabulario para MyLex",
+    "action": {
+        "default_popup": "index.html"
+    },
+    "background": {
+        "service_worker": "src/background.js",
+        "type": "module"
+    },
+    "content_scripts": [
+        {
+            "matches": [
+                "<all_urls>"
+            ],
+            "js": [
+                "src/content.jsx"
+            ]
+        }
+    ],
+    "permissions": [
+        "storage",
+        "activeTab",
+        "contextMenus"
+    ],
+    "host_permissions": [
+        "http://localhost:8000/*",
+        "http://localhost:5174/*",
+        "http://127.0.0.1:5174/*"
+    ]
+}

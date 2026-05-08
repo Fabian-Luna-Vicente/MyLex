@@ -23,3 +23,10 @@ class GrammarRequest(BaseModel):
 class CorrectorRequest(BaseModel):
     userText: str
     targetWords: List[str] = []
+
+# --- Translation Schemas ---
+
+class TranslationRequest(BaseModel):
+    text: str
+    source: str = "auto"
+    target: str = "en"

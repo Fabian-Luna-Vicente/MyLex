@@ -19,6 +19,7 @@ import SynAntGame from './pages/SynAntGame';
 import ListeningGame from './pages/ListeningGame';
 import WritingGame from './pages/WritingGame';
 import Navbar from './components/Navbar';
+import ScrollToTop from './components/ScrollToTop';
 
 function Layout({ children }) {
   return (
@@ -37,6 +38,7 @@ function App() {
       <VocabularyProvider>
         <AiProvider>
           <Router>
+            <ScrollToTop />
             <Routes>
               <Route path="/login" element={<Login />} />
               <Route path="/verify-email" element={<VerifyEmail />} />

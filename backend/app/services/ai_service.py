@@ -3,13 +3,15 @@ import json
 import httpx
 from fastapi import HTTPException
 from groq import AsyncGroq
-from app.schemas.ai import DictionaryRequest, GrammarRequest, CorrectorRequest
+from app.schemas.ai import DictionaryRequest, GrammarRequest, CorrectorRequest, TranslationRequest
 from app.core.config import settings
+from app.repositories.dictionaryApi_repository import DictionaryApiRepository
 
 class AIService:
     def __init__(self):
         self.client = AsyncGroq(api_key=settings.GROQ_API_KEY)
         self.model = "llama-3.3-70b-versatile"
+        self.dict_repo = DictionaryApiRepository()
 
     def _get_prompt(self, context_type: str, language: str, target_lang: str) -> str:
         source_lang_instruction = f"del idioma '{language}'" if language and language != "auto" else "del idioma detectado de la palabra"
@@ -73,6 +75,16 @@ class AIService:
                 "words_used_correctly": true/false
             }
             """
+        
+        elif context_type == "translation":
+            return f"""
+            Actúa como un TRADUCTOR PROFESIONAL.
+            IDIOMA ORIGEN: {language}
+            IDIOMA DESTINO: {target_lang}
+            
+            Devuelve SIEMPRE un objeto JSON con el siguiente formato:
+            {{ "translation": "texto traducido" }}
+            """
         return "Asistente útil."
 
     async def _call_llm(self, prompt: str, system_prompt: str, json_format: bool = True, temp: float = 0.1) -> str:
@@ -121,55 +133,12 @@ class AIService:
         else:
             # Traditional Dictionary API
             if request.language == "en":
-                async with httpx.AsyncClient() as client:
-                    try:
-                        resp = await client.get(f"https://api.dictionaryapi.dev/api/v2/entries/en/{clean_word}")
-                        if resp.status_code == 200:
-                            raw_data = resp.json()
-                            formatted_data = []
+                return await self.dict_repo.getDefinition(clean_word)
 
-                            for entry in raw_data:
-                                all_meanings = []
-                                all_examples = []
-                                all_synonyms = set()
-                                all_antonyms = set()
-                                all_types = set()
-
-                                for m in entry.get("meanings", []):
-                                    part_of_speech = m.get("partOfSpeech", "").capitalize()
-                                    if part_of_speech:
-                                        all_types.add(part_of_speech)
-
-                                    for i, d in enumerate(m.get("definitions", [])):
-                                        definition_text = d.get("definition")
-                                        formatted_def = f"{len(all_meanings) + 1}. ({part_of_speech}) {definition_text}"
-                                        all_meanings.append(formatted_def)
-                                        if "example" in d:
-                                            all_examples.append(d["example"])
-
-                                    all_synonyms.update(m.get("synonyms", []))
-                                    all_antonyms.update(m.get("antonyms", []))
-
-                                formatted_data.append({
-                                    "name": entry.get("word"),
-                                    "meaning": "\n".join(all_meanings), 
-                                    "type": list(all_types),
-                                    "examples": all_examples[:4],
-                                    "synonyms": list(all_synonyms)[:6],
-                                    "antonyms": list(all_antonyms)[:6],
-                                    "image": "",
-                                    "language": "en",
-                                    "originalContext": "" 
-                                })
-                            return formatted_data
-                        else:
-                            return [{"error": True, "message": "Word not found in API"}]
-                    except Exception as e:
-                        return [{"error": True, "message": f"API Error: {str(e)}"}]
             else:
                 return [{
                     "name": clean_word, 
-                    "meaning": "⚠️ Traditional dictionary is only available for English. Please enable 'AI Mode'.",
+                    "meaning": "Traditional dictionary is only available for English. Please enable 'AI Mode'.",
                     "examples": [],
                     "error": True
                 }]
@@ -206,14 +175,10 @@ class AIService:
         3. Confirma si usó las palabras requeridas correctamente.
         """
         sys_prompt = self._get_prompt("corrector", "auto", "es")
-        print("sys_prompt", sys_prompt)
-        print("prompt", prompt)
         resp_str = await self._call_llm(prompt, sys_prompt, json_format=True, temp=0.6)
-        print("resp_str", resp_str)
         try:
             raw_response = resp_str.replace("```json", "").replace("```", "").strip()
             parsed = json.loads(raw_response)
-            print("parsed", parsed)
             return {
                 "status": True,
                 "response": parsed
@@ -223,3 +188,15 @@ class AIService:
                 "status": False,
                 "message": "Error procesando la corrección."
             }
+
+    # --- Translation Methods ---
+
+    async def translate_text(self, request: TranslationRequest):
+        clean_text = request.text.strip()
+        sys_prompt = self._get_prompt("translation", request.source, request.target)
+        resp_str = await self._call_llm(clean_text, sys_prompt, json_format=True)
+        try:
+            parsed = json.loads(resp_str)
+            return {"status": True, "translation": parsed.get("translation", "")}
+        except:
+            return {"status": False, "message": "Error translating text."}

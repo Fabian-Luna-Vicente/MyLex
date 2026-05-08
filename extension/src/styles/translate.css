@@ -1,0 +1,221 @@
+/* translate.css */
+
+/* --- CONTENEDOR PRINCIPAL FLOTANTE --- */
+.floating-fab-container {
+   z-index: 2147483647 !important;
+    position: fixed; 
+    display: flex;
+    flex-direction: column; 
+    align-items: flex-end; 
+    overflow: visible;
+    width: 60px; 
+    height: 60px;
+}
+
+/* --- BOTÓN FLOTANTE (El círculo azul) --- */
+.fab-button {
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    background-color: #00c3ff; 
+    border: none;
+    box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.3);
+    color: #072138;
+    font-size: 24px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: grab; 
+    transition: transform 0.2s ease, background 0.3s;
+    flex-shrink: 0; 
+    position: relative;
+    z-index: 2; 
+}
+
+.fab-button:active {
+    cursor: grabbing;
+}
+
+/* --- EL MENÚ DESPLEGABLE --- */
+.fab-menu {
+    background-color: #f0f8ff;
+    border-radius: 12px;
+    box-shadow: 0 5px 20px rgba(0,0,0,0.3);
+    border: 1px solid #00c3ff;
+    
+    width: 280px; /* Un poco más compacto */
+    padding: 12px;
+    
+    position: absolute;
+    bottom: 75px; 
+    right: 0; 
+    
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    animation: fadeIn 0.2s ease-out;
+    
+    z-index: 1;
+}
+
+/* --- BARRA SUPERIOR (Settings + Título opcional) --- */
+.fab-header {
+    display: flex;
+    justify-content: flex-end; /* Botón a la derecha */
+    margin-bottom: 5px;
+}
+
+.fab-settings-btn {
+    background: transparent;
+    border: none;
+    color: #555;
+    font-size: 1.2rem;
+    cursor: pointer;
+    transition: color 0.3s, transform 0.3s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 5px;
+}
+
+.fab-settings-btn:hover {
+    color: #00c3ff;
+    transform: rotate(45deg); /* Efecto giratorio */
+}
+
+/* --- PANEL DE AJUSTES (Oculto/Visible) --- */
+.fab-settings-panel {
+    background: rgba(0,0,0,0.05);
+    border-radius: 8px;
+    padding: 10px;
+    margin-bottom: 10px;
+    border: 1px solid #ddd;
+    animation: slideDown 0.2s ease-out;
+}
+
+/* --- INPUT DE TEXTO COMPACTO --- */
+.fab-input {
+    width: 90%;
+    height: 40px; /* Altura fija de input normal */
+    padding: 0 10px; /* Padding lateral */
+    border-radius: 8px;
+    border: 1px solid #ccc;
+    background-color: white;
+    color: #333;
+    font-size: 0.95rem;
+    box-shadow: inset 1px 1px 4px rgba(0,0,0,0.05);
+    outline: none;
+    font-family: inherit;
+    display: flex;
+    align-items: center;
+}
+
+.fab-input:focus {
+    border-color: #00c3ff;
+    box-shadow: 0 0 5px rgba(0, 195, 255, 0.3);
+}
+
+/* --- BOTONES DE ACCIÓN --- */
+.fab-actions-row {
+    display: flex;
+    justify-content: space-between;
+    gap: 8px;
+    margin-top: 5px;
+}
+
+.fab-action-btn {
+    cursor: pointer;
+    height: 40px;
+    flex: 1; /* Todos del mismo ancho */
+    border: none;
+    font-size: 1.2rem;
+    color: #333;
+    background-color: rgba(255, 255, 255, 0);
+    box-shadow: inset 0px 2px 5px rgba(0, 0, 0, 0.375);
+    border-radius: 8px;
+    transition: 0.2s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.fab-action-btn:hover {
+   box-shadow: 0px 2px 5px rgba(0, 0, 0, 0.375);
+    transform: translateY(-2px);
+}
+
+/* --- RESULTADO --- */
+.fab-result {
+    margin-top: 5px;
+    padding: 8px;
+    background-color: #eefbff;
+    border-radius: 6px;
+    color: #072138;
+    font-size: 0.9rem;
+    border-left: 3px solid #00c3ff;
+    max-height: 120px;
+    overflow-y: auto;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes slideDown {
+    from { opacity: 0; height: 0; padding: 0; }
+    to { opacity: 1; height: auto; padding: 10px; }
+}
+
+/* --- CONTENEDOR DE SELECTORES DE IDIOMA --- */
+.fab-language-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-end; /* Alinea los inputs y la flecha abajo */
+    gap: 10px;
+    width: 100%;
+    margin-bottom: 10px;
+}
+
+/* Columnas individuales (Label + Select) */
+.fab-lang-column {
+    display: flex;
+    flex-direction: column;
+    flex: 1; /* Ocupan el mismo ancho */
+    gap: 4px; /* Espacio entre Label y Select */
+}
+
+/* Estilo de los Labels (From / To) */
+.fab-lang-label {
+    font-size: 0.75rem;
+    color: #666;
+    font-weight: 600;
+    margin-left: 2px;
+}
+
+/* Estilo de la flecha central */
+.fab-lang-arrow {
+    color: #00c3ff;
+    font-size: 1.2rem;
+    padding-bottom: 5px; /* Ajuste fino para alinear con el centro del input */
+}
+
+/* --- REFUERZO DEL SELECT (Lo que hicimos antes) --- */
+.fab-lang-select {
+    width: 100% !important;
+    margin: 0 !important;
+    height: 35px !important;
+    
+    background-color: white !important;
+    color: #333 !important;
+    border: 1px solid #ccc !important;
+    border-radius: 6px !important;
+    padding: 0 5px !important;
+    font-size: 0.9rem !important;
+    outline: none;
+    cursor: pointer;
+}
+
+.fab-lang-select:focus {
+    border-color: #00c3ff !important;
+}
