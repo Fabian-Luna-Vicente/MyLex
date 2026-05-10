@@ -1,7 +1,7 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from app.core.config import settings
-from app.api.routes import auth_routes, vocabulary_routes, ai_routes, progress_routes, google_images_routes, profile_routes
+from app.api.routes import auth_routes, vocabulary_routes, ai_routes, progress_routes, google_images_routes, profile_routes, chat_routes
 
 app = FastAPI(
     title=settings.PROJECT_NAME,
@@ -34,3 +34,5 @@ app.include_router(ai_routes.router, prefix="/api/ai", tags=["AI Tools"])
 app.include_router(progress_routes.router, prefix="/api", tags=["Game Progress"])
 app.include_router(google_images_routes.router, prefix="/api", tags=["Google Images"])
 app.include_router(profile_routes.router, prefix="/api", tags=["Profile & Friends"])
+app.include_router(chat_routes.router, prefix="/api/chat", tags=["Chat & Gamification"])
+

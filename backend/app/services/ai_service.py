@@ -204,3 +204,35 @@ class AIService:
             return {"status": True, "translation": parsed.get("translation", "")}
         except:
             return {"status": False, "message": "Error translating text."}
+
+    # --- Chat Methods ---
+
+    async def generate_chat_response(self, user_message: str, context_words: list[str]) -> str:
+        prompt = f"""
+        Usuario dice: "{user_message}"
+        """
+        vocab_instruction = ""
+        if context_words:
+            vocab_instruction = f"""
+            TU MISIÓN PRINCIPAL: Debes obligatoriamente usar al menos una o dos de las siguientes palabras en tu respuesta, de manera muy natural: {", ".join(context_words)}.
+            """
+            
+        sys_prompt = f"""
+        Eres un compañero de conversación amigable (Language Exchange Partner) nativo de inglés. Tu objetivo es ayudar al usuario a practicar.
+        Mantén la conversación fluida, haz preguntas abiertas y responde con interés.
+        {vocab_instruction}
+        
+        Devuelve SIEMPRE un objeto JSON con el siguiente formato:
+        {{
+            "response": "Tu respuesta en inglés"
+        }}
+        """
+        
+        resp_str = await self._call_llm(prompt, sys_prompt, json_format=True, temp=0.7)
+        try:
+            parsed = json.loads(resp_str)
+            return parsed.get("response", "I'm sorry, I couldn't understand that. Could you rephrase?")
+        except Exception as e:
+            print(f"Chat AI Error: {e}")
+            return "Sorry, I'm having trouble thinking right now."
+

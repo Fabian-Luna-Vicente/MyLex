@@ -4,7 +4,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import {
   FaHome, FaListUl, FaChartLine, FaGamepad,
   FaUserCircle, FaCog, FaSignOutAlt, FaChevronDown,
-  FaPlusCircle
+  FaPlusCircle, FaComments
 } from 'react-icons/fa';
 import { useAuth } from '../hooks/useAuth';
 
@@ -18,6 +18,7 @@ export default function Navbar() {
     { name: 'Dashboard', path: '/dashboard', icon: <FaHome /> },
     { name: 'My Lists', path: '/lists', icon: <FaListUl /> },
     { name: 'Statistics', path: '/statistics', icon: <FaChartLine /> },
+    { name: 'Chat', path: '/chat', icon: <FaComments /> },
   ];
 
   const handleLogout = () => {

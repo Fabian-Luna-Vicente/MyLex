@@ -14,6 +14,8 @@ import Statistics from './pages/Statistics';
 import MyProfile from './pages/MyProfile';
 import UserProfile from './pages/UserProfile';
 import Friends from './pages/Friends';
+import ChatList from './pages/ChatList';
+import ChatView from './pages/ChatView';
 
 import RandomGame from './pages/RandomGame';
 import HangmanGame from './pages/HangmanGame';
@@ -55,6 +57,8 @@ function App() {
               <Route path="/profile" element={<ProtectedRoute><Layout><MyProfile /></Layout></ProtectedRoute>} />
               <Route path="/user/:userId" element={<ProtectedRoute><Layout><UserProfile /></Layout></ProtectedRoute>} />
               <Route path="/friends" element={<ProtectedRoute><Layout><Friends /></Layout></ProtectedRoute>} />
+              <Route path="/chat" element={<ProtectedRoute><Layout><ChatList /></Layout></ProtectedRoute>} />
+              <Route path="/chat/:roomId" element={<ProtectedRoute><Layout><ChatView /></Layout></ProtectedRoute>} />
 
               <Route path="/games/random" element={<ProtectedRoute><Layout><RandomGame /></Layout></ProtectedRoute>} />
               <Route path="/games/hangman" element={<ProtectedRoute><Layout><HangmanGame /></Layout></ProtectedRoute>} />

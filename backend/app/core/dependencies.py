@@ -44,3 +44,20 @@ def get_current_user(request: Request, db: Session = Depends(get_db)) -> User:
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Inactive user")
 
     return user
+
+async def get_current_user_ws(token: str, db: Session) -> User | None:
+    if not token:
+        return None
+    try:
+        payload = jwt.decode(token, settings.SECRET_KEY, algorithms=[settings.ALGORITHM])
+        user_id: str = payload.get("sub")
+        if user_id is None:
+            return None
+    except JOSEError:
+        return None
+
+    user_repo = UserRepository(db)
+    user = user_repo.get_user_by_id(user_id)
+    if user is None or not user.is_active:
+        return None
+    return user
