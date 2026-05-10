@@ -135,7 +135,10 @@ async def refresh_token(
         max_age=30 * 24 * 60 * 60,
         httponly=True, secure=True, samesite="None", path="/refresh"
     )
-    return {"message": "Tokens rotated successfully"}
+    return {
+        "status": True,
+        "access_token": result["access_token"]
+    }
 
 @router.post("/logout")
 async def logout(

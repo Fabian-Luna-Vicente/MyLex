@@ -11,6 +11,9 @@ import VerifyEmail from './pages/VerifyEmail';
 import CreateWord from './pages/CreateWord';
 import EditWord from './pages/EditWord';
 import Statistics from './pages/Statistics';
+import MyProfile from './pages/MyProfile';
+import UserProfile from './pages/UserProfile';
+import Friends from './pages/Friends';
 
 import RandomGame from './pages/RandomGame';
 import HangmanGame from './pages/HangmanGame';
@@ -49,6 +52,9 @@ function App() {
               <Route path="/create-word" element={<ProtectedRoute><Layout><CreateWord /></Layout></ProtectedRoute>} />
               <Route path="/word/edit/:id" element={<ProtectedRoute><Layout><EditWord /></Layout></ProtectedRoute>} />
               <Route path="/statistics" element={<ProtectedRoute><Layout><Statistics /></Layout></ProtectedRoute>} />
+              <Route path="/profile" element={<ProtectedRoute><Layout><MyProfile /></Layout></ProtectedRoute>} />
+              <Route path="/user/:userId" element={<ProtectedRoute><Layout><UserProfile /></Layout></ProtectedRoute>} />
+              <Route path="/friends" element={<ProtectedRoute><Layout><Friends /></Layout></ProtectedRoute>} />
 
               <Route path="/games/random" element={<ProtectedRoute><Layout><RandomGame /></Layout></ProtectedRoute>} />
               <Route path="/games/hangman" element={<ProtectedRoute><Layout><HangmanGame /></Layout></ProtectedRoute>} />
