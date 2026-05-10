@@ -1,221 +1,245 @@
-/* translate.css */
+/* translate.css - MyLex Frontend Theme Match */
 
-/* --- CONTENEDOR PRINCIPAL FLOTANTE --- */
-.floating-fab-container {
-   z-index: 2147483647 !important;
-    position: fixed; 
-    display: flex;
-    flex-direction: column; 
-    align-items: flex-end; 
-    overflow: visible;
-    width: 60px; 
-    height: 60px;
+/* 1. Importamos la fuente para asegurarnos de que el Shadow DOM la pueda renderizar */
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700;900&display=swap');
+
+/* 2. Cambiamos :root por :host para que funcione correctamente en el Shadow DOM de la extensión */
+:host {
+    --mylex-bg-main: #071320;
+    --mylex-bg-panel: rgba(14, 12, 29, 0.9);
+    --mylex-cyan: #00c3ff;
+    --mylex-cyan-dim: rgba(0, 195, 255, 0.2);
+    --mylex-text: #ffffff;
+    --mylex-text-muted: #a0a0a0;
+    --mylex-font: 'Inter', system-ui, -apple-system, sans-serif;
 }
 
-/* --- BOTÓN FLOTANTE (El círculo azul) --- */
+.floating-fab-container {
+    z-index: 2147483647 !important;
+    position: fixed;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    overflow: visible;
+    /* 3. Aseguramos la aplicación de la fuente */
+    font-family: var(--mylex-font, 'Inter', system-ui, -apple-system, sans-serif);
+}
+
+/* 4. OBLIGAMOS a que los inputs, botones y selects hereden la fuente (por defecto el navegador los formatea distinto) */
+.fab-input,
+.fab-button,
+.fab-settings-btn,
+.fab-action-btn,
+.fab-lang-select {
+    font-family: inherit;
+}
+
 .fab-button {
     width: 60px;
     height: 60px;
     border-radius: 50%;
-    background-color: #00c3ff; 
-    border: none;
-    box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.3);
-    color: #072138;
-    font-size: 24px;
+    background: linear-gradient(135deg, #00c3ff 0%, #0080ff 100%);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    box-shadow: 0px 10px 25px rgba(0, 195, 255, 0.4);
+    color: #fff;
+    font-size: 28px;
     display: flex;
     align-items: center;
     justify-content: center;
-    cursor: grab; 
-    transition: transform 0.2s ease, background 0.3s;
-    flex-shrink: 0; 
+    cursor: grab;
+    transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    flex-shrink: 0;
     position: relative;
-    z-index: 2; 
+    z-index: 2;
 }
 
-.fab-button:active {
-    cursor: grabbing;
+.fab-button:hover {
+    transform: scale(1.1) rotate(5deg);
+    box-shadow: 0px 15px 35px rgba(0, 195, 255, 0.6);
 }
 
-/* --- EL MENÚ DESPLEGABLE --- */
 .fab-menu {
-    background-color: #f0f8ff;
-    border-radius: 12px;
-    box-shadow: 0 5px 20px rgba(0,0,0,0.3);
-    border: 1px solid #00c3ff;
-    
-    width: 280px; /* Un poco más compacto */
-    padding: 12px;
-    
+    background: var(--mylex-bg-panel);
+    backdrop-filter: blur(20px);
+    border-radius: 24px;
+    border: 1px solid var(--mylex-cyan-dim);
+    box-shadow: 0 20px 50px rgba(0, 0, 0, 0.8);
+    width: 320px;
+    padding: 24px;
     position: absolute;
-    bottom: 75px; 
-    right: 0; 
-    
+    bottom: 75px;
+    right: 0;
     display: flex;
     flex-direction: column;
-    gap: 8px;
-    animation: fadeIn 0.2s ease-out;
-    
+    gap: 16px;
+    animation: slideInUp 0.3s ease-out;
     z-index: 1;
 }
 
-/* --- BARRA SUPERIOR (Settings + Título opcional) --- */
+@keyframes slideInUp {
+    from {
+        opacity: 0;
+        transform: translateY(20px) scale(0.95);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+    }
+}
+
 .fab-header {
     display: flex;
-    justify-content: flex-end; /* Botón a la derecha */
+    justify-content: space-between;
+    align-items: center;
     margin-bottom: 5px;
 }
 
+.fab-title {
+    font-weight: 900;
+    font-size: 1.1rem;
+    color: var(--mylex-text);
+    text-shadow: 0 0 10px rgba(0, 195, 255, 0.5);
+}
+
+.fab-title span {
+    color: var(--mylex-cyan);
+}
+
 .fab-settings-btn {
-    background: transparent;
-    border: none;
-    color: #555;
-    font-size: 1.2rem;
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    color: var(--mylex-text-muted);
+    font-size: 1.1rem;
     cursor: pointer;
-    transition: color 0.3s, transform 0.3s;
+    border-radius: 10px;
+    width: 36px;
+    height: 36px;
     display: flex;
     align-items: center;
     justify-content: center;
-    padding: 5px;
+    transition: all 0.3s;
 }
 
 .fab-settings-btn:hover {
-    color: #00c3ff;
-    transform: rotate(45deg); /* Efecto giratorio */
+    background: var(--mylex-cyan-dim);
+    color: var(--mylex-cyan);
+    border-color: var(--mylex-cyan);
+    transform: rotate(90deg);
 }
 
-/* --- PANEL DE AJUSTES (Oculto/Visible) --- */
-.fab-settings-panel {
-    background: rgba(0,0,0,0.05);
-    border-radius: 8px;
-    padding: 10px;
-    margin-bottom: 10px;
-    border: 1px solid #ddd;
-    animation: slideDown 0.2s ease-out;
-}
-
-/* --- INPUT DE TEXTO COMPACTO --- */
 .fab-input {
-    width: 90%;
-    height: 40px; /* Altura fija de input normal */
-    padding: 0 10px; /* Padding lateral */
-    border-radius: 8px;
-    border: 1px solid #ccc;
-    background-color: white;
-    color: #333;
+    width: 100%;
+    box-sizing: border-box;
+    height: 50px;
+    padding: 0 16px;
+    border-radius: 14px;
+    border: 1px solid var(--mylex-cyan-dim);
+    background: var(--mylex-bg-main);
+    color: var(--mylex-text);
     font-size: 0.95rem;
-    box-shadow: inset 1px 1px 4px rgba(0,0,0,0.05);
     outline: none;
-    font-family: inherit;
-    display: flex;
-    align-items: center;
+    transition: all 0.3s;
 }
 
 .fab-input:focus {
-    border-color: #00c3ff;
-    box-shadow: 0 0 5px rgba(0, 195, 255, 0.3);
+    border-color: var(--mylex-cyan);
+    box-shadow: inset 0 0 10px rgba(0, 195, 255, 0.2);
 }
 
-/* --- BOTONES DE ACCIÓN --- */
 .fab-actions-row {
     display: flex;
     justify-content: space-between;
-    gap: 8px;
-    margin-top: 5px;
+    gap: 12px;
 }
 
 .fab-action-btn {
     cursor: pointer;
-    height: 40px;
-    flex: 1; /* Todos del mismo ancho */
-    border: none;
+    height: 45px;
+    flex: 1;
+    border: 1px solid rgba(255, 255, 255, 0.05);
     font-size: 1.2rem;
-    color: #333;
-    background-color: rgba(255, 255, 255, 0);
-    box-shadow: inset 0px 2px 5px rgba(0, 0, 0, 0.375);
-    border-radius: 8px;
-    transition: 0.2s;
+    color: var(--mylex-text-muted);
+    background: rgba(255, 255, 255, 0.03);
+    border-radius: 12px;
+    transition: all 0.3s;
     display: flex;
     align-items: center;
     justify-content: center;
 }
 
 .fab-action-btn:hover {
-   box-shadow: 0px 2px 5px rgba(0, 0, 0, 0.375);
-    transform: translateY(-2px);
+    background: var(--mylex-cyan-dim);
+    color: var(--mylex-cyan);
+    border-color: var(--mylex-cyan);
+    transform: translateY(-3px);
+    box-shadow: 0 5px 15px rgba(0, 195, 255, 0.2);
 }
 
-/* --- RESULTADO --- */
 .fab-result {
-    margin-top: 5px;
-    padding: 8px;
-    background-color: #eefbff;
-    border-radius: 6px;
-    color: #072138;
-    font-size: 0.9rem;
-    border-left: 3px solid #00c3ff;
-    max-height: 120px;
+    padding: 16px;
+    background: rgba(255, 255, 255, 0.03);
+    border-radius: 14px;
+    color: var(--mylex-text);
+    font-size: 0.95rem;
+    border: 1px solid rgba(255, 255, 255, 0.05);
+    border-left: 4px solid var(--mylex-cyan);
+    max-height: 180px;
     overflow-y: auto;
+    line-height: 1.5;
+    animation: fadeIn 0.3s ease;
 }
 
-@keyframes fadeIn {
-    from { opacity: 0; transform: translateY(10px); }
-    to { opacity: 1; transform: translateY(0); }
+/* Scrollbar para resultados */
+.fab-result::-webkit-scrollbar {
+    width: 6px;
 }
 
-@keyframes slideDown {
-    from { opacity: 0; height: 0; padding: 0; }
-    to { opacity: 1; height: auto; padding: 10px; }
+.fab-result::-webkit-scrollbar-thumb {
+    background: var(--mylex-cyan);
+    border-radius: 10px;
 }
 
-/* --- CONTENEDOR DE SELECTORES DE IDIOMA --- */
+.fab-settings-panel {
+    background: rgba(7, 19, 32, 0.5);
+    border-radius: 14px;
+    padding: 16px;
+    border: 1px solid var(--mylex-cyan-dim);
+    margin-bottom: 8px;
+}
+
 .fab-language-row {
     display: flex;
-    justify-content: space-between;
-    align-items: flex-end; /* Alinea los inputs y la flecha abajo */
+    align-items: center;
     gap: 10px;
-    width: 100%;
-    margin-bottom: 10px;
+    justify-content: space-between;
 }
 
-/* Columnas individuales (Label + Select) */
 .fab-lang-column {
     display: flex;
     flex-direction: column;
-    flex: 1; /* Ocupan el mismo ancho */
-    gap: 4px; /* Espacio entre Label y Select */
+    flex: 1;
 }
 
-/* Estilo de los Labels (From / To) */
 .fab-lang-label {
     font-size: 0.75rem;
-    color: #666;
-    font-weight: 600;
-    margin-left: 2px;
+    color: var(--mylex-text-muted);
+    margin-bottom: 4px;
+    font-weight: bold;
 }
 
-/* Estilo de la flecha central */
 .fab-lang-arrow {
-    color: #00c3ff;
-    font-size: 1.2rem;
-    padding-bottom: 5px; /* Ajuste fino para alinear con el centro del input */
+    color: var(--mylex-cyan);
+    font-weight: bold;
+    margin-top: 15px;
 }
 
-/* --- REFUERZO DEL SELECT (Lo que hicimos antes) --- */
 .fab-lang-select {
-    width: 100% !important;
-    margin: 0 !important;
-    height: 35px !important;
-    
-    background-color: white !important;
-    color: #333 !important;
-    border: 1px solid #ccc !important;
-    border-radius: 6px !important;
-    padding: 0 5px !important;
-    font-size: 0.9rem !important;
-    outline: none;
-    cursor: pointer;
-}
-
-.fab-lang-select:focus {
-    border-color: #00c3ff !important;
+    width: 100%;
+    height: 36px;
+    background: #0e0c1d;
+    color: #fff;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 8px;
+    padding: 0 8px;
 }

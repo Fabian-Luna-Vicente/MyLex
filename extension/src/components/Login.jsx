@@ -12,15 +12,13 @@ export default function Login({ onLoginSuccess }) {
     setError('');
 
     try {
-      // Usamos form-data para el login de OAuth2 en FastAPI
-      const formData = new URLSearchParams();
-      formData.append('username', email);
-      formData.append('password', password);
-
       const response = await fetch('http://localhost:8000/auth/login', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-        body: formData,
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+            email: email,
+            password: password
+        }),
       });
 
       const data = await response.json();

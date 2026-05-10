@@ -1,14 +1,20 @@
 import { useState, useEffect } from "react";
-import { IoMdClose } from "react-icons/io";
+import { BsXLg } from "react-icons/bs";
 import { FaPuzzlePiece } from "react-icons/fa";
 
 function GrammarCard({ text, onClose, grammarData: propGrammarData }) {
-    const [grammarData, setGrammarData] = useState(propGrammarData || null);
-    const [loading, setLoading] = useState(true);
+    const [grammarData, setGrammarData] = useState(() => {
+        if (propGrammarData) {
+            return propGrammarData.data ? propGrammarData.data : propGrammarData;
+        }
+        return null;
+    });
+    const [loading, setLoading] = useState(!propGrammarData);
     const [error, setError] = useState(null);
 
     useEffect(() => {
         if (!text || grammarData) {
+
             setLoading(false);
             return;
         }
@@ -17,10 +23,17 @@ function GrammarCard({ text, onClose, grammarData: propGrammarData }) {
         chrome.runtime.sendMessage(
             { action: "ANALYZE_GRAMMAR", payload: { text: text, language: "en" } },
             (response) => {
+                console.log("RAW RESPONSE COMPLETO:", JSON.stringify(response));
                 setLoading(false);
                 if (response && response.success) {
-                    setGrammarData(response.data);
+
+                    const backendData = response.data;
+
+                    const actualData = backendData.data ? backendData.data : backendData;
+                    console.log("actualData que se pinta:", JSON.stringify(actualData));
+                    setGrammarData(actualData);
                 } else {
+                    console.log("response error", response);
                     setError(response?.error || "Failed to analyze grammar.");
                 }
             }
@@ -29,72 +42,93 @@ function GrammarCard({ text, onClose, grammarData: propGrammarData }) {
 
     return (
         <div className="ElementCardOverlay">
-            <div className="ElementCardContainer" style={{ maxWidth: '600px' }}>
+            {/* Usamos ElementCardContainer pero lo forzamos a una sola columna centrada */}
+            <div className="ElementCardContainer" style={{ maxWidth: '700px', flexDirection: 'column', padding: '32px', maxHeight: '90vh' }}>
 
-                {/* Header */}
-                <div className="EC-Header" style={{ borderBottom: '2px solid #a78bfa' }}>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-                        <button className="EC-CloseBtn" onClick={onClose}>
-                            <IoMdClose />
-                        </button>
-                        <h3 className="EC-Title" style={{ fontSize: '1.1rem' }}>
-                            <FaPuzzlePiece style={{ marginRight: '8px', color: '#a78bfa' }} />
-                            Grammar Analysis
-                        </h3>
+                {/* Botón de Cerrar Premium (Absoluto) */}
+                <button className="EC-CloseBtnTop" onClick={onClose} title="Close">
+                    <BsXLg size={18} />
+                </button>
+
+                {/* Cabecera Premium */}
+                <div style={{ display: 'flex', alignItems: 'center', gap: '16px', marginBottom: '24px', flexShrink: 0 }}>
+                    <div style={{ background: 'rgba(0, 195, 255, 0.1)', border: '1px solid rgba(0, 195, 255, 0.3)', padding: '14px', borderRadius: '16px', color: '#00c3ff' }}>
+                        <FaPuzzlePiece size={24} />
+                    </div>
+                    <div>
+                        <h2 className="EC-Title" style={{ textAlign: 'left', fontSize: '1.8rem', margin: 0 }}>Grammar Analysis</h2>
+                        <p style={{ color: '#a0a0a0', fontSize: '0.8rem', margin: 0, fontWeight: 'bold', textTransform: 'uppercase', letterSpacing: '1px' }}>
+                            Structural Breakdown
+                        </p>
                     </div>
                 </div>
 
-                <div className="EC-Content">
-                    {/* Estados de Carga y Error */}
+                {/* Contenedor con Scroll para los Resultados */}
+                <div className="EC-ScrollBox" style={{ flexGrow: 1, paddingRight: '12px' }}>
+
+                    {/* Estado de Carga */}
                     {loading && (
-                        <div style={{ textAlign: 'center', padding: '40px', color: '#a78bfa' }}>
-                            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[#a78bfa] mx-auto mb-4"></div>
-                            <p>AI is analyzing the sentence...</p>
+                        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', height: '200px' }}>
+                            <div className="EC-Spinner" style={{ width: '40px', height: '40px', borderWidth: '3px', marginBottom: '16px' }}></div>
+                            <p style={{ color: '#a0a0a0', fontSize: '0.95rem', fontStyle: 'italic' }}>Analyzing sentence structure...</p>
                         </div>
                     )}
 
+                    {/* Estado de Error */}
                     {error && (
-                        <div style={{ color: '#ff4d4d', textAlign: 'center', padding: '20px' }}>
+                        <div style={{ background: 'rgba(255, 77, 77, 0.1)', border: '1px solid rgba(255, 77, 77, 0.3)', color: '#ff4d4d', padding: '16px', borderRadius: '12px', textAlign: 'center', fontWeight: 'bold' }}>
                             {error}
                         </div>
                     )}
 
-                    {/* Contenido Original de la Tarjeta (Solo se muestra si hay datos) */}
+                    {/* Datos del Análisis */}
                     {grammarData && (
-                        <>
-                            <div style={{
-                                padding: '15px', background: 'rgba(255,255,255,0.05)', borderRadius: '8px',
-                                fontStyle: 'italic', fontSize: '1.1rem', textAlign: 'center', marginBottom: '15px',
-                                border: '1px solid #444', color: 'wheat'
-                            }}>
-                                "{grammarData.original}"
-                            </div>
+                        <div style={{ display: 'flex', flexDirection: 'column', gap: '28px' }}>
 
-                            <div style={{ marginBottom: '20px' }}>
-                                <h4 style={{ color: '#a78bfa', margin: '0 0 5px 0' }}>Structure:</h4>
-                                <p style={{ margin: 0, lineHeight: '1.5', color: 'white' }}>{grammarData.general_explanation}</p>
-                            </div>
-
-                            <div className="EC-Examples">
-                                <h4 style={{ borderBottom: '1px solid #444', paddingBottom: '5px', color: '#a78bfa' }}>Breakdown:</h4>
-                                <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', marginTop: '10px' }}>
-                                    {grammarData.breakdown.map((item, i) => (
-                                        <div key={i} style={{
-                                            display: 'flex', flexDirection: 'column', background: '#222', padding: '10px',
-                                            borderRadius: '6px', borderLeft: `4px solid ${['#a78bfa', '#00c3ff', '#ff0055'][i % 3]}`
-                                        }}>
-                                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '5px' }}>
-                                                <span style={{ fontWeight: 'bold', color: '#fff' }}>"{item.segment}"</span>
-                                                <span style={{ fontSize: '0.8rem', background: '#333', padding: '2px 6px', borderRadius: '4px', color: '#ccc' }}>
-                                                    {item.role}
-                                                </span>
-                                            </div>
-                                            <p style={{ margin: 0, fontSize: '0.9rem', color: '#aaa' }}>{item.explanation}</p>
-                                        </div>
-                                    ))}
+                            {/* Frase Original */}
+                            <section>
+                                <h4 className="EC-SectionTitle">Original Sentence</h4>
+                                <div className="EC-MeaningBox" style={{ borderLeft: '4px solid #00c3ff', paddingLeft: '16px' }}>
+                                    <span style={{ fontStyle: 'italic', fontSize: '1.1rem', color: '#fff', fontWeight: '500' }}>
+                                        "{grammarData.original || text}"
+                                    </span>
                                 </div>
-                            </div>
-                        </>
+                            </section>
+
+                            {/* Explicación General */}
+                            {grammarData.general_explanation && (
+                                <section>
+                                    <h4 className="EC-SectionTitle">General Explanation</h4>
+                                    <div className="EC-MeaningBox">
+                                        {grammarData.general_explanation}
+                                    </div>
+                                </section>
+                            )}
+
+                            {/* Desglose paso a paso (Protegido con fallback a array vacío) */}
+                            {(grammarData.breakdown || []).length > 0 && (
+                                <section>
+                                    <h4 className="EC-SectionTitle">Step-by-step Breakdown</h4>
+                                    <div className="EC-ExampleList">
+                                        {(grammarData.breakdown || []).map((item, i) => (
+                                            <div key={i} className="EC-ExampleItem" style={{ display: 'flex', flexDirection: 'column', gap: '10px', padding: '20px' }}>
+                                                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                                                    <span style={{ fontWeight: '900', color: '#fff', fontSize: '1.1rem' }}>
+                                                        "{item.segment}"
+                                                    </span>
+                                                    <span className="EC-Tag" style={{ fontSize: '0.65rem' }}>
+                                                        {item.role}
+                                                    </span>
+                                                </div>
+                                                <p style={{ margin: 0, fontSize: '0.95rem', color: '#a0a0a0', fontStyle: 'normal', lineHeight: '1.5' }}>
+                                                    {item.explanation}
+                                                </p>
+                                            </div>
+                                        ))}
+                                    </div>
+                                </section>
+                            )}
+                        </div>
                     )}
                 </div>
             </div>

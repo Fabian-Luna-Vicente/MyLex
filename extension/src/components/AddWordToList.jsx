@@ -7,12 +7,10 @@ function AddWordToList({ data, ExtraFunction, CurrentListId = "" }) {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
 
-  // Pedir listas al background.js al abrir el modal
   useEffect(() => {
     chrome.runtime.sendMessage({ action: "GET_LISTS" }, (response) => {
       setLoading(false);
       if (response && response.success) {
-        // Aseguramos que sea un array
         setUserLists(Array.isArray(response.data) ? response.data : []);
       }
     });
@@ -51,37 +49,40 @@ function AddWordToList({ data, ExtraFunction, CurrentListId = "" }) {
   const availableLists = UserLists.filter(list => list.id !== CurrentListId);
 
   return (
-    <div className="AddToListCard">
-      <h4>Add to List</h4>
+    <div className="AW-Container">
+      <h4 className="AW-Title">Save to <span>Lists</span></h4>
 
-      <div className="ListScrollArea">
+      <div className="AW-ListScrollArea">
         {loading ? (
           <p style={{ color: '#aaa', textAlign: 'center', fontSize: '0.8rem', padding: '10px' }}>Loading lists...</p>
         ) : availableLists.length > 0 ? (
-          availableLists.map((list) => (
-            <label key={list.id} className="ListOption">
-              <input
-                type="checkbox"
-                checked={ListsToPost.includes(list.id)}
-                onChange={() => handleCheckboxChange(list.id)}
-              />
-              <span>{list.name || list.title}</span> {/* Ajusta según cómo lo envíe FastAPI */}
-            </label>
-          ))
+          availableLists.map((list) => {
+            const isSelected = ListsToPost.includes(list.id);
+            return (
+              <label key={list.id} className={`AW-ListOption ${isSelected ? 'selected' : ''}`}>
+                <input
+                  type="checkbox"
+                  checked={isSelected}
+                  onChange={() => handleCheckboxChange(list.id)}
+                />
+                <span>{list.name || list.title}</span>
+              </label>
+            );
+          })
         ) : (
-          <p style={{ color: '#aaa', textAlign: 'center', fontSize: '0.8rem', padding: '10px' }}>
-            No other lists found.
+          <p style={{ color: '#aaa', textAlign: 'center', fontSize: '0.8rem', padding: '10px', fontStyle: 'italic' }}>
+            No other lists found. Create one in the dashboard!
           </p>
         )}
       </div>
 
       <button
-        className="BtnSendList"
+        className="AW-BtnSubmit"
         onClick={PostData}
         disabled={ListsToPost.length === 0 || saving}
         title="Confirm selection"
       >
-        <BsFillSendCheckFill />
+        {saving ? <div className="EC-Spinner" style={{ borderColor: '#000', borderTopColor: 'transparent' }}></div> : <BsFillSendCheckFill size={18} />}
         <span>{saving ? "Saving..." : "Add Words"}</span>
       </button>
     </div>

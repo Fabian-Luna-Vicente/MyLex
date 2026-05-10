@@ -10,6 +10,7 @@ import imageSearchStyles from './styles/ImageSearch.css?inline';
 import FloatingMenu from './components/FloatingMenu';
 import GrammarCard from './components/GrammarCard';
 import AddWordToList from './components/AddWordToList';
+import ElementCard from './components/ElementCard';
 
 // --- COMPONENTE PRINCIPAL DE LA EXTENSIÓN ---
 function ContentApp() {
@@ -18,8 +19,20 @@ function ContentApp() {
   const [showMenu, setShowMenu] = useState(false);
   const [activeModal, setActiveModal] = useState(null); // 'grammar' | 'addWord' | null
 
+  // Estados globales de la extensión
+  const [selectedObjects, setSelectedObjects] = useState([]);
+  const [userLists, setUserLists] = useState([]);
+  const [grammarData, setGrammarData] = useState(null);
+
   useEffect(() => {
+    chrome.runtime.sendMessage({ action: "GET_LISTS" }, (response) => {
+      if (response && response.success) {
+        setUserLists(response.data);
+      }
+    });
+
     const handleMouseUp = (e) => {
+      // Si el clic es dentro de nuestra extensión, no cerramos el menú
       if (e.target.closest('#drillexa-extension-root')) return;
 
       const selection = window.getSelection();
@@ -36,7 +49,10 @@ function ContentApp() {
         });
         setShowMenu(true);
       } else {
-        setShowMenu(false);
+        // Solo cerramos si no hay un modal activo o datos seleccionados
+        if (selectedObjects.length === 0 && !grammarData && !activeModal) {
+          setShowMenu(false);
+        }
       }
     };
 
@@ -60,22 +76,48 @@ function ContentApp() {
       document.removeEventListener('mouseup', handleMouseUp);
       chrome.runtime.onMessage.removeListener(handleMessage);
     };
-  }, []);
+  }, [selectedObjects.length, grammarData, activeModal]);
 
   return (
     <div className="drillexa-wrapper text-base font-sans">
-      {/* Menú Flotante */}
-      {showMenu && !activeModal && (
+      {/* Menú Flotante (Selector de texto) */}
+      {showMenu && !activeModal && !grammarData && selectedObjects.length === 0 && (
         <FloatingMenu
           position={menuPosition}
-          text={selectedText}
-          onAnalyze={() => setActiveModal('grammar')}
-          onAdd={() => setActiveModal('addWord')}
+          inputValue={selectedText}
+          setInputValue={setSelectedText}
+          selectedObjects={selectedObjects}
+          setSelectedObjects={setSelectedObjects}
+          userLists={userLists}
+          setUserLists={setUserLists}
+          setGrammarData={setGrammarData}
           onClose={() => setShowMenu(false)}
         />
       )}
 
-      {/* Modal de Gramática */}
+      {/* Tarjeta de Gramática (IA) */}
+      {grammarData && (
+        <div style={{ position: "fixed", top: 0, left: 0, zIndex: 214748365, width: "100vw", height: "100vh" }}>
+          <GrammarCard
+            grammarData={grammarData}
+            onClose={() => setGrammarData(null)}
+          />
+        </div>
+      )}
+
+      {/* Tarjeta de Vocabulario (Diccionario) */}
+      {selectedObjects.length > 0 && (
+        <div style={{ position: "fixed", top: 0, left: 0, zIndex: 214748364, width: "100vw", height: "100vh" }}>
+          <ElementCard
+            CurrentListId={"none"}
+            selectedObjects={selectedObjects}
+            setSelectedObjects={setSelectedObjects}
+            userLists={userLists}
+          />
+        </div>
+      )}
+
+      {/* Modales disparados desde menú contextual */}
       {activeModal === 'grammar' && (
         <GrammarCard
           text={selectedText}
@@ -83,7 +125,6 @@ function ContentApp() {
         />
       )}
 
-      {/* Modal para Añadir Palabra */}
       {activeModal === 'addWord' && (
         <AddWordToList
           word={selectedText}

@@ -154,8 +154,12 @@ class AIService:
         sys_prompt += "\nENVUELVE LA RESPUESTA EN 'result'."
         
         resp_str = await self._call_llm(clean_text, sys_prompt, json_format=True)
+        print("RESP_STR")
+        print(resp_str)
         try:
             parsed = json.loads(resp_str)
+            print("PARSED")
+            print(parsed)
             if "result" in parsed:
                 return {"status": True, "data": parsed["result"]}
             return {"status": True, "data": parsed}

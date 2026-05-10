@@ -80,4 +80,10 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
         });
         return true;
     }
-});
+    if (request.action === "SEARCH_IMAGES") {
+        api.get(`/api/images/search?q=${encodeURIComponent(request.payload.query)}&start=${request.payload.start}`)
+            .then(response => sendResponse({ success: true, data: response.data }))
+            .catch(error => sendResponse({ success: false, error: error.message }));
+        return true;
+    }
+});
