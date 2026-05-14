@@ -30,3 +30,4 @@ class TranslationRequest(BaseModel):
     text: str
     source: str = "auto"
     target: str = "en"
+

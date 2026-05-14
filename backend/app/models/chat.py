@@ -7,32 +7,64 @@ class ChatRoom(Base):
     __tablename__ = "chat_rooms"
 
     id = Column(Integer, primary_key=True, index=True, autoincrement=True)
-    is_ai_chat = Column(Boolean, default=False)
-    
-    # For human-to-human
-    user1_id = Column(String, ForeignKey("users.id", ondelete="CASCADE"), nullable=True)
-    user2_id = Column(String, ForeignKey("users.id", ondelete="CASCADE"), nullable=True)
-    
-    # For AI
-    human_user_id = Column(String, ForeignKey("users.id", ondelete="CASCADE"), nullable=True)
-
+    name = Column(String, nullable=False, default="New Chat")
+    description = Column(String, nullable=True)
+    context = Column(String, nullable=True) # e.g. "Ordering coffee in a cafe"
+    language = Column(String, nullable=False, default="en") # Immutable ideally
+    created_by = Column(String, ForeignKey("users.id", ondelete="CASCADE"), nullable=False)
     created_at = Column(DateTime(timezone=True), server_default=func.now())
     
     # Relationships
+    participants = relationship("ChatParticipant", back_populates="room", cascade="all, delete-orphan")
     messages = relationship("ChatMessage", back_populates="room", cascade="all, delete-orphan")
     linked_lists = relationship("RoomVocabularyList", back_populates="room", cascade="all, delete-orphan")
+
+class AIPersona(Base):
+    __tablename__ = "ai_personas"
+    
+    id = Column(Integer, primary_key=True, index=True, autoincrement=True)
+    user_id = Column(String, ForeignKey("users.id", ondelete="CASCADE"), nullable=False)
+    name = Column(String, nullable=False)
+    gender = Column(String, default="female")
+    personality = Column(String, nullable=False)
+    avatar_url = Column(String, nullable=True)
+    created_at = Column(DateTime(timezone=True), server_default=func.now())
+    
+    user = relationship("User")
+
+class ChatParticipant(Base):
+    __tablename__ = "chat_participants"
+    
+    id = Column(Integer, primary_key=True, index=True, autoincrement=True)
+    room_id = Column(Integer, ForeignKey("chat_rooms.id", ondelete="CASCADE"), nullable=False)
+    user_id = Column(String, ForeignKey("users.id", ondelete="CASCADE"), nullable=True) # Null if AI
+    
+    # Common
+    role = Column(String, nullable=True) # The character/role they play in the context
+    
+    # AI specific
+    is_ai = Column(Boolean, default=False)
+    ai_name = Column(String, nullable=True)
+    ai_gender = Column(String, nullable=True) # e.g. 'male', 'female'
+    ai_personality = Column(String, nullable=True)
+    ai_avatar_url = Column(String, nullable=True)
+
+    room = relationship("ChatRoom", back_populates="participants")
+    user = relationship("User")
+    messages = relationship("ChatMessage", back_populates="participant", cascade="all, delete-orphan")
 
 class ChatMessage(Base):
     __tablename__ = "chat_messages"
 
     id = Column(Integer, primary_key=True, index=True, autoincrement=True)
     room_id = Column(Integer, ForeignKey("chat_rooms.id", ondelete="CASCADE"), nullable=False)
-    sender_id = Column(String, ForeignKey("users.id", ondelete="CASCADE"), nullable=True) # Null if AI
+    participant_id = Column(Integer, ForeignKey("chat_participants.id", ondelete="CASCADE"), nullable=False)
     content = Column(String, nullable=False)
     message_type = Column(String, default="text") # 'text', 'audio'
     created_at = Column(DateTime(timezone=True), server_default=func.now())
 
     room = relationship("ChatRoom", back_populates="messages")
+    participant = relationship("ChatParticipant", back_populates="messages")
 
 class RoomVocabularyList(Base):
     __tablename__ = "room_vocabulary_lists"

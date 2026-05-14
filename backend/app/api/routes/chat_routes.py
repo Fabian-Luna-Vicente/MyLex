@@ -1,11 +1,12 @@
 import json
-from fastapi import APIRouter, Depends, WebSocket, WebSocketDisconnect
+from fastapi import APIRouter, Depends, WebSocket, WebSocketDisconnect, HTTPException
 from sqlalchemy.orm import Session
 from app.core.database import get_db
 from app.core.dependencies import get_current_user, get_current_user_ws
 from app.models.user import User
 from app.services.chat_service import ChatService
-from app.schemas.chat import ChatRoomCreate, RoomVocabularyListCreate, AIChatRequest
+from app.schemas.chat import ChatRoomCreate, ChatRoomUpdate, RoomVocabularyListCreate, AIChatRequest, IcebreakerRequest, ChatParticipantCreate, AIPersonaCreate, AIPersonaUpdate
+from app.services.ai_service import AIService
 
 router = APIRouter()
 
@@ -43,20 +44,31 @@ def get_rooms(
 ):
     return service.get_user_rooms(current_user.id)
 
-@router.post("/rooms/ai")
-def get_or_create_ai_room(
-    current_user: User = Depends(get_current_user),
-    service: ChatService = Depends(get_chat_service)
-):
-    return service.get_or_create_ai_room(current_user.id)
-
-@router.post("/rooms/human")
-def get_or_create_human_room(
+@router.post("/rooms")
+def create_room(
     data: ChatRoomCreate,
     current_user: User = Depends(get_current_user),
     service: ChatService = Depends(get_chat_service)
 ):
-    return service.get_or_create_human_room(current_user.id, data.user2_id)
+    return service.create_room(current_user.id, data)
+
+@router.put("/rooms/{room_id}")
+def update_room(
+    room_id: int,
+    data: ChatRoomUpdate,
+    current_user: User = Depends(get_current_user),
+    service: ChatService = Depends(get_chat_service)
+):
+    return service.update_room(room_id, current_user.id, data.name, data.description, data.context)
+
+@router.post("/rooms/{room_id}/participants")
+def add_participant(
+    room_id: int,
+    data: ChatParticipantCreate,
+    current_user: User = Depends(get_current_user),
+    service: ChatService = Depends(get_chat_service)
+):
+    return service.add_participant(room_id, current_user.id, data)
 
 @router.get("/rooms/{room_id}/messages")
 def get_messages(
@@ -89,7 +101,13 @@ async def send_ai_message(
     current_user: User = Depends(get_current_user),
     service: ChatService = Depends(get_chat_service)
 ):
-    return await service.send_ai_message(data.room_id, current_user.id, data.message, context_words=data.context_words)
+    return await service.send_ai_message(
+        room_id=data.room_id, 
+        user_id=current_user.id, 
+        content=data.message, 
+        context_words=data.context_words,
+        mentioned_ai_participant_ids=data.mentioned_ai_participant_ids
+    )
 
 # --- WebSocket Endpoint for Human Chat ---
 
@@ -97,9 +115,9 @@ async def send_ai_message(
 async def websocket_endpoint(
     websocket: WebSocket,
     room_id: int,
-    token: str,
     db: Session = Depends(get_db)
 ):
+    token = websocket.cookies.get("access_token")
     user = await get_current_user_ws(token, db)
     if not user:
         await websocket.close(code=1008)
@@ -109,7 +127,7 @@ async def websocket_endpoint(
     # verify user belongs to room
     try:
         room = service.repo.get_room_by_id(room_id)
-        if not room or user.id not in [room.user1_id, room.user2_id]:
+        if not room or not any(p.user_id == user.id for p in room.participants):
             await websocket.close(code=1008)
             return
     except:
@@ -132,3 +150,61 @@ async def websocket_endpoint(
             
     except WebSocketDisconnect:
         manager.disconnect(websocket, room_id)
+
+@router.post("/icebreaker")
+async def get_icebreaker(
+    payload: IcebreakerRequest,
+    db: Session = Depends(get_db)
+):
+    service = ChatService(db)
+    room = service.repo.get_room_by_id(payload.room_id)
+    if not room:
+        raise HTTPException(status_code=404, detail="Room not found")
+        
+    participants_info = ", ".join([
+        f"{p.ai_name if p.is_ai else 'Human User'} (Role: {p.role or 'None'})" 
+        for p in room.participants
+    ])
+    
+    ai_service = AIService()
+    message = await ai_service.generate_icebreaker_message(
+        chat_context=room.context or "General conversation",
+        vocabulary=payload.vocabulary_words,
+        language=payload.language,
+        participants_info=participants_info
+    )
+    return {"status": True, "message": message}
+
+# --- AI Personas Endpoints ---
+
+@router.get("/ai-personas")
+def get_ai_personas(
+    current_user: User = Depends(get_current_user),
+    service: ChatService = Depends(get_chat_service)
+):
+    return service.get_ai_personas(current_user.id)
+
+@router.post("/ai-personas")
+def create_ai_persona(
+    data: AIPersonaCreate,
+    current_user: User = Depends(get_current_user),
+    service: ChatService = Depends(get_chat_service)
+):
+    return service.create_ai_persona(current_user.id, data)
+
+@router.put("/ai-personas/{persona_id}")
+def update_ai_persona(
+    persona_id: int,
+    data: AIPersonaUpdate,
+    current_user: User = Depends(get_current_user),
+    service: ChatService = Depends(get_chat_service)
+):
+    return service.update_ai_persona(persona_id, current_user.id, data)
+
+@router.delete("/ai-personas/{persona_id}")
+def delete_ai_persona(
+    persona_id: int,
+    current_user: User = Depends(get_current_user),
+    service: ChatService = Depends(get_chat_service)
+):
+    return service.delete_ai_persona(persona_id, current_user.id)

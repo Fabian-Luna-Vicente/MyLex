@@ -1,13 +1,18 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { FaRobot, FaUserCircle, FaPlus, FaComments, FaArrowRight } from 'react-icons/fa';
+import { FaRobot, FaUserCircle, FaPlus, FaComments, FaArrowRight, FaTimes, FaUsersCog } from 'react-icons/fa';
 import { chatService } from '../services/chatService';
+import CreateChatModal from '../components/chat/CreateChatModal';
+import AIPersonasModal from '../components/chat/AIPersonasModal';
 
 export default function ChatList() {
   const navigate = useNavigate();
   const [rooms, setRooms] = useState([]);
   const [loading, setLoading] = useState(true);
+  
+  const [showCreateModal, setShowCreateModal] = useState(false);
+  const [showAIPersonasModal, setShowAIPersonasModal] = useState(false);
 
   useEffect(() => {
     loadRooms();
@@ -24,13 +29,9 @@ export default function ChatList() {
     }
   };
 
-  const startAIChat = async () => {
-    try {
-      const room = await chatService.getOrCreateAIRoom();
-      navigate(`/chat/${room.id}`);
-    } catch (e) {
-      console.error(e);
-    }
+  const handleChatCreated = (room) => {
+    setShowCreateModal(false);
+    navigate(`/chat/${room.id}`);
   };
 
   return (
@@ -44,16 +45,16 @@ export default function ChatList() {
           </div>
           <div className="flex gap-3">
             <button 
-              onClick={() => navigate('/friends')}
-              className="px-4 py-2 rounded-xl text-sm font-bold bg-[#00c3ff]/10 text-[#00c3ff] border border-[#00c3ff]/20 hover:bg-[#00c3ff]/20 transition-all flex items-center gap-2"
+              onClick={() => setShowAIPersonasModal(true)}
+              className="px-4 py-2.5 rounded-xl text-sm font-bold bg-[#00c3ff]/10 text-[#00c3ff] border border-[#00c3ff]/20 hover:bg-[#00c3ff]/20 transition-all flex items-center gap-2"
             >
-              <FaPlus /> New Chat
+              <FaUsersCog /> AI Menu
             </button>
             <button 
-              onClick={startAIChat}
-              className="px-4 py-2 rounded-xl text-sm font-black bg-gradient-to-r from-[#00c3ff] to-[#0080ff] text-black hover:shadow-[0_0_20px_rgba(0,195,255,0.4)] transition-all flex items-center gap-2"
+              onClick={() => setShowCreateModal(true)}
+              className="px-6 py-2.5 rounded-xl text-sm font-black bg-[#00c3ff] text-black hover:shadow-[0_0_20px_rgba(0,195,255,0.4)] transition-all flex items-center gap-2"
             >
-              <FaRobot /> AI Tutor
+              <FaPlus /> Custom Chat
             </button>
           </div>
         </header>
@@ -89,14 +90,17 @@ export default function ChatList() {
                 
                 <div className="flex-1 min-w-0">
                   <h3 className="text-lg font-black text-white group-hover:text-[#00c3ff] transition-colors truncate">
-                    {room.partner_name}
+                    {room.name}
                   </h3>
                   <div className="flex items-center gap-2 mt-1">
-                    <span className={`text-[10px] font-bold px-2 py-0.5 rounded ${
-                      room.is_ai_chat ? 'bg-[#00ff88]/10 text-[#00ff88] border border-[#00ff88]/20' : 'bg-white/5 text-[#a0a0a0]'
-                    }`}>
-                      {room.is_ai_chat ? 'AI TUTOR' : 'HUMAN'}
+                    <span className={`text-[10px] font-bold px-2 py-0.5 rounded bg-white/5 text-[#a0a0a0]`}>
+                      {room.participants?.length || 0} PARTICIPANTS
                     </span>
+                    {room.participants?.some(p => p.is_ai) && (
+                      <span className="text-[10px] font-bold px-2 py-0.5 rounded bg-[#ff00ff]/10 text-[#ff00ff] border border-[#ff00ff]/20">
+                        AI INSIDE
+                      </span>
+                    )}
                   </div>
                 </div>
 
@@ -109,6 +113,17 @@ export default function ChatList() {
         )}
 
       </motion.div>
+
+      {showCreateModal && (
+        <CreateChatModal 
+          onClose={() => setShowCreateModal(false)} 
+          onSuccess={handleChatCreated} 
+        />
+      )}
+
+      {showAIPersonasModal && (
+        <AIPersonasModal onClose={() => setShowAIPersonasModal(false)} />
+      )}
     </div>
   );
 }

@@ -2,6 +2,73 @@ from pydantic import BaseModel
 from typing import Optional, List
 from datetime import datetime, date
 
+class ChatParticipantBase(BaseModel):
+    role: Optional[str] = None
+    is_ai: bool = False
+    ai_name: Optional[str] = None
+    ai_gender: Optional[str] = None
+    ai_personality: Optional[str] = None
+    ai_avatar_url: Optional[str] = None
+
+class ChatParticipantCreate(ChatParticipantBase):
+    user_id: Optional[str] = None
+
+class AIPersonaBase(BaseModel):
+    name: str
+    gender: str = "female"
+    personality: str
+    avatar_url: Optional[str] = None
+
+class AIPersonaCreate(AIPersonaBase):
+    pass
+
+class AIPersonaUpdate(BaseModel):
+    name: Optional[str] = None
+    gender: Optional[str] = None
+    personality: Optional[str] = None
+    avatar_url: Optional[str] = None
+
+class AIPersonaResponse(AIPersonaBase):
+    id: int
+    user_id: str
+    created_at: datetime
+
+    class Config:
+        from_attributes = True
+
+class ChatParticipantResponse(ChatParticipantBase):
+    id: int
+    room_id: int
+    user_id: Optional[str] = None
+    name_display: str
+    avatar_display: str
+
+    class Config:
+        from_attributes = True
+
+class ChatRoomBase(BaseModel):
+    name: str = "New Chat"
+    description: Optional[str] = None
+    context: Optional[str] = None
+    language: str = "en"
+
+class ChatRoomCreate(ChatRoomBase):
+    initial_participants: List[ChatParticipantCreate] = []
+
+class ChatRoomUpdate(BaseModel):
+    name: Optional[str] = None
+    description: Optional[str] = None
+    context: Optional[str] = None
+
+class ChatRoomResponse(ChatRoomBase):
+    id: int
+    created_by: str
+    created_at: datetime
+    participants: List[ChatParticipantResponse] = []
+
+    class Config:
+        from_attributes = True
+
 class ChatMessageBase(BaseModel):
     content: str
     message_type: str = "text"
@@ -12,28 +79,9 @@ class ChatMessageCreate(ChatMessageBase):
 class ChatMessageResponse(ChatMessageBase):
     id: int
     room_id: int
-    sender_id: Optional[str] = None
+    participant_id: int
+    participant: Optional[ChatParticipantResponse] = None
     created_at: datetime
-
-    class Config:
-        from_attributes = True
-
-class ChatRoomBase(BaseModel):
-    is_ai_chat: bool
-
-class ChatRoomCreate(ChatRoomBase):
-    user2_id: Optional[str] = None # For human chat
-
-class ChatRoomResponse(ChatRoomBase):
-    id: int
-    user1_id: Optional[str] = None
-    user2_id: Optional[str] = None
-    human_user_id: Optional[str] = None
-    created_at: datetime
-    
-    # We can include the latest message or chat partner details
-    partner_name: Optional[str] = None
-    partner_avatar: Optional[str] = None
 
     class Config:
         from_attributes = True
@@ -49,3 +97,9 @@ class AIChatRequest(BaseModel):
     message: str
     room_id: int
     context_words: Optional[List[str]] = []
+    mentioned_ai_participant_ids: Optional[List[int]] = []
+
+class IcebreakerRequest(BaseModel):
+    room_id: int
+    language: str
+    vocabulary_words: List[str]

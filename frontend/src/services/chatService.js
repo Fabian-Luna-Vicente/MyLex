@@ -6,13 +6,8 @@ export const chatService = {
     return response.data;
   },
 
-  getOrCreateAIRoom: async () => {
-    const response = await api.post('/api/chat/rooms/ai');
-    return response.data;
-  },
-
-  getOrCreateHumanRoom: async (user2Id) => {
-    const response = await api.post('/api/chat/rooms/human', { user2_id: user2Id, is_ai_chat: false });
+  createRoom: async (data) => {
+    const response = await api.post('/api/chat/rooms', data);
     return response.data;
   },
 
@@ -33,6 +28,21 @@ export const chatService = {
 
   sendAIMessage: async (roomId, message, contextWords = []) => {
     const response = await api.post('/api/chat/ai/message', { room_id: roomId, message, context_words: contextWords });
+    return response.data;
+  },
+
+  getAIPersonas: async () => {
+    const response = await api.get('/api/chat/ai-personas');
+    return response.data;
+  },
+
+  createAIPersona: async (data) => {
+    const response = await api.post('/api/chat/ai-personas', data);
+    return response.data;
+  },
+
+  deleteAIPersona: async (personaId) => {
+    const response = await api.delete(`/api/chat/ai-personas/${personaId}`);
     return response.data;
   }
 };

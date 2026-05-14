@@ -188,15 +188,29 @@ export default function MyProfile() {
 
               {/* Native Language */}
               <div>
-                <label className="text-[10px] font-bold text-[#a0a0a0] uppercase tracking-widest block mb-2">Native Language</label>
-                <select
-                  value={form.native_language}
-                  onChange={(e) => setForm({ ...form, native_language: e.target.value })}
-                  className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white text-sm focus:border-[#00c3ff]/50 focus:outline-none"
-                >
-                  <option value="">Select language</option>
-                  {LANGUAGES.map(l => <option key={l} value={l}>{l}</option>)}
-                </select>
+                <label className="text-[10px] font-bold text-[#a0a0a0] uppercase tracking-widest block mb-2">
+                  Native Language
+                </label>
+                <div className="relative">
+                  <select
+                    name="native_language"
+                    value={profile.native_language || ''}
+                    onChange={handleInputChange}
+                    className="w-full bg-[#0e0c1d] border border-white/10 rounded-xl px-4 py-3 text-white text-sm focus:border-[#00c3ff]/50 focus:shadow-[0_0_15px_rgba(0,195,255,0.2)] focus:outline-none transition-all appearance-none cursor-pointer"
+                  >
+                    <option value="" className="bg-[#1a182c] text-[#a0a0a0]">Select native language...</option>
+                    <option value="English" className="bg-[#1a182c] text-white">English</option>
+                    <option value="Spanish" className="bg-[#1a182c] text-white">Spanish</option>
+                    <option value="French" className="bg-[#1a182c] text-white">French</option>
+                    <option value="German" className="bg-[#1a182c] text-white">German</option>
+                  </select>
+
+                  <div className="absolute inset-y-0 right-4 flex items-center pointer-events-none text-[#a0a0a0]">
+                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7" />
+                    </svg>
+                  </div>
+                </div>
               </div>
 
               {/* Level */}
@@ -221,11 +235,10 @@ export default function MyProfile() {
                     <button
                       key={lang}
                       onClick={() => toggleLanguage(lang)}
-                      className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all ${
-                        (form.learning_languages || []).includes(lang)
+                      className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all ${(form.learning_languages || []).includes(lang)
                           ? 'bg-[#00c3ff]/20 text-[#00c3ff] border border-[#00c3ff]/40'
                           : 'bg-white/5 text-[#a0a0a0] border border-white/10 hover:border-white/20'
-                      }`}
+                        }`}
                     >
                       {lang}
                     </button>

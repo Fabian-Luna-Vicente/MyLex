@@ -207,24 +207,24 @@ class AIService:
 
     # --- Chat Methods ---
 
-    async def generate_chat_response(self, user_message: str, context_words: list[str]) -> str:
+    async def generate_chat_response(self, user_message: str, context_words: list[str], system_context: str = None) -> str:
         prompt = f"""
         Usuario dice: "{user_message}"
         """
         vocab_instruction = ""
         if context_words:
             vocab_instruction = f"""
-            TU MISIÓN PRINCIPAL: Debes obligatoriamente usar al menos una o dos de las siguientes palabras en tu respuesta, de manera muy natural: {", ".join(context_words)}.
+            TU MISIÓN PRINCIPAL: Debes obligatoriamente usar al menos una o dos de las siguientes palabras en tu respuesta (no necesariamente todas), de manera muy natural: {", ".join(context_words)}.
             """
             
         sys_prompt = f"""
-        Eres un compañero de conversación amigable (Language Exchange Partner) nativo de inglés. Tu objetivo es ayudar al usuario a practicar.
-        Mantén la conversación fluida, haz preguntas abiertas y responde con interés.
+        {system_context or "Eres un compañero de conversación amigable (Language Exchange Partner) nativo de inglés. Tu objetivo es ayudar al usuario a practicar."}
+        Mantén la conversación fluida, haz preguntas abiertas y responde con interés de acuerdo a tu rol.
         {vocab_instruction}
         
         Devuelve SIEMPRE un objeto JSON con el siguiente formato:
         {{
-            "response": "Tu respuesta en inglés"
+            "response": "Tu respuesta"
         }}
         """
         
@@ -236,3 +236,30 @@ class AIService:
             print(f"Chat AI Error: {e}")
             return "Sorry, I'm having trouble thinking right now."
 
+    async def generate_icebreaker_message(self, chat_context: str, vocabulary: list[str], language: str, participants_info: str) -> str:
+        vocab_str = ", ".join(vocabulary) if vocabulary else "vocabulario básico"
+
+        prompt = f"""
+        El contexto de nuestra situación o conversación es: {chat_context}.
+        El idioma en el que debes generar el rompehielos es: {language}.
+        Los participantes y sus roles son: {participants_info}
+
+        Tu tarea es generar un mensaje corto, natural y creativo para "romper el hielo" y comenzar la conversación de forma inmersiva.
+        Puede ser desde la perspectiva de cualquiera de los participantes (o como un narrador si prefieres) que establezca la escena.
+        
+        REGLA ESTRICTA: Debes intentar incluir de forma natural algunas de estas palabras en tu mensaje: {vocab_str}.
+
+        Solo devuelve el mensaje exacto que enviarías en el chat, sin comillas adicionales, sin saludos genéricos de IA y sin texto explicativo.
+        """
+
+        try:
+            response = await self.client.chat.completions.create(
+                model="llama-3.3-70b-versatile",
+                messages=[{"role": "system", "content": prompt}],
+                temperature=0.7,
+                max_tokens=150
+            )
+            return response.choices[0].message.content
+        except Exception as e:
+            print(f"Error en generate_icebreaker_message: {e}")
+            return "¡Hola! Estoy listo para empezar a hablar."

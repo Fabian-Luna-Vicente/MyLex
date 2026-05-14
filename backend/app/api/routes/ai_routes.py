@@ -52,3 +52,4 @@ async def translate_text(
     Translate text using AI.
     """
     return await ai_service.translate_text(request)
+
