@@ -6,6 +6,8 @@ from app.repositories.chat_repository import ChatRepository
 from app.repositories.profile_repository import ProfileRepository
 from app.services.ai_service import AIService
 from app.schemas.chat import ChatMessageResponse, ChatRoomResponse, ChatRoomCreate, ChatParticipantCreate, ChatParticipantResponse
+from app.graph import build_chat_graph
+from app.graph.state import ChatState, AIParticipant, HumanParticipant, ChatMessagePayload
 
 class ChatService:
     def __init__(self, db: Session):
@@ -173,50 +175,99 @@ class ChatService:
         user_msg = self.repo.create_message(room_id, user_participant.id, content, "text")
         self._check_and_update_vocab_usage(room_id, user_id, content)
         
-        # 2. Determine which AIs should reply
-        ais_to_reply = []
-        if mentioned_ai_participant_ids:
-            ais_to_reply = [p for p in room.participants if p.is_ai and p.id in mentioned_ai_participant_ids]
-        else:
-            # If no one mentioned, perhaps just the first AI replies, or all AIs roll a chance to reply.
-            # For simplicity, we just have all AIs in the room reply if no one is explicitly mentioned,
-            # or just the primary one. Let's make all AIs reply sequentially if no mention.
-            ais_to_reply = [p for p in room.participants if p.is_ai]
-            
-        if not ais_to_reply:
-            raise HTTPException(status_code=400, detail="No AI participants to reply")
+        # Build Initial ChatState
+        ai_participants_state = []
+        for p in room.participants:
+            if p.is_ai:
+                ai_participants_state.append(AIParticipant(
+                    participant_id=p.id,
+                    persona_id=None,
+                    name=p.ai_name or "AI",
+                    role_prompt=p.role or "",
+                    description=p.ai_personality or "",
+                    example_responses=[]
+                ))
+                
+        human_participants_state = []
+        for p in room.participants:
+            if not p.is_ai:
+                human_participants_state.append(HumanParticipant(
+                    participant_id=p.id,
+                    user_id=p.user_id,
+                    name="Human" # Can be fetched from user, simple for now
+                ))
 
-        # Prepare room context for AI
-        room_context = f"Room Language: {room.language}. Context: {room.context or 'General Conversation'}. "
-        room_context += "Participants: " + ", ".join([f"{p.ai_name if p.is_ai else 'User'} (Role: {p.role or 'None'})" for p in room.participants])
-            
+        message_history = []
+        recent_msgs = self.repo.get_messages(room_id, limit=10, offset=0)
+        recent_msgs.reverse() # chronologically
+        for m in recent_msgs:
+            message_history.append(ChatMessagePayload(
+                message_id=m.id,
+                sender_participant_id=m.participant_id,
+                sender_name=m.participant.ai_name if m.participant.is_ai else "User",
+                is_ai=m.participant.is_ai,
+                content=m.content,
+                timestamp=m.created_at.isoformat()
+            ))
+
+        vocab_targets = []
+        if context_words:
+            for cw in context_words:
+                vocab_targets.append({"name": cw})
+
+        initial_state = ChatState(
+            room_id=room_id,
+            conversation_language=room.language or "en",
+            room_context=room.context or "General conversation",
+            human_participants=human_participants_state,
+            ai_participants=ai_participants_state,
+            message_history=message_history,
+            new_messages=[],
+            vocabulary_targets=vocab_targets,
+            ai_respondents_queue=[],
+            current_ai_index=0,
+            current_draft="",
+            correction_attempts=0,
+            max_correction_attempts=2,
+            last_review=None,
+            typing_delay_seconds=0.0,
+            pending_human_messages=[],
+            should_interrupt=False,
+            thread_id=str(room_id),
+            sent_messages=[]
+        )
+
+        # Build and invoke Graph
+        graph = build_chat_graph(self.ai_service, self.repo)
+        
+        # Determine if there's a specific AI mentioned, to force the Orchestrator
+        if mentioned_ai_participant_ids:
+            initial_state["ai_respondents_queue"] = mentioned_ai_participant_ids
+            # We skip orchestrator node if we force it, but let's just let it run 
+            # actually we can set it up to just invoke normally
+        
+        result_state = await graph.ainvoke(initial_state)
+
+        # Prepare Response format
         responses = []
-        # Return user message formatted
-        u_msg_formatted = ChatMessageResponse(**{
+        # First include user message formatted
+        responses.append(ChatMessageResponse(**{
             "id": user_msg.id, "room_id": user_msg.room_id, "participant_id": user_msg.participant_id,
             "content": user_msg.content, "message_type": user_msg.message_type, "created_at": user_msg.created_at,
             "participant": self._map_participant(user_msg.participant)
-        })
-        responses.append(u_msg_formatted)
+        }))
 
-        for ai_p in ais_to_reply:
-            ai_personality = f"You are {ai_p.ai_name}. Your personality is: {ai_p.ai_personality}. Your role is: {ai_p.role}."
-            full_context = f"{room_context}\n{ai_personality}"
-            
-            ai_text = await self.ai_service.generate_chat_response(
-                user_message=content,
-                context_words=context_words or [],
-                system_context=full_context
-            )
-            
-            ai_msg = self.repo.create_message(room_id, ai_p.id, ai_text, "text")
-            a_msg_formatted = ChatMessageResponse(**{
-                "id": ai_msg.id, "room_id": ai_msg.room_id, "participant_id": ai_msg.participant_id,
-                "content": ai_msg.content, "message_type": ai_msg.message_type, "created_at": ai_msg.created_at,
-                "participant": self._map_participant(ai_msg.participant)
-            })
-            responses.append(a_msg_formatted)
-            
+        # Include all new AI messages generated by graph
+        for m in result_state.get("sent_messages", []):
+            if m.get("message_id"):
+                saved_db_msg = self.repo.get_message_by_id(m["message_id"])
+                if saved_db_msg:
+                    responses.append(ChatMessageResponse(**{
+                        "id": saved_db_msg.id, "room_id": saved_db_msg.room_id, "participant_id": saved_db_msg.participant_id,
+                        "content": saved_db_msg.content, "message_type": saved_db_msg.message_type, "created_at": saved_db_msg.created_at,
+                        "participant": self._map_participant(saved_db_msg.participant)
+                    }))
+
         return responses
 
     def _check_and_update_vocab_usage(self, room_id: int, user_id: str, text: str):

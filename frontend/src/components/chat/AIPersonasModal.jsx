@@ -7,6 +7,7 @@ export default function AIPersonasModal({ onClose }) {
   const [personas, setPersonas] = useState([]);
   const [loading, setLoading] = useState(true);
   const [showForm, setShowForm] = useState(false);
+  const [editingId, setEditingId] = useState(null);
 
   // Form
   const [name, setName] = useState('');
@@ -29,24 +30,45 @@ export default function AIPersonasModal({ onClose }) {
     loadPersonas();
   }, []);
 
-  const handleCreate = async () => {
+  const handleCreateOrUpdate = async () => {
     if (!name || !personality) return;
     try {
-      await chatService.createAIPersona({
+      const data = {
         name,
         personality,
         gender,
         avatar_url: avatarUrl || null
-      });
-      setShowForm(false);
-      setName('');
-      setPersonality('');
-      setGender('female');
-      setAvatarUrl('');
+      };
+      
+      if (editingId) {
+        await chatService.updateAIPersona(editingId, data);
+      } else {
+        await chatService.createAIPersona(data);
+      }
+      
+      handleCloseForm();
       loadPersonas();
     } catch (e) {
       console.error(e);
     }
+  };
+
+  const handleEdit = (p) => {
+    setEditingId(p.id);
+    setName(p.name);
+    setPersonality(p.personality);
+    setGender(p.gender);
+    setAvatarUrl(p.avatar_url || '');
+    setShowForm(true);
+  };
+
+  const handleCloseForm = () => {
+    setShowForm(false);
+    setEditingId(null);
+    setName('');
+    setPersonality('');
+    setGender('female');
+    setAvatarUrl('');
   };
 
   const handleDelete = async (id) => {
@@ -77,7 +99,10 @@ export default function AIPersonasModal({ onClose }) {
           {!showForm ? (
             <>
               <button 
-                onClick={() => setShowForm(true)}
+                onClick={() => {
+                  setEditingId(null);
+                  setShowForm(true);
+                }}
                 className="w-full py-4 rounded-xl border border-dashed border-white/20 text-[#a0a0a0] hover:text-white hover:border-[#00c3ff] hover:bg-[#00c3ff]/5 transition-all font-bold flex items-center justify-center gap-2"
               >
                 <FaPlus /> Create New AI Companion
@@ -103,12 +128,22 @@ export default function AIPersonasModal({ onClose }) {
                           <p className="text-[#a0a0a0] text-xs mt-2 line-clamp-2">{p.personality}</p>
                         </div>
                       </div>
-                      <button 
-                        onClick={() => handleDelete(p.id)}
-                        className="absolute top-3 right-3 text-[#a0a0a0] hover:text-red-500 opacity-0 group-hover:opacity-100 transition-opacity"
-                      >
-                        <FaTrash />
-                      </button>
+                      <div className="absolute top-3 right-3 opacity-0 group-hover:opacity-100 transition-opacity flex gap-2">
+                        <button 
+                          onClick={() => handleEdit(p)}
+                          className="text-[#a0a0a0] hover:text-[#00c3ff] transition-colors p-1"
+                          title="Edit"
+                        >
+                          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" /></svg>
+                        </button>
+                        <button 
+                          onClick={() => handleDelete(p.id)}
+                          className="text-[#a0a0a0] hover:text-red-500 transition-colors p-1"
+                          title="Delete"
+                        >
+                          <FaTrash size={14} />
+                        </button>
+                      </div>
                     </div>
                   ))}
                 </div>
@@ -117,8 +152,8 @@ export default function AIPersonasModal({ onClose }) {
           ) : (
             <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="space-y-4">
               <div className="flex justify-between items-center mb-4">
-                <h3 className="text-lg font-bold text-white">Design AI Persona</h3>
-                <button onClick={() => setShowForm(false)} className="text-[#a0a0a0] text-sm hover:text-white">Cancel</button>
+                <h3 className="text-lg font-bold text-white">{editingId ? 'Edit AI Persona' : 'Design AI Persona'}</h3>
+                <button onClick={handleCloseForm} className="text-[#a0a0a0] text-sm hover:text-white">Cancel</button>
               </div>
 
               <div className="grid grid-cols-2 gap-4">
@@ -151,8 +186,8 @@ export default function AIPersonasModal({ onClose }) {
               </div>
 
               <div className="pt-4">
-                <button onClick={handleCreate} disabled={!name || !personality} className="w-full bg-[#00c3ff] text-black font-black py-4 rounded-xl hover:shadow-[0_0_20px_rgba(0,195,255,0.2)] transition-all disabled:opacity-50">
-                  Save AI Companion
+                <button onClick={handleCreateOrUpdate} disabled={!name || !personality} className="w-full bg-[#00c3ff] text-black font-black py-4 rounded-xl hover:shadow-[0_0_20px_rgba(0,195,255,0.2)] transition-all disabled:opacity-50">
+                  {editingId ? 'Save Changes' : 'Save AI Companion'}
                 </button>
               </div>
             </motion.div>

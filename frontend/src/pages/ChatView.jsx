@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useAuth } from '../hooks/useAuth';
@@ -12,6 +13,7 @@ export default function ChatView() {
   const { roomId } = useParams();
   const navigate = useNavigate();
   const { user } = useAuth();
+  const [showParticipants, setShowParticipants] = useState(false);
 
   const {
     room,
@@ -64,9 +66,12 @@ export default function ChatView() {
               </div>
               <div>
                 <h2 className="text-white font-black">{room.name}</h2>
-                <p className="text-[#00ff88] text-[10px] font-bold uppercase tracking-widest">
+                <button 
+                  onClick={() => setShowParticipants(true)}
+                  className="text-[#00ff88] text-[10px] font-bold uppercase tracking-widest hover:underline text-left"
+                >
                   {room.participants?.length || 0} Participants
-                </p>
+                </button>
               </div>
             </div>
           </div>
@@ -292,6 +297,47 @@ export default function ChatView() {
           </div>
         )
       }
+
+      {/* --- PARTICIPANTS MODAL --- */}
+      {showParticipants && (
+        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-[150] flex items-center justify-center p-4">
+          <motion.div
+            initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }}
+            className="bg-[#0e0c1d] border border-white/10 rounded-3xl p-6 w-full max-w-md shadow-2xl"
+          >
+            <div className="flex justify-between items-center mb-6">
+              <h2 className="text-xl font-black text-white">Cast & Characters</h2>
+              <button onClick={() => setShowParticipants(false)} className="text-[#a0a0a0] hover:text-white"><FaTimes /></button>
+            </div>
+
+            <div className="space-y-3 max-h-[60vh] overflow-y-auto pr-2">
+              {room.participants?.map(p => {
+                const isMe = p.user_id === user.id;
+                return (
+                  <div key={p.id} className="bg-white/5 border border-white/10 p-3 rounded-xl flex items-center gap-4">
+                    <div className="w-12 h-12 rounded-full flex items-center justify-center bg-[#00c3ff]/10 text-[#00c3ff]">
+                      {p.avatar_display ? <img src={p.avatar_display} className="w-full h-full rounded-full object-cover" /> : (p.is_ai ? <FaRobot size={24} /> : <FaUserCircle size={24} />)}
+                    </div>
+                    <div>
+                      <div className="flex items-center gap-2">
+                        <p className="text-white font-bold text-sm">
+                          {p.name_display}
+                        </p>
+                        {isMe && <span className="text-[9px] bg-white/10 text-[#a0a0a0] px-1.5 py-0.5 rounded font-bold">YOU</span>}
+                        {p.is_ai && <span className="text-[9px] bg-[#00c3ff]/20 text-[#00c3ff] px-1.5 py-0.5 rounded font-bold uppercase">AI ({p.ai_gender})</span>}
+                      </div>
+                      <p className="text-[#a0a0a0] text-[10px] uppercase font-bold tracking-widest mt-0.5">Role: {p.role || 'Participant'}</p>
+                      {p.is_ai && p.ai_personality && (
+                         <p className="text-[#a0a0a0] text-xs mt-1 italic line-clamp-2">"{p.ai_personality}"</p>
+                      )}
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          </motion.div>
+        </div>
+      )}
 
     </div >
   );

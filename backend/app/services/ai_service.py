@@ -236,6 +236,32 @@ class AIService:
             print(f"Chat AI Error: {e}")
             return "Sorry, I'm having trouble thinking right now."
 
+    async def select_ai_to_reply(self, room_context: str, user_message: str, ai_participants: list) -> int:
+        if len(ai_participants) == 1:
+            return ai_participants[0].id
+            
+        participants_info = [{"id": p.id, "name": p.ai_name, "role": p.role, "personality": p.ai_personality} for p in ai_participants]
+        prompt = f"""
+        Contexto de la sala: {room_context}
+        Último mensaje: "{user_message}"
+        
+        Participantes IA disponibles:
+        {json.dumps(participants_info)}
+        
+        ¿Cuál de estos participantes IA es el MÁS adecuado para responder a este último mensaje?
+        Ten en cuenta su rol, su personalidad, y si el mensaje está dirigido a él implícitamente o es quien lógicamente hablaría ahora en la escena.
+        
+        Devuelve SIEMPRE un objeto JSON estricto con el ID del participante seleccionado.
+        Ejemplo: {{"selected_id": 123}}
+        """
+        try:
+            resp_str = await self._call_llm(prompt, "Eres un director de escena inteligente. Devuelve SOLO JSON.", json_format=True, temp=0.1)
+            parsed = json.loads(resp_str)
+            return parsed.get("selected_id", ai_participants[0].id)
+        except Exception as e:
+            print(f"Router AI Error: {e}")
+            return ai_participants[0].id
+
     async def generate_icebreaker_message(self, chat_context: str, vocabulary: list[str], language: str, participants_info: str) -> str:
         vocab_str = ", ".join(vocabulary) if vocabulary else "vocabulario básico"
 

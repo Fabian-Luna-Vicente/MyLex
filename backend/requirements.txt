@@ -16,3 +16,4 @@ requests
 deep-translator
 pydantic[email]
 groq
+langgraph
