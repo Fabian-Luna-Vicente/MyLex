@@ -1,5 +1,5 @@
 import json
-from fastapi import APIRouter, Depends, WebSocket, WebSocketDisconnect, HTTPException
+from fastapi import APIRouter, Depends, WebSocket, WebSocketDisconnect, HTTPException, BackgroundTasks
 from sqlalchemy.orm import Session
 from app.core.database import get_db
 from app.core.dependencies import get_current_user, get_current_user_ws
@@ -98,6 +98,7 @@ def link_list_to_room(
 @router.post("/ai/message")
 async def send_ai_message(
     data: AIChatRequest,
+    background_tasks: BackgroundTasks,
     current_user: User = Depends(get_current_user),
     service: ChatService = Depends(get_chat_service)
 ):
@@ -106,7 +107,8 @@ async def send_ai_message(
         user_id=current_user.id, 
         content=data.message, 
         context_words=data.context_words,
-        mentioned_ai_participant_ids=data.mentioned_ai_participant_ids
+        mentioned_ai_participant_ids=data.mentioned_ai_participant_ids,
+        background_tasks=background_tasks
     )
 
 # --- WebSocket Endpoint for Human Chat ---

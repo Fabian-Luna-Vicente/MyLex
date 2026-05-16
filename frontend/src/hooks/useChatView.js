@@ -37,7 +37,9 @@ export const useChatView = (roomId, user) => {
   }, [messages]);
 
   const scrollToBottom = () => {
-    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+    setTimeout(() => {
+      messagesEndRef.current?.scrollIntoView({ behavior: 'auto' });
+    }, 100);
   };
 
   const loadRoomData = async () => {
@@ -257,6 +259,17 @@ export const useChatView = (roomId, user) => {
     }
   };
 
+  const handleUpdateRoomInfo = async (data) => {
+    try {
+      const updated = await chatService.updateRoom(room.id, data);
+      setRoom(updated);
+      return true;
+    } catch (e) {
+      console.error("Error updating room:", e);
+      return false;
+    }
+  };
+
   return {
     room,
     messages,
@@ -277,6 +290,7 @@ export const useChatView = (roomId, user) => {
     speak,
     handleLinkList,
     handleIcebreaker,
+    handleUpdateRoomInfo,
     lists
   };
 };

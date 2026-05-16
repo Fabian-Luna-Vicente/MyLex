@@ -6,6 +6,7 @@ from groq import AsyncGroq
 from app.schemas.ai import DictionaryRequest, GrammarRequest, CorrectorRequest, TranslationRequest
 from app.core.config import settings
 from app.repositories.dictionaryApi_repository import DictionaryApiRepository
+from app.services.prompt_service import PromptService
 
 class AIService:
     def __init__(self):
@@ -205,27 +206,15 @@ class AIService:
         except:
             return {"status": False, "message": "Error translating text."}
 
-    # --- Chat Methods ---
-
-    async def generate_chat_response(self, user_message: str, context_words: list[str], system_context: str = None) -> str:
+    async def generate_chat_response(self, user_message: str, context_words: list[str], system_context: str = None, language: str = "english") -> str:
         prompt = f"""
-        Usuario dice: "{user_message}"
+        User says: "{user_message}"
         """
-        vocab_instruction = ""
-        if context_words:
-            vocab_instruction = f"""
-            TU MISIÓN PRINCIPAL: Debes obligatoriamente usar al menos una o dos de las siguientes palabras en tu respuesta (no necesariamente todas), de manera muy natural: {", ".join(context_words)}.
-            """
-            
-        sys_prompt = f"""
-        {system_context or "Eres un compañero de conversación amigable (Language Exchange Partner) nativo de inglés. Tu objetivo es ayudar al usuario a practicar."}
-        Mantén la conversación fluida, haz preguntas abiertas y responde con interés de acuerdo a tu rol.
-        {vocab_instruction}
         
-        Devuelve SIEMPRE un objeto JSON con el siguiente formato:
-        {{
-            "response": "Tu respuesta"
-        }}
+        sys_prompt = f"""
+        {system_context or "You are a friendly language exchange partner. Your goal is to help the user practice."}
+        
+        {PromptService.get_chat_response_rules(language, context_words)}
         """
         
         resp_str = await self._call_llm(prompt, sys_prompt, json_format=True, temp=0.7)

@@ -11,6 +11,11 @@ export const chatService = {
     return response.data;
   },
 
+  updateRoom: async (roomId, data) => {
+    const response = await api.put(`/api/chat/rooms/${roomId}`, data);
+    return response.data;
+  },
+
   getMessages: async (roomId) => {
     const response = await api.get(`/api/chat/rooms/${roomId}/messages`);
     return response.data;

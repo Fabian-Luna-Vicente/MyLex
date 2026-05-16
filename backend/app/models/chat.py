@@ -14,6 +14,10 @@ class ChatRoom(Base):
     created_by = Column(String, ForeignKey("users.id", ondelete="CASCADE"), nullable=False)
     created_at = Column(DateTime(timezone=True), server_default=func.now())
     
+    # Hybrid Memory
+    summary = Column(String, nullable=True)
+    last_summarized_message_id = Column(Integer, nullable=True)
+    
     # Relationships
     participants = relationship("ChatParticipant", back_populates="room", cascade="all, delete-orphan")
     messages = relationship("ChatMessage", back_populates="room", cascade="all, delete-orphan")

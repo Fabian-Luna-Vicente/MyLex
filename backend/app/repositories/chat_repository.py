@@ -69,6 +69,15 @@ class ChatRepository:
             self.db.refresh(room)
         return room
 
+    def update_room_summary(self, room_id: int, summary: str, last_message_id: int):
+        room = self.get_room_by_id(room_id)
+        if room:
+            room.summary = summary
+            room.last_summarized_message_id = last_message_id
+            self.db.commit()
+            self.db.refresh(room)
+        return room
+
     def add_participant(self, room_id: int, data: ChatParticipantCreate) -> ChatParticipant:
         p = ChatParticipant(
             room_id=room_id,
@@ -108,6 +117,19 @@ class ChatRepository:
         return self.db.query(ChatMessage).options(joinedload(ChatMessage.participant)).filter(
             ChatMessage.room_id == room_id
         ).order_by(desc(ChatMessage.created_at)).offset(offset).limit(limit).all()
+
+    def get_unsummarized_messages(self, room_id: int, start_id: int, limit: int = 50):
+        query = self.db.query(ChatMessage).options(joinedload(ChatMessage.participant)).filter(
+            ChatMessage.room_id == room_id
+        )
+        if start_id:
+            query = query.filter(ChatMessage.id > start_id)
+        return query.order_by(ChatMessage.id.asc()).limit(limit).all()
+
+    def get_message_by_id(self, message_id: int) -> ChatMessage:
+        return self.db.query(ChatMessage).options(joinedload(ChatMessage.participant)).filter(
+            ChatMessage.id == message_id
+        ).first()
 
     def create_message(self, room_id: int, participant_id: int, content: str, message_type: str = "text") -> ChatMessage:
         msg = ChatMessage(

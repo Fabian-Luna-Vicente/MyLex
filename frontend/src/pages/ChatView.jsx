@@ -1,11 +1,12 @@
-import { useState } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useAuth } from '../hooks/useAuth';
 import { useChatView } from '../hooks/useChatView';
 import {
   FaPaperPlane, FaMicrophone, FaVolumeUp, FaArrowLeft,
-  FaBookOpen, FaTimes, FaRobot, FaUserCircle, FaPlus
+  FaBookOpen, FaTimes, FaRobot, FaUserCircle, FaPlus,
+  FaEdit, FaSave, FaGlobe, FaComments
 } from 'react-icons/fa';
 import { GiMeltingIceCube } from "react-icons/gi";
 
@@ -14,6 +15,12 @@ export default function ChatView() {
   const navigate = useNavigate();
   const { user } = useAuth();
   const [showParticipants, setShowParticipants] = useState(false);
+  const [showRoomInfo, setShowRoomInfo] = useState(false);
+  const [isEditingInfo, setIsEditingInfo] = useState(false);
+  const [editData, setEditData] = useState({ name: '', description: '', context: '' });
+  const [mentionQuery, setMentionQuery] = useState(null);
+  const inputRef = useRef(null);
+  const scrollContainerRef = useRef(null);
 
   const {
     room,
@@ -35,8 +42,67 @@ export default function ChatView() {
     speak,
     handleLinkList,
     handleIcebreaker,
+    handleUpdateRoomInfo,
     lists
   } = useChatView(roomId, user);
+
+  // Handle Scroll positions for Room Info vs Messages
+  useEffect(() => {
+    if (showRoomInfo) {
+      if (scrollContainerRef.current) {
+        scrollContainerRef.current.scrollTop = 0;
+      }
+    } else {
+      setTimeout(() => {
+        messagesEndRef.current?.scrollIntoView({ behavior: 'auto' });
+      }, 100);
+    }
+  }, [showRoomInfo, messagesEndRef]);
+
+  const startEditing = () => {
+    setEditData({ name: room.name, description: room.description || '', context: room.context || '' });
+    setIsEditingInfo(true);
+  };
+
+  const saveEditing = async () => {
+    const success = await handleUpdateRoomInfo(editData);
+    if (success) setIsEditingInfo(false);
+  };
+
+  const handleInputChange = (e) => {
+    const val = e.target.value;
+    setInput(val);
+
+    const cursor = e.target.selectionStart;
+    const textBeforeCursor = val.slice(0, cursor);
+    const words = textBeforeCursor.split(/\s+/);
+    const lastWord = words[words.length - 1];
+
+    if (lastWord.startsWith('@')) {
+      setMentionQuery(lastWord.slice(1).toLowerCase());
+    } else {
+      setMentionQuery(null);
+    }
+  };
+
+  const handleMentionSelect = (aiName) => {
+    const cursor = inputRef.current.selectionStart;
+    const textBeforeCursor = input.slice(0, cursor);
+    const textAfterCursor = input.slice(cursor);
+    const words = textBeforeCursor.split(/\s+/);
+    words.pop();
+
+    const prefix = words.length > 0 ? words.join(' ') + ' ' : '';
+    const newText = prefix + `@${aiName} ` + textAfterCursor;
+
+    setInput(newText);
+    setMentionQuery(null);
+    inputRef.current?.focus();
+  };
+
+  const mentionSuggestions = mentionQuery !== null && room?.participants
+    ? room.participants.filter(p => p.is_ai && p.ai_name && p.ai_name.toLowerCase().includes(mentionQuery))
+    : [];
 
   if (loading || !room) {
     return (
@@ -65,13 +131,17 @@ export default function ChatView() {
                 <FaUserCircle size={20} className="text-[#00c3ff]/50" />
               </div>
               <div>
-                <h2 className="text-white font-black">{room.name}</h2>
-                <button 
-                  onClick={() => setShowParticipants(true)}
-                  className="text-[#00ff88] text-[10px] font-bold uppercase tracking-widest hover:underline text-left"
+                <button
+                  onClick={() => setShowRoomInfo(!showRoomInfo)}
+                  className="text-white font-black hover:underline text-left"
+                >
+                  {room.name}
+                </button>
+                <div
+                  className="text-[#00ff88] text-[10px] font-bold uppercase tracking-widest text-left"
                 >
                   {room.participants?.length || 0} Participants
-                </button>
+                </div>
               </div>
             </div>
           </div>
@@ -83,9 +153,77 @@ export default function ChatView() {
           </button>
         </div>
 
-        {/* Messages */}
-        <div className="flex-1 overflow-y-auto p-4 space-y-4">
-          {messages.length === 0 ? (
+        {/* Messages or Room Info */}
+        <div ref={scrollContainerRef} className="flex-1 overflow-y-auto p-4 space-y-4">
+          {showRoomInfo ? (
+            <div className="h-full flex flex-col p-4 animate-fadeIn max-w-3xl mx-auto w-full">
+              <div className="flex justify-between items-center mb-8">
+                <h3 className="text-3xl font-black text-white tracking-wide">Room Details</h3>
+                <div className="flex gap-2">
+                  {isEditingInfo ? (
+                    <button onClick={saveEditing} className="bg-[#00ff88] text-black px-4 py-2 rounded-full font-bold flex items-center gap-2 hover:scale-105 transition-transform"><FaSave /> Save</button>
+                  ) : (
+                    <button onClick={startEditing} className="bg-white/10 text-white px-4 py-2 rounded-full font-bold flex items-center gap-2 hover:bg-white/20 transition-colors"><FaEdit /> Edit</button>
+                  )}
+                  <button onClick={() => { setShowRoomInfo(false); setIsEditingInfo(false); }} className="bg-white/5 text-[#a0a0a0] px-4 py-2 rounded-full font-bold hover:bg-white/10 hover:text-white transition-colors">Close</button>
+                </div>
+              </div>
+
+              {isEditingInfo ? (
+                <div className="space-y-4 mb-8">
+                  <div>
+                    <label className="text-xs text-[#00c3ff] font-bold uppercase tracking-widest ml-2">Room Name</label>
+                    <input type="text" value={editData.name} onChange={e => setEditData({ ...editData, name: e.target.value })} className="w-full bg-white/5 border border-white/10 rounded-2xl px-4 py-3 text-white focus:border-[#00c3ff]/50 outline-none" />
+                  </div>
+                  <div>
+                    <label className="text-xs text-[#00c3ff] font-bold uppercase tracking-widest ml-2">Description</label>
+                    <textarea value={editData.description} onChange={e => setEditData({ ...editData, description: e.target.value })} className="w-full bg-white/5 border border-white/10 rounded-2xl px-4 py-3 text-white focus:border-[#00c3ff]/50 outline-none h-24 resize-none" />
+                  </div>
+                  <div>
+                    <label className="text-xs text-[#00c3ff] font-bold uppercase tracking-widest ml-2">Context Setting</label>
+                    <input type="text" value={editData.context} onChange={e => setEditData({ ...editData, context: e.target.value })} className="w-full bg-white/5 border border-white/10 rounded-2xl px-4 py-3 text-white focus:border-[#00c3ff]/50 outline-none" />
+                  </div>
+                </div>
+              ) : (
+                <div className="mb-8">
+                  <h2 className="text-4xl font-black text-transparent bg-clip-text bg-gradient-to-r from-[#00c3ff] to-[#00ff88] mb-4">{room.name}</h2>
+                  <p className="text-[#a0a0a0] text-lg leading-relaxed">{room.description || "No description provided."}</p>
+                </div>
+              )}
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-8">
+                <div className="bg-gradient-to-br from-[#00c3ff]/10 to-transparent border border-[#00c3ff]/20 p-6 rounded-3xl relative overflow-hidden group">
+                  <div className="absolute top-0 right-0 p-4 opacity-10 group-hover:opacity-20 transition-opacity"><FaComments size={80} /></div>
+                  <h4 className="text-xs font-bold text-[#00c3ff] uppercase tracking-widest mb-2 relative z-10">Current Context</h4>
+                  <p className="text-white font-medium text-lg relative z-10">{room.context || "General conversation"}</p>
+                </div>
+                <div className="bg-gradient-to-br from-[#00ff88]/10 to-transparent border border-[#00ff88]/20 p-6 rounded-3xl relative overflow-hidden group">
+                  <div className="absolute top-0 right-0 p-4 opacity-10 group-hover:opacity-20 transition-opacity"><FaGlobe size={80} /></div>
+                  <h4 className="text-xs font-bold text-[#00ff88] uppercase tracking-widest mb-2 relative z-10">Target Language</h4>
+                  <p className="text-white font-medium text-lg capitalize relative z-10">{room.language || "English"}</p>
+                </div>
+              </div>
+
+              <h3 className="text-xl font-black text-white mb-4">Cast & Members</h3>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                {room.participants?.map(p => (
+                  <div key={p.id} className="bg-white/5 border border-white/10 p-4 rounded-3xl flex items-center gap-4 hover:bg-white/10 transition-colors">
+                    <div className="w-14 h-14 rounded-full flex items-center justify-center bg-gradient-to-br from-[#00c3ff]/20 to-[#0080ff]/20 border border-[#00c3ff]/30 text-[#00c3ff] shadow-[0_0_15px_rgba(0,195,255,0.1)]">
+                      {p.avatar_display ? <img src={p.avatar_display} className="w-full h-full rounded-full object-cover" /> : (p.is_ai ? <FaRobot size={24} /> : <FaUserCircle size={24} />)}
+                    </div>
+                    <div>
+                      <div className="flex items-center gap-2">
+                        <p className="text-white font-bold text-lg">{p.name_display}</p>
+                        {p.user_id === user.id && <span className="text-[10px] bg-white/10 text-white px-2 py-0.5 rounded-full font-bold">YOU</span>}
+                        {p.is_ai && <span className="text-[10px] bg-[#00c3ff]/20 text-[#00c3ff] border border-[#00c3ff]/30 px-2 py-0.5 rounded-full font-bold uppercase">AI</span>}
+                      </div>
+                      <p className="text-[#a0a0a0] text-xs uppercase font-bold tracking-widest mt-1">Role: <span className="text-white">{p.role || 'Participant'}</span></p>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          ) : messages.length === 0 ? (
             <div className="h-full flex flex-col items-center justify-center text-center px-4">
               <div className="w-16 h-16 rounded-full bg-[#00c3ff]/10 flex items-center justify-center mb-4">
                 <FaPaperPlane className="text-[#00c3ff] text-2xl ml-1" />
@@ -144,38 +282,71 @@ export default function ChatView() {
         </div>
 
         {/* Input Area */}
-        <div className="p-4 bg-black/20 border-t border-white/5">
-          <div className="flex gap-2">
+        <div className="p-4 bg-transparent border-t border-white/5 relative">
+          <AnimatePresence>
+            {mentionSuggestions.length > 0 && (
+              <motion.div
+                initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: 10 }}
+                className="absolute bottom-full mb-4 left-4 bg-[#1a182c] border border-white/10 rounded-xl shadow-[0_10px_30px_rgba(0,0,0,0.5)] p-2 z-10 min-w-[200px]"
+              >
+                <div className="text-[10px] uppercase tracking-widest text-[#a0a0a0] font-bold mb-2 px-2">Mention:</div>
+                {mentionSuggestions.map(p => (
+                  <button
+                    key={p.id}
+                    onClick={() => handleMentionSelect(p.ai_name)}
+                    className="w-full text-left px-3 py-2 rounded-lg hover:bg-white/5 flex items-center gap-3 transition-colors"
+                  >
+                    <div className="w-6 h-6 rounded-full bg-[#00c3ff]/20 text-[#00c3ff] flex items-center justify-center">
+                      {p.avatar_display ? <img src={p.avatar_display} className="w-full h-full rounded-full object-cover" /> : <FaRobot size={12} />}
+                    </div>
+                    <span className="text-white font-bold text-sm">{p.ai_name}</span>
+                  </button>
+                ))}
+              </motion.div>
+            )}
+          </AnimatePresence>
+
+          <div className="flex items-center gap-2 bg-[#1a182c] p-1.5 rounded-full border border-white/10 shadow-2xl">
             <button
               onClick={toggleRecording}
-              className={`p-3.5 rounded-xl border flex items-center justify-center transition-all ${isRecording
-                ? 'bg-red-500/20 border-red-500/50 text-red-500 animate-pulse shadow-[0_0_15px_rgba(239,68,68,0.3)]'
-                : 'bg-[#0e0c1d] border-white/10 text-[#a0a0a0] hover:border-[#00c3ff]/50 hover:text-[#00c3ff]'
+              className={`w-11 h-11 rounded-full flex-none flex items-center justify-center transition-all ${isRecording
+                ? 'bg-red-500/20 text-red-500 animate-pulse'
+                : 'bg-white/5 text-[#a0a0a0] hover:bg-[#00c3ff]/10 hover:text-[#00c3ff]'
                 }`}
             >
-              <FaMicrophone />
+              <FaMicrophone size={16} />
             </button>
             <button
               onClick={handleIcebreaker}
               disabled={loadingIcebreaker}
-              className="bg-gradient-to-r from-[#00c3ff] to-[#0080ff] text-black font-bold px-4 rounded-xl flex items-center justify-center transition-all hover:scale-105 hover:shadow-[0_0_15px_rgba(0,195,255,0.5)] disabled:opacity-50"
+              className="w-11 h-11 rounded-full flex-none bg-white/5 text-[#00ff88] flex items-center justify-center transition-all hover:bg-[#00ff88]/10 hover:scale-105 disabled:opacity-50"
             >
-              <GiMeltingIceCube size={20} className={loadingIcebreaker ? "animate-spin" : ""} />
+              <GiMeltingIceCube size={18} className={loadingIcebreaker ? "animate-spin" : ""} />
             </button>
             <input
+              ref={inputRef}
               type="text"
               value={input}
-              onChange={(e) => setInput(e.target.value)}
-              onKeyDown={(e) => e.key === 'Enter' && handleSend()}
-              placeholder="Type a message..."
-              className="flex-1 bg-[#0e0c1d] border border-white/10 rounded-xl px-4 py-3 text-white text-sm focus:border-[#00c3ff]/50 focus:outline-none transition-all"
+              onChange={handleInputChange}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter') {
+                  if (mentionSuggestions.length > 0) {
+                    e.preventDefault();
+                    handleMentionSelect(mentionSuggestions[0].ai_name);
+                  } else {
+                    handleSend();
+                  }
+                }
+              }}
+              placeholder="Type a message... Use @ to mention"
+              className="flex-1 bg-transparent px-3 py-2 text-white text-sm focus:outline-none placeholder-[#a0a0a0]/50"
             />
             <button
               onClick={handleSend}
               disabled={!input.trim() || sending}
-              className="px-6 py-3 rounded-xl bg-gradient-to-r from-[#00c3ff] to-[#0080ff] text-black font-black hover:shadow-[0_0_20px_rgba(0,195,255,0.4)] transition-all disabled:opacity-50"
+              className="w-11 h-11 rounded-full flex-none bg-gradient-to-tr from-[#00c3ff] to-[#0080ff] text-black flex items-center justify-center transition-all hover:scale-105 hover:shadow-[0_0_20px_rgba(0,195,255,0.4)] disabled:opacity-50"
             >
-              <FaPaperPlane />
+              <FaPaperPlane size={14} className="ml-0.5" />
             </button>
           </div>
         </div>
@@ -328,7 +499,7 @@ export default function ChatView() {
                       </div>
                       <p className="text-[#a0a0a0] text-[10px] uppercase font-bold tracking-widest mt-0.5">Role: {p.role || 'Participant'}</p>
                       {p.is_ai && p.ai_personality && (
-                         <p className="text-[#a0a0a0] text-xs mt-1 italic line-clamp-2">"{p.ai_personality}"</p>
+                        <p className="text-[#a0a0a0] text-xs mt-1 italic line-clamp-2">"{p.ai_personality}"</p>
                       )}
                     </div>
                   </div>

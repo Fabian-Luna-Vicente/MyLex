@@ -6,8 +6,9 @@ from app.repositories.chat_repository import ChatRepository
 from app.repositories.profile_repository import ProfileRepository
 from app.services.ai_service import AIService
 from app.schemas.chat import ChatMessageResponse, ChatRoomResponse, ChatRoomCreate, ChatParticipantCreate, ChatParticipantResponse
-from app.graph import build_chat_graph
+from app.graph.builder import build_chat_graph
 from app.graph.state import ChatState, AIParticipant, HumanParticipant, ChatMessagePayload
+import re
 
 class ChatService:
     def __init__(self, db: Session):
@@ -162,7 +163,7 @@ class ChatService:
         }
         return ChatMessageResponse(**m_dict)
 
-    async def send_ai_message(self, room_id: int, user_id: str, content: str, context_words: list[str] = None, mentioned_ai_participant_ids: list[int] = None):
+    async def send_ai_message(self, room_id: int, user_id: str, content: str, context_words: list[str] = None, mentioned_ai_participant_ids: list[int] = None, background_tasks = None):
         room = self.repo.get_room_by_id(room_id)
         if not room:
             raise HTTPException(status_code=404, detail="Room not found")
@@ -174,6 +175,23 @@ class ChatService:
         # 1. Save User Message
         user_msg = self.repo.create_message(room_id, user_participant.id, content, "text")
         self._check_and_update_vocab_usage(room_id, user_id, content)
+        
+        # 1.5 Detect @mentions
+        if mentioned_ai_participant_ids is None:
+            mentioned_ai_participant_ids = []
+            
+        detected_mentions = set()
+        for w in content.split():
+            if w.startswith('@') and len(w) > 1:
+                clean_name = re.sub(r'[^\w\s]', '', w[1:]).lower()
+                detected_mentions.add(clean_name)
+                
+        for p in room.participants:
+            if p.is_ai and p.ai_name:
+                ai_first_name = p.ai_name.split()[0].lower()
+                if ai_first_name in detected_mentions or p.ai_name.lower() in detected_mentions:
+                    if p.id not in mentioned_ai_participant_ids:
+                        mentioned_ai_participant_ids.append(p.id)
         
         # Build Initial ChatState
         ai_participants_state = []
@@ -219,6 +237,8 @@ class ChatService:
             room_id=room_id,
             conversation_language=room.language or "en",
             room_context=room.context or "General conversation",
+            room_summary=room.summary,
+            mentioned_ai_participant_ids=mentioned_ai_participant_ids,
             human_participants=human_participants_state,
             ai_participants=ai_participants_state,
             message_history=message_history,
@@ -239,12 +259,6 @@ class ChatService:
 
         # Build and invoke Graph
         graph = build_chat_graph(self.ai_service, self.repo)
-        
-        # Determine if there's a specific AI mentioned, to force the Orchestrator
-        if mentioned_ai_participant_ids:
-            initial_state["ai_respondents_queue"] = mentioned_ai_participant_ids
-            # We skip orchestrator node if we force it, but let's just let it run 
-            # actually we can set it up to just invoke normally
         
         result_state = await graph.ainvoke(initial_state)
 
@@ -268,7 +282,35 @@ class ChatService:
                         "participant": self._map_participant(saved_db_msg.participant)
                     }))
 
+        # Trigger Hybrid Memory Summarization
+        if background_tasks:
+            background_tasks.add_task(self._summarize_background, room_id)
+
         return responses
+
+    async def _summarize_background(self, room_id: int):
+        from app.core.database import SessionLocal
+        db = SessionLocal()
+        try:
+            repo = ChatRepository(db)
+            room = repo.get_room_by_id(room_id)
+            if not room: return
+            
+            unsummarized = repo.get_unsummarized_messages(room_id, room.last_summarized_message_id, limit=20)
+            if len(unsummarized) < 10:
+                return # Only summarize when we have built up enough messages
+                
+            chat_log = "\n".join([f"{m.participant.ai_name if m.participant.is_ai else 'User'}: {m.content}" for m in unsummarized])
+            prompt = f"Previous summary: {room.summary or 'None'}\n\nRecent messages:\n{chat_log}\n\nProvide a concise updated summary of the entire conversation. Do not write anything else besides the summary."
+            
+            ai_service = AIService()
+            new_summary = await ai_service._call_llm(prompt, "You are a helpful assistant that summarizes conversations concisely.", json_format=False, temp=0.2)
+            
+            repo.update_room_summary(room_id, new_summary, unsummarized[-1].id)
+        except Exception as e:
+            print(f"Error summarizer background task: {e}")
+        finally:
+            db.close()
 
     def _check_and_update_vocab_usage(self, room_id: int, user_id: str, text: str):
         linked_lists = self.repo.get_linked_lists_for_room(room_id)
