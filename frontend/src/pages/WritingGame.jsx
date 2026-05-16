@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { useWritingGame } from '../hooks/useWritingGame';
 import { GrPrevious, GrLinkNext } from 'react-icons/gr';
 import { MdNotStarted } from 'react-icons/md';
-import { FaPenNib, FaCheckCircle, FaExclamationCircle } from 'react-icons/fa';
+import { FaCheckCircle, FaExclamationCircle } from 'react-icons/fa';
 import { motion, AnimatePresence } from 'framer-motion';
 
 export default function WritingGame() {
@@ -133,7 +133,7 @@ export default function WritingGame() {
                     {aiLoading ? (
                       <><div className="h-4 w-4 animate-spin rounded-full border-2 border-[#00c3ff] border-t-transparent" /> AI Thinking...</>
                     ) : (
-                      <><FaPenNib size={20} /> Check Grammar</>
+                      <><img src="https://i.postimg.cc/XqV5DCwC/b086d171-7edf-403b-a9e5-a6acdd5606f2-removebg-preview.png" alt="Corrector" className="w-12 h-12 object-contain drop-shadow-[0_0_5px_rgba(0,195,255,0.5)]" /> Check Grammar</>
                     )}
                   </button>
 
@@ -163,11 +163,11 @@ export default function WritingGame() {
                   className="mt-8 bg-[#0e0c1d]/60 backdrop-blur-xl border border-[#00c3ff]/20 rounded-[24px] p-6 shadow-2xl"
                 >
                   <div className="flex items-center gap-3 mb-5 border-b border-[#ffffff10] pb-4">
-                    <div className="p-1.5 bg-[#00c3ff]/10 rounded-xl shadow-[0_0_10px_rgba(0,195,255,0.2)] flex items-center justify-center w-9 h-9">
+                    <div className="p-1.5 bg-[#00c3ff]/10 rounded-xl shadow-[0_0_10px_rgba(0,195,255,0.2)] flex items-center justify-center w-12 h-12">
                       <img
-                        src="/mi-logo.png"
+                        src="https://i.postimg.cc/XqV5DCwC/b086d171-7edf-403b-a9e5-a6acdd5606f2-removebg-preview.png"
                         alt="AI Logo"
-                        className="w-full h-full object-contain drop-shadow-[0_0_5px_rgba(0,195,255,0.5)]"
+                        className="w-12 h-12 object-contain drop-shadow-[0_0_5px_rgba(0,195,255,0.5)]"
                       />
                     </div>
                     <h3 className="text-white font-bold text-sm tracking-widest uppercase">

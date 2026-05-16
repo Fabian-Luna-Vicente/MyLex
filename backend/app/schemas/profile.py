@@ -1,6 +1,6 @@
 from pydantic import BaseModel
 from typing import Optional, List
-from datetime import datetime
+from datetime import datetime, date
 
 
 class ProfileUpdate(BaseModel):
@@ -22,6 +22,9 @@ class ProfilePublic(BaseModel):
     learning_languages: List[str] = []
     level: str = "Beginner"
     created_at: Optional[datetime] = None
+    current_streak: int = 0
+    longest_streak: int = 0
+    last_activity_date: Optional[date] = None
     total_words: int = 0
     total_lists: int = 0
     friend_count: int = 0

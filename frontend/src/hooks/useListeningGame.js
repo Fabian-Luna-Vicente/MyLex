@@ -11,7 +11,7 @@ export const useListeningGame = () => {
 
     const [shuffledWords, setShuffledWords] = useState([]);
     const [index, setIndex] = useState(0);
-    const [choices, setChoices] = useState([]);
+    const [userAnswers, setUserAnswers] = useState({}); // { 'blankId': 'value' }
     const [gameStatus, setGameStatus] = useState('playing'); // playing, won, lost
     const [score, setScore] = useState({ correct: 0, wrong: 0 });
     const [pendingProgress, setPendingProgress] = useState([]);
@@ -28,26 +28,24 @@ export const useListeningGame = () => {
         window.speechSynthesis.speak(utterance);
     }, []);
 
-    const generateChoices = (words, currentIndex) => {
-        if (words.length < 4) {
-            setChoices(words);
-            return;
-        }
-
-        let tempChoices = [];
-        const correctWord = words[currentIndex];
-
-        while (tempChoices.length < 3) {
-            const randomWord = words[Math.floor(Math.random() * words.length)];
-            if (randomWord.id !== correctWord.id && !tempChoices.find(w => w.id === randomWord.id)) {
-                tempChoices.push(randomWord);
+    const playFullAudio = useCallback((word) => {
+        if (!word) return;
+        const utterance = new SpeechSynthesisUtterance(word.name);
+        utterance.lang = 'en-US';
+        utterance.rate = 0.85;
+        
+        utterance.onend = () => {
+            if (word.examples && word.examples.length > 0) {
+                const examplesText = word.examples.join(". ");
+                const examplesUtterance = new SpeechSynthesisUtterance(examplesText);
+                examplesUtterance.lang = 'en-US';
+                examplesUtterance.rate = 0.85;
+                window.speechSynthesis.speak(examplesUtterance);
             }
-        }
-
-        const insertPos = Math.floor(Math.random() * 4);
-        tempChoices.splice(insertPos, 0, correctWord);
-        setChoices(tempChoices);
-    };
+        };
+        
+        window.speechSynthesis.speak(utterance);
+    }, []);
 
     const startGame = async (listId) => {
         setLoading(true);
@@ -61,12 +59,12 @@ export const useListeningGame = () => {
 
             setShuffledWords(words);
             setIndex(0);
+            setUserAnswers({});
             setScore({ correct: 0, wrong: 0 });
             setGameStatus('playing');
-            generateChoices(words, 0);
             setShowGame(true);
-            const examples = words[0].examples.map((e, i) => "Example " + (i + 1) + ": " + e).join("\n");
-            setTimeout(() => playAudio(words[0].name + ". " + examples), 500);
+            
+            setTimeout(() => playFullAudio(words[0]), 500);
 
         } catch (error) {
             console.error("Error starting game", error);
@@ -75,13 +73,19 @@ export const useListeningGame = () => {
         }
     };
 
-    const handleAnswer = (selectedChoice) => {
+    const handleAnswer = (correctAnswers) => {
         if (gameStatus !== 'playing') return;
 
-        const correctWord = shuffledWords[index];
-        const isCorrect = selectedChoice.id === correctWord.id;
+        let allCorrect = true;
+        for (const [id, correctVal] of Object.entries(correctAnswers)) {
+            const userVal = (userAnswers[id] || '').trim().toLowerCase();
+            if (userVal !== correctVal.trim().toLowerCase()) {
+                allCorrect = false;
+                break;
+            }
+        }
 
-        if (isCorrect) {
+        if (allCorrect) {
             setScore(s => ({ ...s, correct: s.correct + 1 }));
             setGameStatus('won');
         } else {
@@ -89,7 +93,8 @@ export const useListeningGame = () => {
             setGameStatus('lost');
         }
 
-        const newProgress = { word_id: correctWord.id, game: 'listening', is_correct: isCorrect };
+        const correctWord = shuffledWords[index];
+        const newProgress = { word_id: correctWord.id, game: 'listening', is_correct: allCorrect };
 
         setPendingProgress(prev => {
             const updated = [...prev, newProgress];
@@ -105,9 +110,9 @@ export const useListeningGame = () => {
         if (index + 1 < shuffledWords.length) {
             const nextIdx = index + 1;
             setIndex(nextIdx);
+            setUserAnswers({});
             setGameStatus('playing');
-            generateChoices(shuffledWords, nextIdx);
-            setTimeout(() => playAudio(shuffledWords[nextIdx].name), 500);
+            setTimeout(() => playFullAudio(shuffledWords[nextIdx]), 500);
         } else {
             // End of game
             if (pendingProgress.length > 0) {
@@ -136,8 +141,8 @@ export const useListeningGame = () => {
     };
 
     return {
-        lists, loading, showGame, shuffledWords, index, choices,
+        lists, loading, showGame, shuffledWords, index, userAnswers, setUserAnswers,
         gameStatus, selectedListId, setSelectedListId, score,
-        loadLists, startGame, handleAnswer, nextLevel, quitGame, playAudio
+        loadLists, startGame, handleAnswer, nextLevel, quitGame, playFullAudio
     };
 };

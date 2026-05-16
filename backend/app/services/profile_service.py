@@ -168,3 +168,6 @@ class ProfileService:
                 request_status=request_status
             ))
         return results
+
+    def update_user_streak(self, user_id: str):
+        return self.repo.update_streak(user_id)

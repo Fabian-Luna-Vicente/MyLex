@@ -23,6 +23,7 @@ import VisualMemoryGame from './pages/VisualMemoryGame';
 import SynAntGame from './pages/SynAntGame';
 import ListeningGame from './pages/ListeningGame';
 import WritingGame from './pages/WritingGame';
+import Settings from './pages/Settings';
 import Navbar from './components/Navbar';
 import ScrollToTop from './components/ScrollToTop';
 
@@ -59,6 +60,7 @@ function App() {
               <Route path="/friends" element={<ProtectedRoute><Layout><Friends /></Layout></ProtectedRoute>} />
               <Route path="/chat" element={<ProtectedRoute><Layout><ChatList /></Layout></ProtectedRoute>} />
               <Route path="/chat/:roomId" element={<ProtectedRoute><Layout><ChatView /></Layout></ProtectedRoute>} />
+              <Route path="/settings" element={<ProtectedRoute><Layout><Settings /></Layout></ProtectedRoute>} />
 
               <Route path="/games/random" element={<ProtectedRoute><Layout><RandomGame /></Layout></ProtectedRoute>} />
               <Route path="/games/hangman" element={<ProtectedRoute><Layout><HangmanGame /></Layout></ProtectedRoute>} />

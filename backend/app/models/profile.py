@@ -1,9 +1,8 @@
-from sqlalchemy import Column, String, Integer, DateTime, ForeignKey, UniqueConstraint
+from sqlalchemy import Column, String, Integer, DateTime, ForeignKey, UniqueConstraint,Date
 from sqlalchemy.orm import relationship
 from sqlalchemy.sql import func
 from sqlalchemy.dialects.postgresql import ARRAY
 from app.core.database import Base
-
 
 class UserProfile(Base):
     __tablename__ = "user_profiles"
@@ -18,7 +17,9 @@ class UserProfile(Base):
     level = Column(String, nullable=True, default="Beginner")
     created_at = Column(DateTime(timezone=True), server_default=func.now())
     updated_at = Column(DateTime(timezone=True), onupdate=func.now())
-
+    current_streak = Column(Integer, default=0)
+    longest_streak = Column(Integer, default=0)
+    last_activity_date = Column(Date, nullable=True)
     user = relationship("User", backref="profile", uselist=False)
 
 

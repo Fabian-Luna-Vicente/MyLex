@@ -6,7 +6,7 @@ import {
 } from 'recharts';
 import { motion, AnimatePresence } from 'framer-motion';
 import { GrPrevious } from 'react-icons/gr';
-import { FaFilter, FaCalendarAlt, FaGamepad, FaListUl, FaTags, FaCheckCircle, FaTimesCircle } from 'react-icons/fa';
+import { FaFilter, FaCalendarAlt, FaGamepad, FaListUl, FaTags, FaCheckCircle, FaTimesCircle, FaFire } from 'react-icons/fa';
 import { progressService } from '../services/progressService';
 import { useVocabulary } from '../hooks/useVocabulary';
 
@@ -48,6 +48,7 @@ export default function Statistics() {
     setLoading(true);
     try {
       const data = await progressService.getDetailedStats(filters);
+      console.log(data);
       setStats(data);
     } catch (e) {
       console.error(e);
@@ -115,8 +116,20 @@ export default function Statistics() {
               <h2 className="text-lg font-bold flex items-center gap-2">
                 <FaCalendarAlt className="text-[#00c3ff]" /> Recent Activity (7 Days)
               </h2>
-              <div className="bg-[#00c3ff]/10 px-4 py-1 rounded-full text-[#00c3ff] text-xs font-bold uppercase tracking-widest">
-                Streak: {overall?.streak || 0} Days
+              <div className="bg-[#0e0c1d]/60 backdrop-blur-md border border-[#00c3ff]/20 rounded-[20px] p-6 shadow-xl flex items-center justify-between">
+                <div>
+                  <h3 className="text-[#00c3ff] font-bold uppercase tracking-widest text-xs mb-2">Racha Actual</h3>
+                  <p className="text-3xl font-black text-white">{overall?.streak || 0} Días</p>
+                </div>
+                <FaFire className="text-[#00c3ff] opacity-50" size={40} />
+              </div>
+
+              <div className="bg-[#0e0c1d]/60 backdrop-blur-md border border-[#00c3ff]/20 rounded-[20px] p-6 shadow-xl flex items-center justify-between">
+                <div>
+                  <h3 className="text-[#a0a0a0] font-bold uppercase tracking-widest text-xs mb-2">Mejor Racha</h3>
+                  <p className="text-3xl font-black text-white">{overall?.longest_streak || 0} Días</p>
+                </div>
+                <FaFire className="text-orange-500 opacity-50" size={40} />
               </div>
             </div>
             <div className="h-[250px] w-full">

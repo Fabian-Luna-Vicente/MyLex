@@ -3,7 +3,7 @@ from sqlalchemy.orm import Session
 from app.repositories.progress_repository import ProgressRepository
 from app.schemas.vocabulary import ProgressUpsert, ProgressBulkUpsert
 from typing import List
-
+from datetime import date, timedelta
 
 class ProgressService:
     def __init__(self, db: Session):

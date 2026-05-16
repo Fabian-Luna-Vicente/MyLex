@@ -8,6 +8,7 @@ import {
   AreaChart, Area, ResponsiveContainer, XAxis, YAxis, Tooltip
 } from 'recharts';
 import { motion, AnimatePresence } from 'framer-motion';
+import { FaFire, FaCog, FaSignOutAlt } from 'react-icons/fa';
 
 const AccuracyCarousel = ({ accuracies }) => {
   const [index, setIndex] = useState(0);
@@ -81,6 +82,7 @@ export default function Dashboard() {
   const loadStats = async () => {
     try {
       const data = await progressService.getOverallStats();
+      console.log(data);
       setStats(data);
     } catch (e) {
       console.error("Dashboard stats error:", e);
@@ -114,13 +116,31 @@ export default function Dashboard() {
       <div className="w-full max-w-[1400px] mx-auto relative z-10 px-5 pb-12">
 
         <header className="text-center mb-12">
-          <motion.h1
-            initial={{ opacity: 0, y: -20 }}
-            animate={{ opacity: 1, y: 0 }}
-            className="text-[2.5rem] md:text-5xl font-bold text-white drop-shadow-[0_0_10px_rgba(0,195,255,0.5)] mb-4"
-          >
-            Welcome back, <span className="text-[#00c3ff]">{user?.username}</span>
-          </motion.h1>
+          <div className="flex flex-col md:flex-row items-center justify-center gap-4 mb-4">
+            <motion.h1
+              initial={{ opacity: 0, y: -20 }}
+              animate={{ opacity: 1, y: 0 }}
+              className="text-[2.5rem] md:text-5xl font-bold text-white drop-shadow-[0_0_10px_rgba(0,195,255,0.5)]"
+            >
+              Welcome back, <span className="text-[#00c3ff]">{user?.full_name || user?.username}</span>
+            </motion.h1>
+            <div className="flex gap-2">
+               <button 
+                 onClick={() => navigate('/settings')}
+                 className="p-3 rounded-full bg-white/5 border border-white/10 text-[#a0a0a0] hover:text-[#00c3ff] hover:border-[#00c3ff]/30 transition-all shadow-lg"
+                 title="Settings"
+               >
+                 <FaCog size={20} />
+               </button>
+               <button 
+                 onClick={() => { logout(); navigate('/login'); }}
+                 className="p-3 rounded-full bg-red-500/10 border border-red-500/10 text-red-400 hover:bg-red-500 hover:text-white transition-all shadow-lg"
+                 title="Log Out"
+               >
+                 <FaSignOutAlt size={20} />
+               </button>
+            </div>
+          </div>
 
           {/* Quick Stats Summary */}
           <div className="grid grid-cols-1 lg:grid-cols-4 gap-6 mt-12 text-left">
@@ -131,18 +151,15 @@ export default function Dashboard() {
               animate={{ opacity: 1, scale: 1 }}
               className="bg-[#0e0c1d]/60 backdrop-blur-[10px] border border-[#00c3ff]/20 rounded-[25px] p-6 flex flex-col justify-between"
             >
-              <div>
-                <p className="text-[#a0a0a0] text-xs font-bold uppercase tracking-widest mb-1">Learning Streak</p>
-                <h3 className="text-4xl font-extrabold text-white">
-                  {stats?.streak || 0} <span className="text-sm text-[#00c3ff]">Days</span>
-                </h3>
+              <div className="bg-[#0e0c1d]/60 backdrop-blur-md border border-[#00c3ff]/20 rounded-[20px] p-6 shadow-xl flex items-center justify-between">
+                <div>
+                  <h3 className="text-[#00c3ff] font-bold uppercase tracking-widest text-xs mb-2">Racha Actual</h3>
+                  <p className="text-3xl font-black text-white">{stats?.streak || 0} Días</p>
+                </div>
+                <FaFire className="text-[#00c3ff] opacity-50" size={40} />
               </div>
-              <div className="mt-4 pt-4 border-t border-[#ffffff05]">
-                <p className="text-[10px] text-[#00ff88] font-bold uppercase flex items-center gap-2">
-                  <span className="w-2 h-2 rounded-full bg-[#00ff88] animate-pulse"></span>
-                  {(stats?.streak || 0) > 0 ? "You're on fire!" : "Start your streak today!"}
-                </p>
-              </div>
+
+
             </motion.div>
 
             {/* Activity Mini Chart */}

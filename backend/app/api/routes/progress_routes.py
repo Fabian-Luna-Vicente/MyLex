@@ -1,3 +1,4 @@
+from app.services.profile_service import ProfileService
 from fastapi import APIRouter, Depends
 from sqlalchemy.orm import Session
 from typing import List
@@ -12,7 +13,9 @@ router = APIRouter()
 def get_progress_service(db: Session = Depends(get_db)):
     return ProgressService(db)
 
-
+def get_profile_service(db: Session = Depends(get_db)):
+    return ProfileService(db)
+    
 @router.get("/games/{list_id}/{game}", response_model=List[WordResponse])
 def get_words_for_game(
     list_id: int,
@@ -34,23 +37,24 @@ def get_words_for_game(
 def save_single_progress(
     item: ProgressUpsert,
     current_user: User = Depends(get_current_user),
-    service: ProgressService = Depends(get_progress_service)
+    service: ProgressService = Depends(get_progress_service),
+    profile_service: ProfileService = Depends(get_profile_service)
 ):
-    """Upsert progress for a single word (called during active gameplay)."""
-    return service.save_progress(current_user.id, item)
+    result = service.save_progress(current_user.id, item)
+    profile_service.update_user_streak(current_user.id)
+    return result
 
 
 @router.post("/progress/bulk")
 def save_bulk_progress(
     payload: ProgressBulkUpsert,
     current_user: User = Depends(get_current_user),
-    service: ProgressService = Depends(get_progress_service)
+    service: ProgressService = Depends(get_progress_service),
+    profile_service: ProfileService = Depends(get_profile_service)
 ):
-    """
-    Bulk upsert progress for all words at end of session.
-    More efficient than calling the single endpoint repeatedly.
-    """
-    return service.save_progress_bulk(current_user.id, payload)
+    result = service.save_progress_bulk(current_user.id, payload)
+    profile_service.update_user_streak(current_user.id)
+    return result
 
 
 @router.get("/progress/{list_id}", response_model=List[ProgressResponse])
