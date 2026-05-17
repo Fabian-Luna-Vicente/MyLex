@@ -30,31 +30,34 @@ export default function ListeningGame() {
   const puzzle = useMemo(() => {
     if (!currentWord) return null;
     const correctAnswers = {};
-    const processedExamples = (currentWord.examples || []).map((ex, exIdx) => {
-      // Temporarily mark main word
-      const mainWordPlaceholder = "___MAIN___";
-      let sentence = ex.replace(new RegExp(currentWord.name, 'gi'), mainWordPlaceholder);
+    const baseWordLower = currentWord.name.toLowerCase();
 
-      const words = sentence.split(' ');
+    const baseRoot = baseWordLower.length > 4 ? baseWordLower.slice(0, -2) : baseWordLower;
+
+    const processedExamples = (currentWord.examples || []).map((ex, exIdx) => {
+      const words = ex.split(' ');
       let extraBlanksCount = 0;
       const targetExtra = words.length > 8 ? 2 : 1;
 
       return words.map((w, wIdx) => {
-        const clean = w.replace(/[.,!?;:()]/g, '');
-        const suffix = w.slice(clean.length);
+        const match = w.match(/^([^a-zA-Z]*)([a-zA-Z'-]+)([^a-zA-Z]*)$/);
+        const prefix = match ? match[1] : '';
+        const clean = match ? match[2] : w.replace(/[.,!?;:()"]/g, '');
+        const suffix = match ? match[3] : '';
+        const isMain = clean.toLowerCase() === baseWordLower ||
+          (clean.toLowerCase().startsWith(baseRoot) && Math.abs(clean.length - baseWordLower.length) <= 4);
 
-        if (clean === mainWordPlaceholder) {
+        if (isMain) {
           const id = `ex-${exIdx}-main-${wIdx}`;
-          correctAnswers[id] = currentWord.name;
-          return { type: 'blank', id, correct: currentWord.name, suffix, isMain: true };
+          correctAnswers[id] = clean;
+          return { type: 'blank', id, correct: clean, prefix, suffix, isMain: true };
         }
 
-        // Randomly mask other words (length > 4, not already masked)
         if (extraBlanksCount < targetExtra && clean.length > 4 && Math.random() > 0.6) {
           const id = `ex-${exIdx}-extra-${wIdx}`;
           correctAnswers[id] = clean;
           extraBlanksCount++;
-          return { type: 'blank', id, correct: clean, suffix, isMain: false };
+          return { type: 'blank', id, correct: clean, prefix, suffix, isMain: false };
         }
 
         return { type: 'text', content: w + ' ' };
@@ -66,12 +69,9 @@ export default function ListeningGame() {
 
   return (
     <div className="min-h-screen bg-[#071320] text-white font-sans relative overflow-hidden">
-
-      {/* Background Decor */}
       <div className="absolute top-[-20%] right-[-10%] w-[50%] h-[50%] bg-[#00ff88]/5 blur-[120px] rounded-full"></div>
       <div className="absolute bottom-[-20%] left-[-10%] w-[50%] h-[50%] bg-[#00c3ff]/5 blur-[120px] rounded-full"></div>
 
-      {/* Header */}
       <header className="relative z-10 flex items-center justify-between px-6 md:px-12 pt-8 pb-4 border-b border-[#00c3ff]/20 backdrop-blur-md sticky top-0 bg-[#071320]/80">
         <button
           onClick={() => { quitGame(); navigate('/dashboard'); }}
@@ -93,8 +93,6 @@ export default function ListeningGame() {
       </header>
 
       <div className="max-w-4xl mx-auto px-6 md:px-12 py-10 relative z-10">
-
-        {/* --- LIST SELECTION MENU --- */}
         {!showGame && (
           <motion.div
             initial={{ opacity: 0, y: 20 }}
@@ -138,7 +136,6 @@ export default function ListeningGame() {
           </motion.div>
         )}
 
-        {/* --- GAME AREA --- */}
         <AnimatePresence mode="wait">
           {showGame && currentWord && (
             <motion.div
@@ -152,7 +149,6 @@ export default function ListeningGame() {
                 <h2 className="text-[#a0a0a0] uppercase tracking-[4px] font-bold text-sm">
                   What did you hear?
                 </h2>
-
                 <button
                   onClick={() => playFullAudio(currentWord)}
                   className="relative group w-24 h-24 rounded-full bg-gradient-to-br from-[#0e0c1d] to-[#071320] border-2 border-[#00c3ff] shadow-[0_0_20px_rgba(0,195,255,0.3)] flex items-center justify-center hover:scale-105 transition-all"
@@ -160,11 +156,9 @@ export default function ListeningGame() {
                   <div className="absolute inset-0 rounded-full bg-[#00c3ff]/20 animate-ping opacity-30 group-hover:opacity-100"></div>
                   <CiPlay1 size={40} className="text-[#00c3ff] ml-1.5 relative z-10" />
                 </button>
-
                 <p className="text-[10px] text-[#00c3ff]/60 uppercase tracking-widest font-bold">Listen to word and examples</p>
               </div>
 
-              {/* Incomplete Text Area */}
               <div className="w-full max-w-3xl bg-[#0e0c1d]/40 backdrop-blur-md border border-[#ffffff05] rounded-[40px] p-8 shadow-2xl space-y-8">
                 <div className="space-y-6">
                   <div className="flex justify-between items-center mb-4">
@@ -180,12 +174,13 @@ export default function ListeningGame() {
                   </div>
 
                   {puzzle?.examples[subIndex] && (
-                    <div className="bg-white/5 p-8 rounded-[35px] border border-white/5 leading-loose text-xl flex flex-wrap items-center justify-center gap-x-4 gap-y-4 shadow-inner min-h-[140px]">
+                    <div className="bg-white/5 p-8 rounded-[35px] border border-white/5 leading-loose text-xl flex flex-wrap items-center justify-center gap-x-2 gap-y-4 shadow-inner min-h-[140px]">
                       {puzzle.examples[subIndex].map((item, j) => (
                         item.type === 'text' ? (
-                          <span key={j} className="text-white/80 tracking-normal">{item.content}</span>
+                          <span key={j} className="text-white/80 tracking-normal mx-1">{item.content}</span>
                         ) : (
-                          <span key={j} className="inline-flex items-center mx-0.5">
+                          <span key={j} className="inline-flex items-center mx-1">
+                            {item.prefix && <span className="text-white/80 mr-1">{item.prefix}</span>}
                             <input
                               ref={item.isMain ? inputRef : null}
                               type="text"
@@ -203,7 +198,7 @@ export default function ListeningGame() {
                                   : 'border-red-500 text-red-500'
                                 }`}
                             />
-                            <span className="text-white/20 ml-1">{item.suffix}</span>
+                            {item.suffix && <span className="text-white/20 ml-1">{item.suffix}</span>}
                           </span>
                         )
                       ))}
@@ -218,7 +213,7 @@ export default function ListeningGame() {
                         value={userAnswers['main'] || ''}
                         onChange={(e) => setUserAnswers(prev => ({ ...prev, 'main': e.target.value }))}
                         disabled={gameStatus !== 'playing'}
-                        className={`bg-[#071320] border-4 rounded-3xl px-10 py-5 text-center text-3xl font-black outline-none transition-all ${gameStatus === 'playing' ? 'border-[#00c3ff]/30 focus:border-[#00c3ff] text-white' : 'border-[#00ff88] text-[#00ff88]'
+                        className={`bg-[#071320] border-4 rounded-3xl px-10 py-5 text-center text-3xl font-black outline-none transition-all ${gameStatus === 'playing' ? 'border-[#00c3ff]/30 focus:border-[#00c3ff] text-white' : (userAnswers['main'] || '').trim().toLowerCase() === currentWord.name.toLowerCase() ? 'border-[#00ff88] text-[#00ff88]' : 'border-red-500 text-red-500'
                           }`}
                         placeholder="???"
                       />
@@ -251,7 +246,7 @@ export default function ListeningGame() {
                     className="flex flex-col items-center gap-4"
                   >
                     <div className={`text-xl font-black uppercase tracking-widest ${gameStatus === 'won' ? 'text-[#00ff88]' : 'text-red-500'}`}>
-                      {gameStatus === 'won' ? '✓ Perfectly Done!' : '✗ Almost there...'}
+                      {gameStatus === 'won' ? '✓ Perfectly Done!' : '✗ Check your mistakes'}
                     </div>
                     {subIndex + 1 < (puzzle?.examples.length || 0) ? (
                       <button
@@ -265,7 +260,10 @@ export default function ListeningGame() {
                       </button>
                     ) : (
                       <button
-                        onClick={nextLevel}
+                        onClick={() => {
+                          setSubIndex(0);
+                          nextLevel();
+                        }}
                         className="w-full py-6 bg-[#00ff88] text-black font-black rounded-full uppercase tracking-[2px] flex items-center justify-center gap-4 hover:shadow-[0_0_40px_rgba(0,255,136,0.5)] transition-all"
                       >
                         Complete Round <GrLinkNext />
@@ -275,30 +273,19 @@ export default function ListeningGame() {
                 )}
               </div>
 
-              {/* Feedback Overlay */}
               {gameStatus !== 'playing' && (
                 <motion.div
                   initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
                   className="flex flex-col items-center gap-5 text-center mt-4"
                 >
-                  <div className={`px-8 py-3 rounded-full text-sm font-black uppercase tracking-[4px] ${gameStatus === 'won' ? 'bg-[#00ff88]/20 text-[#00ff88]' : 'bg-red-500/20 text-red-500'}`}>
-                    {gameStatus === 'won' ? 'Correct!' : 'Incorrect'}
-                  </div>
                   <p className="text-xl">
                     The spoken word was <span className="text-white font-bold">"{currentWord.name}"</span>
                   </p>
                   <p className="text-[#a0a0a0] italic text-sm">Meaning: {currentWord.meaning}</p>
-                  <button
-                    onClick={nextLevel}
-                    className="flex items-center gap-4 px-12 py-5 bg-white text-black font-black rounded-full hover:shadow-[0_0_30px_rgba(255,255,255,0.5)] transition-all uppercase tracking-widest text-sm group mt-2"
-                  >
-                    Continue <GrLinkNext className="group-hover:translate-x-2 transition-transform" />
-                  </button>
                 </motion.div>
               )}
 
-              {/* Progress */}
               <div className="mt-8 flex items-center gap-4">
                 <span className="text-[10px] text-[#a0a0a0] font-bold uppercase tracking-widest">Progress</span>
                 <div className="flex gap-1.5">
@@ -310,7 +297,6 @@ export default function ListeningGame() {
             </motion.div>
           )}
         </AnimatePresence>
-
       </div>
     </div>
   );

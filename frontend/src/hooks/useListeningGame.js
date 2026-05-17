@@ -11,7 +11,9 @@ export const useListeningGame = () => {
 
     const [shuffledWords, setShuffledWords] = useState([]);
     const [index, setIndex] = useState(0);
-    const [userAnswers, setUserAnswers] = useState({}); // { 'blankId': 'value' }
+
+    // Estados para "Rellenar huecos"
+    const [userAnswers, setUserAnswers] = useState({});
     const [gameStatus, setGameStatus] = useState('playing'); // playing, won, lost
     const [score, setScore] = useState({ correct: 0, wrong: 0 });
     const [pendingProgress, setPendingProgress] = useState([]);
@@ -20,30 +22,19 @@ export const useListeningGame = () => {
         if (lists.length === 0) await fetchLists();
     }, [lists.length, fetchLists]);
 
-    const playAudio = useCallback((text) => {
-        if (!text) return;
-        const utterance = new SpeechSynthesisUtterance(text);
-        utterance.lang = 'en-US';
-        utterance.rate = 0.9; // Slightly slower for clear listening
-        window.speechSynthesis.speak(utterance);
-    }, []);
+    // 1) Reproducir audio de la palabra + los ejemplos
+    const playFullAudio = useCallback((wordObj) => {
+        if (!wordObj) return;
+        window.speechSynthesis.cancel();
 
-    const playFullAudio = useCallback((word) => {
-        if (!word) return;
-        const utterance = new SpeechSynthesisUtterance(word.name);
+        let textToSpeak = wordObj.name + ". ";
+        if (wordObj.examples && wordObj.examples.length > 0) {
+            textToSpeak += wordObj.examples.map((e, i) => "Example " + (i + 1) + ". " + e).join(". ");
+        }
+
+        const utterance = new SpeechSynthesisUtterance(textToSpeak);
         utterance.lang = 'en-US';
-        utterance.rate = 0.85;
-        
-        utterance.onend = () => {
-            if (word.examples && word.examples.length > 0) {
-                const examplesText = word.examples.join(". ");
-                const examplesUtterance = new SpeechSynthesisUtterance(examplesText);
-                examplesUtterance.lang = 'en-US';
-                examplesUtterance.rate = 0.85;
-                window.speechSynthesis.speak(examplesUtterance);
-            }
-        };
-        
+        utterance.rate = 0.85; // Un poco más lento para dictado
         window.speechSynthesis.speak(utterance);
     }, []);
 
@@ -59,11 +50,11 @@ export const useListeningGame = () => {
 
             setShuffledWords(words);
             setIndex(0);
-            setUserAnswers({});
             setScore({ correct: 0, wrong: 0 });
+            setUserAnswers({});
             setGameStatus('playing');
             setShowGame(true);
-            
+
             setTimeout(() => playFullAudio(words[0]), 500);
 
         } catch (error) {
@@ -73,15 +64,18 @@ export const useListeningGame = () => {
         }
     };
 
-    const handleAnswer = (correctAnswers) => {
+    // 5) Validar las respuestas y mostrar aciertos/fallos
+    const handleAnswer = (correctBlanks) => {
         if (gameStatus !== 'playing') return;
 
         let allCorrect = true;
-        for (const [id, correctVal] of Object.entries(correctAnswers)) {
-            const userVal = (userAnswers[id] || '').trim().toLowerCase();
-            if (userVal !== correctVal.trim().toLowerCase()) {
+
+        for (const [id, correctText] of Object.entries(correctBlanks)) {
+            const userAnswer = (userAnswers[id] || '').trim().toLowerCase();
+            const cleanCorrectText = correctText.trim().toLowerCase();
+
+            if (userAnswer !== cleanCorrectText) {
                 allCorrect = false;
-                break;
             }
         }
 
@@ -106,6 +100,7 @@ export const useListeningGame = () => {
         });
     };
 
+    // 6) Pasar al siguiente y reproducir automáticamente
     const nextLevel = () => {
         if (index + 1 < shuffledWords.length) {
             const nextIdx = index + 1;
@@ -114,7 +109,6 @@ export const useListeningGame = () => {
             setGameStatus('playing');
             setTimeout(() => playFullAudio(shuffledWords[nextIdx]), 500);
         } else {
-            // End of game
             if (pendingProgress.length > 0) {
                 saveBulkProgress(pendingProgress);
                 setPendingProgress([]);
@@ -136,13 +130,14 @@ export const useListeningGame = () => {
         if (pendingProgress.length > 0) {
             saveBulkProgress(pendingProgress);
         }
+        window.speechSynthesis.cancel();
         setShowGame(false);
         setPendingProgress([]);
     };
 
     return {
         lists, loading, showGame, shuffledWords, index, userAnswers, setUserAnswers,
-        gameStatus, selectedListId, setSelectedListId, score,
+        gameStatus, setGameStatus, selectedListId, setSelectedListId, score,
         loadLists, startGame, handleAnswer, nextLevel, quitGame, playFullAudio
     };
 };

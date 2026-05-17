@@ -52,7 +52,7 @@ export default function ListWords() {
 
   // --- VISTA PRINCIPAL ---
   return (
-    <div className="min-h-screen bg-[#071320] text-white p-6 md:p-12 font-sans relative z-[1] overflow-hidden">
+    <div className="min-h-screen bg-[#071320] text-white p-6 md:p-12 font-sans relative z-[150] overflow-hidden">
 
       <div className="max-w-7xl mx-auto relative z-10">
 
