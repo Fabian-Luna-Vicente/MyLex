@@ -26,7 +26,4 @@ class Settings(BaseSettings):
         extra="ignore"  # Le dice a Pydantic que ignore cualquier otra variable que no esté definida arriba
     )
 
-    # (Opcional) Nota: En auth_service.py estabas usando os.getenv("GOOGLE_CLIENT_ID")
-    # Es mejor que a partir de ahora uses settings.GOOGLE_CLIENT_ID en su lugar.
-
 settings = Settings()

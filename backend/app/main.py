@@ -1,12 +1,11 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from slowapi import Limiter, _rate_limit_exceeded_handler
+from slowapi import _rate_limit_exceeded_handler
 from slowapi.errors import RateLimitExceeded
-from slowapi.util import get_remote_address
 from app.core.config import settings
 from app.api.routes import auth_routes, vocabulary_routes, ai_routes, progress_routes, google_images_routes, profile_routes, chat_routes
-
-limiter = Limiter(key_func=get_remote_address,default_limits=["100/minute"])
+from app.core.limiter import limiter
+from fastapi import Request
 
 app = FastAPI(
     title=settings.PROJECT_NAME,
@@ -32,8 +31,8 @@ app.state.limiter=limiter
 app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)
 
 @app.get("/")
-@limiter.limit("5/minute")
-def root():
+@limiter.limit("10/minute")
+def root(request: Request):
     return {"message": f"Welcome to {settings.PROJECT_NAME}"}
 
 # Include routers

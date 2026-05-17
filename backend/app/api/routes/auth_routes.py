@@ -4,7 +4,7 @@ from app.core.database import get_db
 from app.schemas.user import GoogleAuthRequest, UserRegister, UserLogin, EmailVerification
 from app.services.auth_service import AuthService
 from app.core.config import settings
-from app.main import limiter
+from app.core.limiter import limiter
 from fastapi import Request
 
 router = APIRouter()
@@ -67,7 +67,9 @@ async def login(
     }
 
 @router.post("/google_signin")
+@limiter.limit("5/minute")
 async def google_signin(
+    request: Request,
     data: GoogleAuthRequest, 
     auth_service: AuthService = Depends(get_auth_service)
 ):
@@ -81,7 +83,9 @@ async def google_signin(
     return result
 
 @router.post("/google_login")
+@limiter.limit("5/minute")
 async def google_login(
+    request: Request,
     response: Response,
     id_token: str = Body(embed=True),
     auth_service: AuthService = Depends(get_auth_service)
@@ -108,7 +112,7 @@ async def google_login(
         httponly=True,
         secure=True,
         samesite="None",
-        path="/refresh" # Scoped to refresh endpoint
+        path="/refresh" 
     )
 
     return {
@@ -118,7 +122,9 @@ async def google_login(
     }
 
 @router.post("/refresh")
+@limiter.limit("5/minute")
 async def refresh_token(
+    request: Request,
     response: Response,
     refresh_token: str = Cookie(None),
     auth_service: AuthService = Depends(get_auth_service)
@@ -147,7 +153,9 @@ async def refresh_token(
     }
 
 @router.post("/logout")
+@limiter.limit("10/minute")
 async def logout(
+    request: Request,
     response: Response,
     background_tasks: BackgroundTasks,
     refresh_token: str = Cookie(None),

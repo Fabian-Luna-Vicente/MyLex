@@ -7,45 +7,28 @@ from app.models.user import User
 from app.services.chat_service import ChatService
 from app.schemas.chat import ChatRoomCreate, ChatRoomUpdate, RoomVocabularyListCreate, AIChatRequest, IcebreakerRequest, ChatParticipantCreate, AIPersonaCreate, AIPersonaUpdate
 from app.services.ai_service import AIService
+from app.core.limiter import limiter
+from fastapi import Request
+from app.core.ws_connection import ConnectionManager
 
 router = APIRouter()
+manager = ConnectionManager()
 
 def get_chat_service(db: Session = Depends(get_db)):
     return ChatService(db)
 
-# --- Connection Manager ---
-class ConnectionManager:
-    def __init__(self):
-        self.active_connections: dict[int, list[WebSocket]] = {}
-
-    async def connect(self, websocket: WebSocket, room_id: int):
-        await websocket.accept()
-        if room_id not in self.active_connections:
-            self.active_connections[room_id] = []
-        self.active_connections[room_id].append(websocket)
-
-    def disconnect(self, websocket: WebSocket, room_id: int):
-        if room_id in self.active_connections:
-            self.active_connections[room_id].remove(websocket)
-
-    async def broadcast(self, message: str, room_id: int):
-        if room_id in self.active_connections:
-            for connection in self.active_connections[room_id]:
-                await connection.send_text(message)
-
-manager = ConnectionManager()
-
-# --- REST Endpoints ---
-
 @router.get("/rooms")
 def get_rooms(
+    request: Request,
     current_user: User = Depends(get_current_user),
     service: ChatService = Depends(get_chat_service)
 ):
     return service.get_user_rooms(current_user.id)
 
 @router.post("/rooms")
+@limiter.limit("5/minute")
 def create_room(
+    request: Request,
     data: ChatRoomCreate,
     current_user: User = Depends(get_current_user),
     service: ChatService = Depends(get_chat_service)
@@ -53,7 +36,9 @@ def create_room(
     return service.create_room(current_user.id, data)
 
 @router.put("/rooms/{room_id}")
+@limiter.limit("10/minute")
 def update_room(
+    request: Request,
     room_id: int,
     data: ChatRoomUpdate,
     current_user: User = Depends(get_current_user),
@@ -63,6 +48,7 @@ def update_room(
 
 @router.post("/rooms/{room_id}/participants")
 def add_participant(
+    request: Request,
     room_id: int,
     data: ChatParticipantCreate,
     current_user: User = Depends(get_current_user),
@@ -72,6 +58,7 @@ def add_participant(
 
 @router.get("/rooms/{room_id}/messages")
 def get_messages(
+    request: Request,
     room_id: int,
     current_user: User = Depends(get_current_user),
     service: ChatService = Depends(get_chat_service)
@@ -80,6 +67,7 @@ def get_messages(
 
 @router.get("/rooms/{room_id}/vocabulary")
 def get_room_vocabulary(
+    request: Request,
     room_id: int,
     current_user: User = Depends(get_current_user),
     service: ChatService = Depends(get_chat_service)
@@ -88,6 +76,7 @@ def get_room_vocabulary(
 
 @router.post("/rooms/{room_id}/vocabulary")
 def link_list_to_room(
+    request: Request,
     room_id: int,
     data: RoomVocabularyListCreate,
     current_user: User = Depends(get_current_user),
@@ -96,7 +85,9 @@ def link_list_to_room(
     return service.link_list_to_room(room_id, data.list_id, current_user.id)
 
 @router.post("/ai/message")
+@limiter.limit("10/minute")
 async def send_ai_message(
+    request: Request,
     data: AIChatRequest,
     background_tasks: BackgroundTasks,
     current_user: User = Depends(get_current_user),
@@ -111,7 +102,7 @@ async def send_ai_message(
         background_tasks=background_tasks
     )
 
-# --- WebSocket Endpoint for Human Chat ---
+# --- WebSocket Endpoint ---
 
 @router.websocket("/ws/{room_id}")
 async def websocket_endpoint(
@@ -126,7 +117,6 @@ async def websocket_endpoint(
         return
         
     service = ChatService(db)
-    # verify user belongs to room
     try:
         room = service.repo.get_room_by_id(room_id)
         if not room or not any(p.user_id == user.id for p in room.participants):
@@ -144,17 +134,17 @@ async def websocket_endpoint(
             content = data.get("content")
             msg_type = data.get("message_type", "text")
             
-            # Save to DB and check vocab usage
             msg = service.send_human_message(room_id, user.id, content, msg_type)
             
-            # Broadcast
             await manager.broadcast(json.dumps(msg.model_dump(mode='json')), room_id)
             
     except WebSocketDisconnect:
         manager.disconnect(websocket, room_id)
 
 @router.post("/icebreaker")
+@limiter.limit("5/minute")
 async def get_icebreaker(
+    request: Request,
     payload: IcebreakerRequest,
     db: Session = Depends(get_db)
 ):
@@ -181,13 +171,16 @@ async def get_icebreaker(
 
 @router.get("/ai-personas")
 def get_ai_personas(
+    request: Request,
     current_user: User = Depends(get_current_user),
     service: ChatService = Depends(get_chat_service)
 ):
     return service.get_ai_personas(current_user.id)
 
 @router.post("/ai-personas")
+@limiter.limit("10/minute")
 def create_ai_persona(
+    request: Request,
     data: AIPersonaCreate,
     current_user: User = Depends(get_current_user),
     service: ChatService = Depends(get_chat_service)
@@ -195,7 +188,9 @@ def create_ai_persona(
     return service.create_ai_persona(current_user.id, data)
 
 @router.put("/ai-personas/{persona_id}")
+@limiter.limit("10/minute")
 def update_ai_persona(
+    request: Request,
     persona_id: int,
     data: AIPersonaUpdate,
     current_user: User = Depends(get_current_user),
@@ -204,7 +199,9 @@ def update_ai_persona(
     return service.update_ai_persona(persona_id, current_user.id, data)
 
 @router.delete("/ai-personas/{persona_id}")
+@limiter.limit("10/minute")
 def delete_ai_persona(
+    request: Request,
     persona_id: int,
     current_user: User = Depends(get_current_user),
     service: ChatService = Depends(get_chat_service)

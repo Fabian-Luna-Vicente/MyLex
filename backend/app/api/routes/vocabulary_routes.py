@@ -9,6 +9,7 @@ from app.schemas.vocabulary import (
     WordCreate, WordUpdate, WordResponse,
     VocabularyListCreate, VocabularyListUpdate, VocabularyListResponse, VocabularyListBasic
 )
+from fastapi import Request
 
 router = APIRouter()
 
@@ -19,6 +20,7 @@ def get_vocab_service(db: Session = Depends(get_db)):
 
 @router.post("/lists", response_model=VocabularyListBasic)
 def create_list(
+    request: Request,
     list_in: VocabularyListCreate,
     current_user: User = Depends(get_current_user),
     vocab_service: VocabularyService = Depends(get_vocab_service)
@@ -27,6 +29,7 @@ def create_list(
 
 @router.get("/lists", response_model=List[VocabularyListBasic])
 def get_lists(
+    request: Request,
     current_user: User = Depends(get_current_user),
     vocab_service: VocabularyService = Depends(get_vocab_service)
 ):
@@ -34,6 +37,7 @@ def get_lists(
 
 @router.get("/lists/{list_id}", response_model=VocabularyListResponse)
 def get_list(
+    request: Request,
     list_id: int,
     current_user: User = Depends(get_current_user),
     vocab_service: VocabularyService = Depends(get_vocab_service)
@@ -42,6 +46,7 @@ def get_list(
 
 @router.put("/lists/{list_id}", response_model=VocabularyListBasic)
 def update_list(
+    request: Request,
     list_id: int,
     list_in: VocabularyListUpdate,
     current_user: User = Depends(get_current_user),
@@ -51,6 +56,7 @@ def update_list(
 
 @router.delete("/lists/{list_id}")
 def delete_list(
+    request: Request,
     list_id: int,
     current_user: User = Depends(get_current_user),
     vocab_service: VocabularyService = Depends(get_vocab_service)
@@ -62,6 +68,7 @@ def delete_list(
 
 @router.post("/words", response_model=WordResponse)
 def create_word(
+    request: Request,
     word_in: WordCreate,
     current_user: User = Depends(get_current_user),
     vocab_service: VocabularyService = Depends(get_vocab_service)
@@ -70,6 +77,7 @@ def create_word(
 
 @router.get("/words", response_model=List[WordResponse])
 def get_words(
+    request: Request,
     search: Optional[str] = Query(None, description="Search term for word name or meaning"),
     current_user: User = Depends(get_current_user),
     vocab_service: VocabularyService = Depends(get_vocab_service)
@@ -78,6 +86,7 @@ def get_words(
 
 @router.get("/words/{word_id}", response_model=WordResponse)
 def get_word(
+    request: Request,
     word_id: int,
     current_user: User = Depends(get_current_user),
     vocab_service: VocabularyService = Depends(get_vocab_service)
@@ -86,6 +95,7 @@ def get_word(
 
 @router.put("/words/{word_id}", response_model=WordResponse)
 def update_word(
+    request: Request,
     word_id: int,
     word_in: WordUpdate,
     current_user: User = Depends(get_current_user),
@@ -95,6 +105,7 @@ def update_word(
 
 @router.delete("/words/{word_id}")
 def delete_word(
+    request: Request,
     word_id: int,
     current_user: User = Depends(get_current_user),
     vocab_service: VocabularyService = Depends(get_vocab_service)

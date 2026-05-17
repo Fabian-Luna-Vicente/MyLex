@@ -3,7 +3,7 @@ from app.schemas.ai import DictionaryRequest, GrammarRequest, CorrectorRequest, 
 from app.services.ai_service import AIService
 from app.core.dependencies import get_current_user
 from app.models.user import User
-from app.main import limiter
+from app.core.limiter import limiter
 from fastapi import Request
 
 router = APIRouter()
@@ -12,7 +12,7 @@ def get_ai_service():
     return AIService()
 
 @router.post("/dictionary/search")
-@limiter.limit("20/minute")
+@limiter.limit("10/minute")
 async def search_dictionary(
     request: Request,
     data: DictionaryRequest,

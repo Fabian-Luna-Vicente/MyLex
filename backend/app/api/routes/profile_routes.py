@@ -5,6 +5,7 @@ from app.core.dependencies import get_current_user
 from app.models.user import User
 from app.services.profile_service import ProfileService
 from app.schemas.profile import ProfileUpdate, FriendRequestCreate, FriendRequestAction
+from fastapi import Request
 
 router = APIRouter()
 
@@ -17,6 +18,7 @@ def get_profile_service(db: Session = Depends(get_db)):
 
 @router.get("/profile/me")
 def get_my_profile(
+    request: Request,
     current_user: User = Depends(get_current_user),
     service: ProfileService = Depends(get_profile_service)
 ):
@@ -25,6 +27,7 @@ def get_my_profile(
 
 @router.put("/profile/me")
 def update_my_profile(
+    request: Request,
     data: ProfileUpdate,
     current_user: User = Depends(get_current_user),
     service: ProfileService = Depends(get_profile_service)
@@ -34,6 +37,7 @@ def update_my_profile(
 
 @router.get("/profile/{user_id}")
 def get_user_profile(
+    request: Request,
     user_id: str,
     current_user: User = Depends(get_current_user),
     service: ProfileService = Depends(get_profile_service)
@@ -45,6 +49,7 @@ def get_user_profile(
 
 @router.get("/profile/search/users")
 def search_users(
+    request: Request,
     q: str = Query(..., min_length=1),
     current_user: User = Depends(get_current_user),
     service: ProfileService = Depends(get_profile_service)
@@ -56,6 +61,7 @@ def search_users(
 
 @router.post("/friends/request")
 def send_friend_request(
+    request: Request,
     data: FriendRequestCreate,
     current_user: User = Depends(get_current_user),
     service: ProfileService = Depends(get_profile_service)
@@ -65,6 +71,7 @@ def send_friend_request(
 
 @router.put("/friends/request/{request_id}")
 def respond_to_request(
+    request: Request,
     request_id: int,
     data: FriendRequestAction,
     current_user: User = Depends(get_current_user),
@@ -75,6 +82,7 @@ def respond_to_request(
 
 @router.get("/friends/requests")
 def get_pending_requests(
+    request: Request,
     current_user: User = Depends(get_current_user),
     service: ProfileService = Depends(get_profile_service)
 ):
@@ -85,6 +93,7 @@ def get_pending_requests(
 
 @router.get("/friends")
 def get_friends(
+    request: Request,
     current_user: User = Depends(get_current_user),
     service: ProfileService = Depends(get_profile_service)
 ):
@@ -93,6 +102,7 @@ def get_friends(
 
 @router.delete("/friends/{friend_id}")
 def remove_friend(
+    request: Request,
     friend_id: str,
     current_user: User = Depends(get_current_user),
     service: ProfileService = Depends(get_profile_service)

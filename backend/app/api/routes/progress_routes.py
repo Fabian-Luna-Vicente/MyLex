@@ -7,6 +7,7 @@ from app.core.dependencies import get_current_user
 from app.models.user import User
 from app.services.progress_service import ProgressService
 from app.schemas.vocabulary import ProgressUpsert, ProgressBulkUpsert, ProgressResponse, WordResponse
+from fastapi import Request
 
 router = APIRouter()
 
@@ -18,6 +19,7 @@ def get_profile_service(db: Session = Depends(get_db)):
     
 @router.get("/games/{list_id}/{game}", response_model=List[WordResponse])
 def get_words_for_game(
+    request: Request,
     list_id: int,
     game: str,
     current_user: User = Depends(get_current_user),
@@ -35,6 +37,7 @@ def get_words_for_game(
 
 @router.post("/progress", response_model=ProgressResponse)
 def save_single_progress(
+    request: Request,
     item: ProgressUpsert,
     current_user: User = Depends(get_current_user),
     service: ProgressService = Depends(get_progress_service),
@@ -47,6 +50,7 @@ def save_single_progress(
 
 @router.post("/progress/bulk")
 def save_bulk_progress(
+    request: Request,
     payload: ProgressBulkUpsert,
     current_user: User = Depends(get_current_user),
     service: ProgressService = Depends(get_progress_service),
@@ -59,6 +63,7 @@ def save_bulk_progress(
 
 @router.get("/progress/{list_id}", response_model=List[ProgressResponse])
 def get_list_progress(
+    request: Request,
     list_id: int,
     current_user: User = Depends(get_current_user),
     service: ProgressService = Depends(get_progress_service)
@@ -69,6 +74,7 @@ def get_list_progress(
 
 @router.get("/stats/overall")
 def get_overall_stats(
+    request: Request,
     current_user: User = Depends(get_current_user),
     service: ProgressService = Depends(get_progress_service)
 ):
@@ -78,6 +84,7 @@ def get_overall_stats(
 
 @router.get("/stats/detailed",response_model=List[ProgressResponse])
 def get_detailed_stats(
+    request: Request,
     game: str = None,
     list_id: int = None,
     word_type: str = None,
