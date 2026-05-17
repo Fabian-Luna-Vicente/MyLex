@@ -17,3 +17,5 @@ deep-translator
 pydantic[email]
 groq
 langgraph
+redis>=4.3.4
+slowapi

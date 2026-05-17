@@ -4,6 +4,8 @@ from app.core.database import get_db
 from app.schemas.user import GoogleAuthRequest, UserRegister, UserLogin, EmailVerification
 from app.services.auth_service import AuthService
 from app.core.config import settings
+from app.main import limiter
+from fastapi import Request
 
 router = APIRouter()
 
@@ -14,7 +16,9 @@ def cleanup_tokens_task(auth_service: AuthService):
     auth_service.user_repo.delete_expired_tokens()
 
 @router.post("/register")
+@limiter.limit("5/minute")
 async def register_user(
+    request: Request,
     data: UserRegister,
     auth_service: AuthService = Depends(get_auth_service)
 ):
@@ -33,7 +37,9 @@ async def verify_email(
     return auth_service.verify_email(token=data.token)
 
 @router.post("/login")
+@limiter.limit("5/minute")
 async def login(
+    request: Request,
     response: Response,
     data: UserLogin,
     auth_service: AuthService = Depends(get_auth_service)
@@ -148,12 +154,12 @@ async def logout(
     access_token: str = Cookie(None),
     auth_service: AuthService = Depends(get_auth_service)
 ):
-    # Run cleanup of expired tokens in background
     background_tasks.add_task(cleanup_tokens_task, auth_service)
+    if access_token:
+        await auth_service.revoke_token(access_token)
 
     auth_service.logout(refresh_token=refresh_token, access_token=access_token)
 
-    # Delete cookies
     response.delete_cookie(key="access_token", httponly=True, secure=True, samesite="None", path="/")
     response.delete_cookie(key="refresh_token", httponly=True, secure=True, samesite="None", path="/refresh")
 

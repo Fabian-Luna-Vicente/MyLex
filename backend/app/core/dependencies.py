@@ -6,11 +6,12 @@ from app.core.database import get_db
 from app.repositories.user_repository import UserRepository
 from sqlalchemy.orm import Session
 from app.models.user import User
-
+from app.repositories.auth_repository import AuthRepository
 # We can use OAuth2PasswordBearer for Swagger UI, but since we use cookies mostly, we'll write a custom dependency.
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="auth/google_login")
+auth_repo = AuthRepository()
 
-def get_current_user(request: Request, db: Session = Depends(get_db)) -> User:
+async def get_current_user(request: Request, db: Session = Depends(get_db)) -> User:
     # First try from Authorization header
     token = request.headers.get("Authorization")
     if token and token.startswith("Bearer "):
@@ -27,6 +28,12 @@ def get_current_user(request: Request, db: Session = Depends(get_db)) -> User:
             headers={"WWW-Authenticate": "Bearer"},
         )
 
+    is_blacklisted = await auth_repo.get_access_token(token)
+    if is_blacklisted:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Token has been revoked"
+        )
     try:
         payload = jwt.decode(token, settings.SECRET_KEY, algorithms=[settings.ALGORITHM])
         user_id: str = payload.get("sub")

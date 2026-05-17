@@ -6,11 +6,12 @@ from app.core.config import settings
 from app.core.security import create_access_token, create_refresh_token
 from app.repositories.user_repository import UserRepository
 import os
-
+import time
 from datetime import datetime, timedelta
 from jose import jwt, JOSEError
 import uuid
 from app.core.security import get_password_hash, verify_password
+from app.repositories.auth_repository import AuthRepository
 
 API_URL = "https://oauth2.googleapis.com/tokeninfo?id_token="
 
@@ -21,11 +22,23 @@ class AuthService:
     def __init__(self, db: Session):
         self.db = db
         self.user_repo = UserRepository(db)
+        self.auth_repo = AuthRepository()
 
     def create_verification_token(self, email: str) -> str:
         expire = datetime.utcnow() + timedelta(hours=24)
         to_encode = {"exp": expire, "sub": email, "type": "verification"}
         return jwt.encode(to_encode, settings.SECRET_KEY, algorithm="HS256")
+
+    async def revoke_token(self,token:str):
+        try:
+            payload = jwt.decode(token, settings.SECRET_KEY, algorithms=[settings.ALGORITHM])
+            exp = payload.get("exp")
+            now = int(time.time())
+            ttl = exp - now
+            if ttl > 0:
+                await self.auth_repo.save_access_token(token, ttl)
+        except:
+            pass 
 
     def register(self, email: str, name: str, password: str, age: int | None = None):
         existing_user = self.user_repo.get_user_by_email(email)
