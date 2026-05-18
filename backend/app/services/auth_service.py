@@ -12,6 +12,8 @@ from jose import jwt, JOSEError
 import uuid
 from app.core.security import get_password_hash, verify_password
 from app.repositories.auth_repository import AuthRepository
+from app.services.email_service import send_registration_verification_email
+from fastapi import BackgroundTasks
 
 API_URL = "https://oauth2.googleapis.com/tokeninfo?id_token="
 
@@ -40,7 +42,7 @@ class AuthService:
         except:
             pass 
 
-    def register(self, email: str, name: str, password: str, age: int | None = None):
+    def register(self, email: str, name: str, password: str, age: int | None = None, background_tasks: BackgroundTasks = None):
         existing_user = self.user_repo.get_user_by_email(email)
         if existing_user:
             raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Email already registered")
@@ -57,13 +59,12 @@ class AuthService:
             is_verified=False
         )
         
-        # Generar token y "enviar" correo
         token = self.create_verification_token(email)
-        verification_link = f"http://localhost:5173/verify-email?token={token}"
-        print(f"\n==============================================")
-        print(f"VERIFICATION EMAIL FOR {email}")
-        print(f"Please click here to verify: {verification_link}")
-        print(f"==============================================\n")
+        
+        if background_tasks:
+            background_tasks.add_task(send_registration_verification_email, email, token)
+        else:
+            send_registration_verification_email(email, token)
         
         return {"status": True, "detail": "User registered successfully. Please verify your email."}
 

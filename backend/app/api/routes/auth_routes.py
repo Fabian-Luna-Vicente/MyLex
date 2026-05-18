@@ -20,13 +20,15 @@ def cleanup_tokens_task(auth_service: AuthService):
 async def register_user(
     request: Request,
     data: UserRegister,
+    background_tasks: BackgroundTasks,
     auth_service: AuthService = Depends(get_auth_service)
 ):
     return auth_service.register(
         email=data.email,
         name=data.name,
         password=data.password,
-        age=data.age
+        age=data.age,
+        background_tasks=background_tasks
     )
 
 @router.post("/verify-email")

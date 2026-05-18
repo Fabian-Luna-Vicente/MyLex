@@ -19,3 +19,4 @@ groq
 langgraph
 redis>=4.3.4
 slowapi
+resend>=2.8.14

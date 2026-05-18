@@ -1,6 +1,4 @@
-import os
 import json
-import httpx
 from fastapi import HTTPException
 from groq import AsyncGroq
 from app.schemas.ai import DictionaryRequest, GrammarRequest, CorrectorRequest, TranslationRequest
