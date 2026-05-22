@@ -24,7 +24,6 @@ function ElementCard({
     const [AddWordB, setAddWordB] = useState(false);
     const [Index, setIndex] = useState(0);
 
-    // Estados para el buscador de imágenes
     const [imageQuery, setImageQuery] = useState("");
     const [imageResults, setImageResults] = useState([]);
     const [isSearchingImages, setIsSearchingImages] = useState(false);
@@ -49,10 +48,26 @@ function ElementCard({
     const handleNext = () => setIndex((prev) => (prev < SelectedObjects.length - 1 ? prev + 1 : 0));
     const handlePrev = () => setIndex((prev) => (prev > 0 ? prev - 1 : SelectedObjects.length - 1));
 
+    const closeTab = (e, i) => {
+        e.stopPropagation();
+        const newObjs = [...SelectedObjects];
+        newObjs.splice(i, 1);
+
+        if (newObjs.length === 0) {
+            setSelectedObjects([]);
+        } else {
+            setSelectedObjects(newObjs);
+            if (Index === i) {
+                setIndex(Math.max(0, i - 1));
+            } else if (Index > i) {
+                setIndex(Index - 1);
+            }
+        }
+    };
+
     const currentWord = SelectedObjects[Index] || {};
     if (!currentWord || !currentWord.name) return null;
 
-    // Lógica para buscar imágenes
     const handleImageSearch = (e) => {
         e?.preventDefault();
         if (!imageQuery.trim()) return;
@@ -64,7 +79,6 @@ function ElementCard({
         }, (response) => {
             setIsSearchingImages(false);
             if (response && response.success) {
-                // response.data contendrá el JSON que te devuelve FastAPI
                 setImageResults(response.data.items || []);
             } else {
                 console.error("Error buscando imágenes:", response?.error);
@@ -91,7 +105,6 @@ function ElementCard({
     const safeArray = (val) => (Array.isArray(val) ? val : []);
 
     const meaningList = safeString(currentWord.meaning) ? currentWord.meaning.split("\n") : [];
-    // Soporta tanto "example" como "examples" (dependiendo de la API)
     const exampleList = safeArray(currentWord.example || currentWord.examples);
     const typeList = isPhrasal ? ["Phrasal Verb"] : (Array.isArray(currentWord.type) ? currentWord.type : [currentWord.type].filter(Boolean));
 
@@ -116,225 +129,270 @@ function ElementCard({
 
     return (
         <div className="ElementCardOverlay">
-            <div className="ElementCardContainer">
+            <div className="ElementCardContainer" style={{ flexDirection: 'column' }}>
 
-                <button className="EC-CloseBtnTop" onClick={handleClose} title="Close">
-                    <BsXLg size={18} />
-                </button>
-
-                {/* --- PANEL IZQUIERDO --- */}
-                <div className="EC-LeftPanel">
-
-                    <div className="EC-ImageContainer" style={{ border: (!currentWord.image && !showSearch) ? '1px solid rgba(0, 195, 255, 0.1)' : '1px solid rgba(0, 195, 255, 0.2)', boxShadow: currentWord.image ? '0 20px 25px -5px rgba(0, 0, 0, 0.5)' : 'none' }}>
-                        {currentWord.image ? (
-                            <div className="EC-ImageWrapper">
-                                <img src={currentWord.image.split(";")[0]} alt={currentWord.name} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
-                                <div className="EC-ImageOverlay">
-                                    <button onClick={handleRemoveImage} className="EC-ChangeImageBtn">
-                                        Change Image
-                                    </button>
-                                </div>
+                {SelectedObjects.length > 0 && (
+                    <div style={{
+                        display: 'flex',
+                        background: 'rgba(7, 19, 32, 0.95)',
+                        borderBottom: '1px solid rgba(0, 195, 255, 0.2)',
+                        padding: '8px 16px 0 16px',
+                        gap: '6px',
+                        overflowX: 'auto',
+                        width: '100%',
+                        alignItems: 'flex-end',
+                        flexShrink: 0
+                    }}>
+                        {SelectedObjects.map((obj, i) => (
+                            <div
+                                key={i}
+                                onClick={() => setIndex(i)}
+                                style={{
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    gap: '12px',
+                                    padding: '10px 16px',
+                                    background: Index === i ? 'rgba(14, 12, 29, 0.9)' : 'rgba(0,0,0,0.3)',
+                                    borderTop: `2px solid ${Index === i ? '#00c3ff' : 'transparent'}`,
+                                    borderLeft: '1px solid rgba(0, 195, 255, 0.1)',
+                                    borderRight: '1px solid rgba(0, 195, 255, 0.1)',
+                                    borderRadius: '10px 10px 0 0',
+                                    cursor: 'pointer',
+                                    color: Index === i ? '#fff' : '#a0a0a0',
+                                    fontWeight: Index === i ? 'bold' : 'normal',
+                                    minWidth: '120px',
+                                    maxWidth: '220px',
+                                    transition: 'all 0.2s'
+                                }}
+                            >
+                                <span style={{ flexGrow: 1, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', fontSize: '0.9rem' }}>
+                                    {obj.name}
+                                </span>
+                                <BsXLg
+                                    size={12}
+                                    style={{ cursor: 'pointer', color: '#a0a0a0', transition: 'color 0.2s' }}
+                                    onMouseEnter={(e) => e.currentTarget.style.color = '#ff4d4d'}
+                                    onMouseLeave={(e) => e.currentTarget.style.color = '#a0a0a0'}
+                                    onClick={(e) => closeTab(e, i)}
+                                />
                             </div>
-                        ) : showSearch ? (
-                            <div className="EC-ImageSearchContainer">
-                                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
-                                    <h4 className="EC-ImageSearchHeader">
-                                        <FaSearch size={12} /> Find Image
-                                    </h4>
-                                    <button onClick={() => setShowSearch(false)} style={{ background: 'transparent', border: 'none', color: '#a0a0a0', cursor: 'pointer' }} title="Cancel">
-                                        <BsXLg size={12} />
-                                    </button>
-                                </div>
-                                <form onSubmit={handleImageSearch} className="EC-ImageSearchForm">
-                                    <input
-                                        type="text"
-                                        value={imageQuery}
-                                        onChange={(e) => setImageQuery(e.target.value)}
-                                        placeholder="Type to search..."
-                                        className="EC-ImageSearchInput"
-                                    />
-                                    <button type="submit" disabled={isSearchingImages} className="EC-ImageSearchBtn">
-                                        {isSearchingImages ? <div className="EC-Spinner"></div> : <FaSearch size={12} />}
-                                    </button>
-                                </form>
+                        ))}
 
-                                <div className="EC-ScrollBox" style={{ flexGrow: 1, position: 'relative' }}>
-                                    {imageResults.length > 0 ? (
-                                        <div className="EC-ImageResultsGrid">
-                                            {imageResults.map((res, i) => (
+                        <div style={{ flexGrow: 1 }}></div>
+                        <button
+                            onClick={handleClose}
+                            title="Cerrar modal"
+                            style={{
+                                background: 'rgba(255,77,77,0.1)',
+                                border: '1px solid rgba(255,77,77,0.3)',
+                                color: '#ff4d4d',
+                                borderRadius: '8px',
+                                padding: '6px 12px',
+                                marginBottom: '8px',
+                                fontSize: '0.8rem',
+                                fontWeight: 'bold',
+                                cursor: 'pointer',
+                                display: 'flex',
+                                alignItems: 'center',
+                                gap: '6px',
+                                transition: 'all 0.2s'
+                            }}
+                        >
+                            <BsXLg size={12} /> Cerrar Modal
+                        </button>
+                    </div>
+                )}
+
+                <div style={{ display: 'flex', flexWrap: 'wrap', width: '100%', flexGrow: 1, overflowY: 'auto' }}>
+
+                    {/* --- PANEL IZQUIERDO --- */}
+                    <div className="EC-LeftPanel" style={{ height: 'auto', flex: '1 1 350px', background: 'rgba(7, 19, 32, 0.5)', padding: '32px', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', borderRight: '1px solid rgba(0, 195, 255, 0.1)' }}>
+
+                        <div className="EC-ImageContainer" style={{ width: '100%', aspectRatio: '1 / 1', marginBottom: '24px', borderRadius: '16px', overflow: 'hidden', border: '1px solid rgba(0, 195, 255, 0.2)', boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.25)', position: 'relative' }}>
+                            {currentWord.image ? (
+                                <div className="EC-ImageWrapper" style={{ width: '100%', height: '100%' }}>
+                                    <img src={currentWord.image.split(";")[0]} alt={currentWord.name} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                                    <div className="EC-ImageOverlay" style={{ position: 'absolute', inset: 0, background: 'rgba(0,0,0,0.5)', display: 'flex', alignItems: 'center', justifyContent: 'center', opacity: 0, transition: 'opacity 0.2s', cursor: 'pointer' }} onMouseEnter={(e) => e.currentTarget.style.opacity = 1} onMouseLeave={(e) => e.currentTarget.style.opacity = 0}>
+                                        <button onClick={handleRemoveImage} style={{ background: 'transparent', color: 'white', border: '1px solid white', padding: '8px 16px', borderRadius: '8px', cursor: 'pointer' }}>
+                                            Change Image
+                                        </button>
+                                    </div>
+                                </div>
+                            ) : showSearch ? (
+                                <div className="EC-ImageSearchContainer" style={{ padding: '16px', height: '100%', display: 'flex', flexDirection: 'column', background: '#0e0c1d' }}>
+                                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
+                                        <h4 style={{ color: '#00c3ff', fontSize: '0.8rem', margin: 0, display: 'flex', alignItems: 'center', gap: '4px' }}>
+                                            <FaSearch size={12} /> Find Image
+                                        </h4>
+                                        <button onClick={() => setShowSearch(false)} style={{ background: 'transparent', border: 'none', color: '#a0a0a0', cursor: 'pointer' }} title="Cancel">
+                                            <BsXLg size={12} />
+                                        </button>
+                                    </div>
+                                    <form onSubmit={handleImageSearch} style={{ display: 'flex', gap: '8px', marginBottom: '8px' }}>
+                                        <input
+                                            type="text"
+                                            value={imageQuery}
+                                            onChange={(e) => setImageQuery(e.target.value)}
+                                            placeholder="Type to search..."
+                                            style={{ flexGrow: 1, padding: '8px', borderRadius: '8px', border: '1px solid rgba(0,195,255,0.3)', background: 'rgba(0,0,0,0.5)', color: 'white' }}
+                                        />
+                                        <button type="submit" disabled={isSearchingImages} style={{ background: '#00c3ff', color: 'black', border: 'none', padding: '8px 12px', borderRadius: '8px', cursor: 'pointer' }}>
+                                            <FaSearch size={12} />
+                                        </button>
+                                    </form>
+
+                                    <div style={{ flexGrow: 1, overflowY: 'auto', display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '8px' }}>
+                                        {imageResults.length > 0 ? (
+                                            imageResults.map((res, i) => (
                                                 <img
                                                     key={i}
                                                     src={res.link}
                                                     onClick={() => { handleSelectImage(res.link); setShowSearch(false); }}
-                                                    className="EC-ImageResultItem"
+                                                    style={{ width: '100%', height: '80px', objectFit: 'cover', borderRadius: '8px', cursor: 'pointer', border: '1px solid rgba(0,195,255,0.2)' }}
                                                     alt={`Result ${i}`}
                                                 />
-                                            ))}
+                                            ))
+                                        ) : (
+                                            <div style={{ gridColumn: 'span 2', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'rgba(160, 160, 160, 0.4)', fontStyle: 'italic', fontSize: '0.75rem', textAlign: 'center', padding: '10px' }}>
+                                                Search for an image to represent this word.
+                                            </div>
+                                        )}
+                                    </div>
+                                </div>
+                            ) : (
+                                <div style={{ width: '100%', height: '100%', background: '#0e0c1d', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', color: 'rgba(160,160,160,0.2)' }}>
+                                    <span style={{ fontStyle: 'italic', fontSize: '0.875rem' }}>No Image Available</span>
+                                    <button onClick={() => setShowSearch(true)} style={{ marginTop: '16px', background: 'transparent', color: '#00c3ff', border: '1px solid #00c3ff', padding: '6px 12px', borderRadius: '8px', cursor: 'pointer', fontSize: '0.75rem', display: 'flex', alignItems: 'center', gap: '4px' }}>
+                                        <FaImage size={12} /> Add Image
+                                    </button>
+                                </div>
+                            )}
+                        </div>
+
+                        <h2 style={{ fontSize: '2.25rem', fontWeight: 900, color: 'white', textAlign: 'center', marginBottom: '8px', textShadow: '0 0 15px rgba(0,195,255,0.3)', margin: '0 0 8px 0' }}>{currentWord.name}</h2>
+
+                        <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px', justifyContent: 'center', marginBottom: '24px' }}>
+                            {typeList.map((type, idx) => (
+                                <span key={idx} style={{ padding: '4px 12px', background: 'rgba(0, 195, 255, 0.1)', color: '#00c3ff', border: '1px solid rgba(0, 195, 255, 0.3)', borderRadius: '8px', fontSize: '0.75rem', fontWeight: 'bold', textTransform: 'uppercase', letterSpacing: '0.1em' }}>{type}</span>
+                            ))}
+                        </div>
+
+                        <div style={{ display: 'flex', gap: '16px' }}>
+                            <button onClick={() => playSound(currentWord.name)} style={{ display: 'flex', alignItems: 'center', gap: '8px', padding: '12px 24px', background: '#00c3ff', color: 'black', borderRadius: '9999px', fontWeight: 'bold', border: 'none', cursor: 'pointer', transition: 'all 0.2s', boxShadow: '0 0 20px rgba(0,195,255,0.5)' }}>
+                                <CiPlay1 size={20} /> Listen
+                            </button>
+                            <button onClick={() => setAddWordB(!AddWordB)} title="Add to List" style={{ padding: '12px', background: '#0e0c1d', border: '1px solid rgba(0, 195, 255, 0.3)', color: '#00c3ff', borderRadius: '9999px', cursor: 'pointer', transition: 'all 0.2s' }}>
+                                <IoMdAdd size={24} />
+                            </button>
+                        </div>
+
+                        {AddWordB && (
+                            <div style={{
+                                position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', zIndex: 10,
+                                background: 'rgba(7, 19, 32, 0.95)', backdropFilter: 'blur(10px)', padding: '30px',
+                                borderRadius: '30px 0 0 30px', display: 'flex', flexDirection: 'column', boxSizing: 'border-box'
+                            }}>
+                                <div style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: '10px' }}>
+                                    <button onClick={() => setAddWordB(false)} style={{ background: 'transparent', color: '#a0a0a0', border: 'none', cursor: 'pointer' }}><BsXLg size={20} /></button>
+                                </div>
+                                <AddWordToList
+                                    ExtraFunction={() => setAddWordB(false)}
+                                    data={PostData()}
+                                    CurrentListId={CurrentListId}
+                                    userLists={UserLists}
+                                    addWordFunction={addWordFunction}
+                                />
+                            </div>
+                        )}
+                    </div>
+
+                    <div className="EC-RightPanel" style={{ flex: '1 1 450px', padding: '32px', overflowY: 'auto', display: 'flex', flexDirection: 'column', gap: '32px' }}>
+
+                        {currentWord.originalContext && (
+                            <section>
+                                <h4 style={{ color: '#00c3ff', fontSize: '0.75rem', fontWeight: 900, textTransform: 'uppercase', letterSpacing: '3px', marginBottom: '12px', margin: 0 }}>Context Found</h4>
+                                <div style={{ fontSize: '1rem', color: 'rgba(255, 255, 255, 0.9)', fontStyle: 'italic', background: 'rgba(255, 255, 255, 0.05)', padding: '20px', borderRadius: '16px', borderLeft: '3px solid #00c3ff' }}>
+                                    "{currentWord.originalContext}"
+                                </div>
+                            </section>
+                        )}
+
+                        <section>
+                            <h4 style={{ color: '#00c3ff', fontSize: '0.75rem', fontWeight: 900, textTransform: 'uppercase', letterSpacing: '3px', marginBottom: '12px', margin: 0 }}>Meaning</h4>
+                            <div style={{ fontSize: '1.125rem', color: 'rgba(255, 255, 255, 0.9)', lineHeight: 1.6, background: 'rgba(255, 255, 255, 0.05)', padding: '20px', borderRadius: '16px', border: '1px solid rgba(255, 255, 255, 0.05)' }}>
+                                {meaningList.length > 0 ? (
+                                    meaningList.map((line, i) => <p key={i} style={{ margin: '0 0 8px 0' }}>{line}</p>)
+                                ) : (
+                                    <p style={{ fontStyle: 'italic', color: '#a0a0a0', margin: 0 }}>No meaning provided.</p>
+                                )}
+                            </div>
+                        </section>
+
+                        <section>
+                            <h4 style={{ color: '#00c3ff', fontSize: '0.75rem', fontWeight: 900, textTransform: 'uppercase', letterSpacing: '3px', marginBottom: '16px', margin: 0 }}>Example Sentences</h4>
+                            <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+                                {exampleList.length > 0 ? (
+                                    exampleList.map((ex, i) => (
+                                        <div key={i} style={{ position: 'relative', background: 'linear-gradient(to bottom right, #0e0c1d, #071320)', padding: '24px', borderRadius: '16px', border: '1px solid rgba(0, 195, 255, 0.1)', boxShadow: '0 10px 15px -3px rgba(0, 0, 0, 0.1)' }}>
+                                            <div style={{ position: 'absolute', top: '-10px', left: '16px', background: '#071320', padding: '0 8px', color: 'rgba(0, 195, 255, 0.3)' }}>
+                                                <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M14.017 21L14.017 18C14.017 16.8954 14.9124 16 16.017 16H19.017C19.5693 16 20.017 15.5523 20.017 15V9C20.017 8.44772 19.5693 8 19.017 8H16.017C14.9124 8 14.017 7.10457 14.017 6V3L14.017 3C15.1216 3 16.017 3.89543 16.017 5V5.5C16.017 6.05228 16.4647 6.5 17.017 6.5H20.017C21.1216 6.5 22.017 7.39543 22.017 8.5V15.5C22.017 16.6046 21.1216 17.5 20.017 17.5H17.017C16.4647 17.5 16.017 17.9477 16.017 18.5V21H14.017ZM2.0166 21L2.0166 18C2.0166 16.8954 2.91203 16 4.0166 16H7.0166C7.56889 16 8.0166 15.5523 8.0166 15V9C8.0166 8.44772 7.56889 8 7.0166 8H4.0166C2.91203 8 2.0166 7.10457 2.0166 6V3L2.0166 3C3.12117 3 4.0166 3.89543 4.0166 5V5.5C4.0166 6.05228 4.46432 6.5 5.0166 6.5H8.0166C9.12117 6.5 10.0166 7.39543 10.0166 8.5V15.5C10.0166 16.6046 9.12117 17.5 8.0166 17.5H5.0166C4.46432 17.5 4.0166 17.9477 4.0166 18.5V21H2.0166Z"/></svg>
+                                            </div>
+                                            <p style={{ color: '#e0e0e0', fontStyle: 'italic', lineHeight: 1.6, margin: 0 }}>
+                                                {typeof ex === 'string' ? ex : JSON.stringify(ex)}
+                                            </p>
                                         </div>
-                                    ) : (
-                                        <div style={{ height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'rgba(160, 160, 160, 0.4)', fontStyle: 'italic', fontSize: '0.75rem', textAlign: 'center', padding: '10px' }}>
-                                            Search for an image to represent this word.
+                                    ))
+                                ) : (
+                                    <div style={{ background: '#0e0c1d', padding: '24px', borderRadius: '16px', border: '1px solid rgba(255, 255, 255, 0.05)', color: '#a0a0a0', fontStyle: 'italic', fontSize: '0.875rem', textAlign: 'center' }}>
+                                        No examples provided yet.
+                                    </div>
+                                )}
+                            </div>
+                        </section>
+
+                        {(currentWord.past || currentWord.gerund || currentWord.participle) && (
+                            <section>
+                                <h4 style={{ color: '#00c3ff', fontSize: '0.75rem', fontWeight: 900, textTransform: 'uppercase', letterSpacing: '3px', margin: '0 0 16px 0' }}>Word Forms</h4>
+                                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(100px, 1fr))', gap: '16px' }}>
+                                    {currentWord.past && (
+                                        <div style={{ background: '#071320', padding: '16px', borderRadius: '12px', border: '1px solid rgba(255, 255, 255, 0.05)' }}>
+                                            <span style={{ fontSize: '0.625rem', color: '#a0a0a0', textTransform: 'uppercase', display: 'block', marginBottom: '4px' }}>Past</span>
+                                            <span style={{ color: 'white', fontWeight: 'bold' }}>{currentWord.past}</span>
+                                        </div>
+                                    )}
+                                    {currentWord.gerund && (
+                                        <div style={{ background: '#071320', padding: '16px', borderRadius: '12px', border: '1px solid rgba(255, 255, 255, 0.05)' }}>
+                                            <span style={{ fontSize: '0.625rem', color: '#a0a0a0', textTransform: 'uppercase', display: 'block', marginBottom: '4px' }}>Gerund</span>
+                                            <span style={{ color: 'white', fontWeight: 'bold' }}>{currentWord.gerund}</span>
+                                        </div>
+                                    )}
+                                    {currentWord.participle && (
+                                        <div style={{ background: '#071320', padding: '16px', borderRadius: '12px', border: '1px solid rgba(255, 255, 255, 0.05)' }}>
+                                            <span style={{ fontSize: '0.625rem', color: '#a0a0a0', textTransform: 'uppercase', display: 'block', marginBottom: '4px' }}>Participle</span>
+                                            <span style={{ color: 'white', fontWeight: 'bold' }}>{currentWord.participle}</span>
                                         </div>
                                     )}
                                 </div>
-                            </div>
-                        ) : (
-                            <div className="EC-DefaultImagePlaceholder">
-                                {/* SVG Logo Placeholder estilo MyLex */}
-                                <svg width="60" height="60" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" style={{ filter: 'drop-shadow(0px 0px 8px rgba(0,195,255,0.4))' }}>
-                                    <path d="M12 2L2 7L12 12L22 7L12 2Z" stroke="#00c3ff" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
-                                    <path d="M2 17L12 22L22 17" stroke="#00c3ff" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
-                                    <path d="M2 12L12 17L22 12" stroke="#00c3ff" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
-                                </svg>
-                                <span style={{ color: 'rgba(255,255,255,0.4)', fontSize: '0.65rem', fontWeight: 'bold', marginTop: '12px', letterSpacing: '2px', textTransform: 'uppercase' }}>No Image</span>
-
-                                <button onClick={() => setShowSearch(true)} className="EC-AddImageBtn">
-                                    <FaImage size={14} /> Add Image
-                                </button>
-                            </div>
+                            </section>
                         )}
-                    </div>
 
-                    <h2 className="EC-Title">{currentWord.name}</h2>
-
-                    <div className="EC-Tags">
-                        {typeList.map((type, idx) => (
-                            <span key={idx} className="EC-Tag">{type}</span>
-                        ))}
-                    </div>
-
-                    <div className="EC-Actions">
-                        <button className="EC-BtnPrimary" onClick={() => playSound(currentWord.name)}>
-                            <CiPlay1 size={20} /> Listen
-                        </button>
-                        <button className="EC-BtnSecondary" onClick={() => setAddWordB(!AddWordB)} title="Add to List">
-                            <IoMdAdd size={24} />
-                        </button>
-                    </div>
-
-                    {/* Modal para Agregar a Lista superpuesto */}
-                    {AddWordB && (
-                        <div style={{
-                            position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', zIndex: 10,
-                            background: 'rgba(7, 19, 32, 0.95)', backdropFilter: 'blur(10px)', padding: '30px',
-                            borderRadius: '30px 0 0 30px', display: 'flex', flexDirection: 'column', boxSizing: 'border-box'
-                        }}>
-                            <div style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: '10px' }}>
-                                <button onClick={() => setAddWordB(false)} style={{ background: 'transparent', color: '#a0a0a0', border: 'none', cursor: 'pointer' }}><BsXLg size={20} /></button>
-                            </div>
-                            <AddWordToList
-                                ExtraFunction={() => setAddWordB(false)}
-                                data={PostData()}
-                                CurrentListId={CurrentListId}
-                                userLists={UserLists}
-                                addWordFunction={addWordFunction}
-                            />
-                        </div>
-                    )}
-                </div>
-
-                {/* --- PANEL DERECHO (Detalles) --- */}
-                <div className="EC-RightPanel">
-
-                    {/* Contexto donde fue encontrada (con Altura máxima) */}
-                    {currentWord.originalContext && (
-                        <section>
-                            <h4 className="EC-SectionTitle">Context Found</h4>
-                            <div className="EC-MeaningBox EC-ScrollBox" style={{ maxHeight: '120px', borderLeft: '3px solid #00c3ff', paddingLeft: '15px' }}>
-                                <span style={{ fontStyle: 'italic', fontSize: '0.95rem' }}>"{currentWord.originalContext}"</span>
-                            </div>
-                        </section>
-                    )}
-
-                    {/* Significado (con Altura máxima) */}
-                    <section>
-                        <h4 className="EC-SectionTitle">Meaning</h4>
-                        <div className="EC-MeaningBox EC-ScrollBox" style={{ maxHeight: '160px' }}>
-                            {meaningList.length > 0 ? (
-                                meaningList.map((line, i) => <p key={i} style={{ margin: '0 0 8px 0' }}>{line}</p>)
-                            ) : (
-                                <p style={{ fontStyle: 'italic', color: '#a0a0a0' }}>No meaning provided.</p>
-                            )}
-                        </div>
-                    </section>
-
-                    {/* Ejemplos (con Altura máxima) */}
-                    <section>
-                        <h4 className="EC-SectionTitle">Example Sentences</h4>
-                        {exampleList.length > 0 ? (
-                            <div className="EC-ExampleList EC-ScrollBox" style={{ maxHeight: '220px' }}>
-                                {exampleList.map((ex, i) => (
-                                    <div key={i} className="EC-ExampleItem">
-                                        {typeof ex === 'string' ? ex : JSON.stringify(ex)}
-                                    </div>
-                                ))}
-                            </div>
-                        ) : (
-                            <div className="EC-MeaningBox" style={{ fontStyle: 'italic', color: '#a0a0a0' }}>
-                                No examples provided.
-                            </div>
-                        )}
-                    </section>
-
-                    {/* Tiempos Verbales */}
-                    {(currentWord.past || currentWord.gerund || currentWord.participle) && (
-                        <section>
-                            <h4 className="EC-SectionTitle">Word Forms</h4>
-                            <div className="EC-Grid3">
-                                {currentWord.past && (
-                                    <div className="EC-SmallBox">
-                                        <span className="EC-SmallBoxLabel">Past</span>
-                                        <span className="EC-SmallBoxValue">{currentWord.past}</span>
-                                    </div>
-                                )}
-                                {currentWord.gerund && (
-                                    <div className="EC-SmallBox">
-                                        <span className="EC-SmallBoxLabel">Gerund</span>
-                                        <span className="EC-SmallBoxValue">{currentWord.gerund}</span>
-                                    </div>
-                                )}
-                                {currentWord.participle && (
-                                    <div className="EC-SmallBox">
-                                        <span className="EC-SmallBoxLabel">Participle</span>
-                                        <span className="EC-SmallBoxValue">{currentWord.participle}</span>
-                                    </div>
-                                )}
-                            </div>
-                        </section>
-                    )}
-
-                    {/* Sinónimos y Antónimos */}
-                    <div className="EC-Grid2">
-                        <section>
-                            <h4 className="EC-SectionTitle" style={{ color: '#00ff88' }}>Synonyms</h4>
-                            <div className="EC-SmallBox Green EC-ScrollBox" style={{ maxHeight: '100px' }}>
-                                <span className="EC-SmallBoxValue" style={{ color: '#a0a0a0', fontSize: '0.85rem' }}>
+                        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '32px' }}>
+                            <section>
+                                <h4 style={{ color: '#00ff88', fontSize: '0.75rem', fontWeight: 900, textTransform: 'uppercase', letterSpacing: '3px', margin: '0 0 12px 0' }}>Synonyms</h4>
+                                <div style={{ fontSize: '0.875rem', color: '#a0a0a0', background: 'rgba(0, 255, 136, 0.05)', padding: '16px', borderRadius: '12px', border: '1px solid rgba(0, 255, 136, 0.1)', minHeight: '60px' }}>
                                     {safeString(currentWord.synonyms) || "None"}
-                                </span>
-                            </div>
-                        </section>
-                        <section>
-                            <h4 className="EC-SectionTitle" style={{ color: '#ff4d4d' }}>Antonyms</h4>
-                            <div className="EC-SmallBox Red EC-ScrollBox" style={{ maxHeight: '100px' }}>
-                                <span className="EC-SmallBoxValue" style={{ color: '#a0a0a0', fontSize: '0.85rem' }}>
+                                </div>
+                            </section>
+                            <section>
+                                <h4 style={{ color: '#ff4d4d', fontSize: '0.75rem', fontWeight: 900, textTransform: 'uppercase', letterSpacing: '3px', margin: '0 0 12px 0' }}>Antonyms</h4>
+                                <div style={{ fontSize: '0.875rem', color: '#a0a0a0', background: 'rgba(255, 77, 77, 0.05)', padding: '16px', borderRadius: '12px', border: '1px solid rgba(255, 77, 77, 0.1)', minHeight: '60px' }}>
                                     {safeString(currentWord.antonyms) || "None"}
-                                </span>
-                            </div>
-                        </section>
+                                </div>
+                            </section>
+                        </div>
                     </div>
 
-                    {/* Paginación */}
-                    {SelectedObjects.length > 1 && (
-                        <div className="EC-Pagination">
-                            <button className="EC-NavBtn" onClick={handlePrev}><IoIosArrowBack size={20} /></button>
-                            <span style={{ fontSize: '0.8rem', color: '#a0a0a0', fontWeight: 'bold', letterSpacing: '1px' }}>
-                                {Index + 1} OF {SelectedObjects.length}
-                            </span>
-                            <button className="EC-NavBtn" onClick={handleNext}><IoIosArrowForward size={20} /></button>
-                        </div>
-                    )}
                 </div>
-
             </div>
         </div>
     );
