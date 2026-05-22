@@ -69,6 +69,12 @@ class ChatRepository:
             self.db.refresh(room)
         return room
 
+    def delete_room(self, room_id: int):
+        room = self.get_room_by_id(room_id)
+        if room:
+            self.db.delete(room)
+            self.db.commit()
+
     def update_room_summary(self, room_id: int, summary: str, last_message_id: int):
         room = self.get_room_by_id(room_id)
         if room:

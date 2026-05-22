@@ -16,11 +16,24 @@ class ChatGraphNodes:
         import random
         ai_participants = state["ai_participants"]
         
+        human_participants = state.get("human_participants", [])
+        
         if not ai_participants:
             return {"ai_respondents_queue": [], "current_ai_index": 0}
             
         # Check if any AI was explicitly mentioned
         mentioned_ids = state.get("mentioned_ai_participant_ids", [])
+        
+        # If there are at least 2 humans, only respond if explicitly mentioned
+        if len(human_participants) >= 2:
+            if mentioned_ids:
+                return {
+                    "ai_respondents_queue": mentioned_ids,
+                    "current_ai_index": 0
+                }
+            else:
+                return {"ai_respondents_queue": [], "current_ai_index": 0}
+
         if mentioned_ids:
             return {
                 "ai_respondents_queue": mentioned_ids,

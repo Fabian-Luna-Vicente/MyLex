@@ -103,3 +103,7 @@ class IcebreakerRequest(BaseModel):
     room_id: int
     language: str
     vocabulary_words: List[str]
+
+class GrammarCheckRequest(BaseModel):
+    message: str
+    language: str = "es"

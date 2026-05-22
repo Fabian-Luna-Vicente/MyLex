@@ -32,22 +32,27 @@ function ContentApp() {
     });
 
     const handleMouseUp = (e) => {
-      const path = e.composedPath();
-      const isInsideFloatingMenu = path.some(el => el.classList && el.classList.contains('floating-fab-container'));
-      if (isInsideFloatingMenu) return;
+      // Si el clic es dentro de nuestra extensión, no cerramos el menú
+      if (e.target.closest('#drillexa-extension-root')) return;
 
-      const shadowRoot = document.getElementById('mylex-extension-root')?.shadowRoot;
-      let text = shadowRoot?.getSelection()?.toString().trim();
-
-      if (!text) {
-        text = window.getSelection()?.toString().trim();
-      }
+      const selection = window.getSelection();
+      const text = selection.toString().trim();
 
       if (text) {
+        const range = selection.getRangeAt(0);
+        const rect = range.getBoundingClientRect();
+
         setSelectedText(text);
+        setMenuPosition({
+          top: rect.bottom + window.scrollY + 10,
+          left: rect.left + window.scrollX + (rect.width / 2),
+        });
         setShowMenu(true);
       } else {
-        setShowMenu(false);
+        // Solo cerramos si no hay un modal activo o datos seleccionados
+        if (selectedObjects.length === 0 && !grammarData && !activeModal) {
+          setShowMenu(false);
+        }
       }
     };
 
@@ -76,7 +81,7 @@ function ContentApp() {
   return (
     <div className="drillexa-wrapper text-base font-sans">
       {/* Menú Flotante (Selector de texto) */}
-      {showMenu && !activeModal && !grammarData && (
+      {showMenu && !activeModal && !grammarData && selectedObjects.length === 0 && (
         <FloatingMenu
           position={menuPosition}
           inputValue={selectedText}

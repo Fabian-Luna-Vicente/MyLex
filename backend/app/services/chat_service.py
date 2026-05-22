@@ -76,6 +76,26 @@ class ChatService:
         room = self.repo.update_room(room_id, name, description, context)
         return self._map_room(room)
 
+    def leave_room(self, room_id: int, user_id: str):
+        room = self.repo.get_room_by_id(room_id)
+        if not room:
+            raise HTTPException(status_code=404, detail="Room not found")
+
+        participant = next((p for p in room.participants if p.user_id == user_id), None)
+        if not participant:
+            raise HTTPException(status_code=403, detail="Not a participant")
+
+        self.repo.remove_participant(participant.id)
+
+        # Re-fetch room or check remaining participants to see if any humans are left
+        human_participants_left = [p for p in room.participants if not p.is_ai and p.id != participant.id]
+        
+        if not human_participants_left:
+            self.repo.delete_room(room_id)
+            return {"status": True, "detail": "Left and room deleted"}
+        
+        return {"status": True, "detail": "Left room successfully"}
+
     def add_participant(self, room_id: int, user_id: str, data: ChatParticipantCreate):
         room = self.repo.get_room_by_id(room_id)
         if not room:

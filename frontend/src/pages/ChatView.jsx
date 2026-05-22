@@ -6,7 +6,7 @@ import { useChatView } from '../hooks/useChatView';
 import {
   FaPaperPlane, FaMicrophone, FaVolumeUp, FaArrowLeft,
   FaBookOpen, FaTimes, FaRobot, FaUserCircle, FaPlus,
-  FaEdit, FaSave, FaGlobe, FaComments
+  FaEdit, FaSave, FaGlobe, FaComments, FaSpellCheck, FaSignOutAlt
 } from 'react-icons/fa';
 import { GiMeltingIceCube } from "react-icons/gi";
 
@@ -43,6 +43,11 @@ export default function ChatView() {
     handleLinkList,
     handleIcebreaker,
     handleUpdateRoomInfo,
+    handleLeaveRoom,
+    handleGrammarCheck,
+    checkingGrammar,
+    grammarResult,
+    setGrammarResult,
     lists
   } = useChatView(roomId, user);
 
@@ -165,6 +170,17 @@ export default function ChatView() {
                   ) : (
                     <button onClick={startEditing} className="bg-white/10 text-white px-4 py-2 rounded-full font-bold flex items-center gap-2 hover:bg-white/20 transition-colors"><FaEdit /> Edit</button>
                   )}
+                  <button 
+                    onClick={async () => {
+                      if(window.confirm("Are you sure you want to leave this room?")) {
+                        const success = await handleLeaveRoom();
+                        if (success) navigate('/chat');
+                      }
+                    }} 
+                    className="bg-red-500/10 text-red-500 px-4 py-2 rounded-full font-bold flex items-center gap-2 hover:bg-red-500/20 transition-colors"
+                  >
+                    <FaSignOutAlt /> Leave
+                  </button>
                   <button onClick={() => { setShowRoomInfo(false); setIsEditingInfo(false); }} className="bg-white/5 text-[#a0a0a0] px-4 py-2 rounded-full font-bold hover:bg-white/10 hover:text-white transition-colors">Close</button>
                 </div>
               </div>
@@ -322,6 +338,14 @@ export default function ChatView() {
               className="w-11 h-11 rounded-full flex-none bg-white/5 text-[#00ff88] flex items-center justify-center transition-all hover:bg-[#00ff88]/10 hover:scale-105 disabled:opacity-50"
             >
               <GiMeltingIceCube size={18} className={loadingIcebreaker ? "animate-spin" : ""} />
+            </button>
+            <button
+              onClick={handleGrammarCheck}
+              disabled={checkingGrammar || !input.trim()}
+              className="w-11 h-11 rounded-full flex-none bg-white/5 text-[#eab308] flex items-center justify-center transition-all hover:bg-[#eab308]/10 hover:scale-105 disabled:opacity-50"
+              title="Autocorregir texto actual antes de enviar"
+            >
+              <FaSpellCheck size={16} className={checkingGrammar ? "animate-pulse" : ""} />
             </button>
             <input
               ref={inputRef}
@@ -505,6 +529,52 @@ export default function ChatView() {
                   </div>
                 );
               })}
+            </div>
+          </motion.div>
+        </div>
+      )}
+
+      {/* --- GRAMMAR RESULT MODAL --- */}
+      {grammarResult && (
+        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-[200] flex items-center justify-center p-4">
+          <motion.div
+            initial={{ opacity: 0, scale: 0.9, y: 20 }} animate={{ opacity: 1, scale: 1, y: 0 }}
+            className="bg-[#0e0c1d] border border-white/10 rounded-3xl p-6 w-full max-w-md shadow-2xl relative overflow-hidden"
+          >
+            <div className="absolute top-0 right-0 p-4 opacity-10 pointer-events-none"><FaSpellCheck size={80} className="text-[#eab308]" /></div>
+            
+            <div className="flex justify-between items-center mb-6 relative z-10">
+              <h2 className="text-xl font-black text-white flex items-center gap-2">
+                <FaSpellCheck className="text-[#eab308]" /> Corrección Gramatical
+              </h2>
+              <button onClick={() => setGrammarResult(null)} className="text-[#a0a0a0] hover:text-white"><FaTimes /></button>
+            </div>
+
+            <div className="space-y-4 relative z-10">
+              {grammarResult.has_errors ? (
+                <>
+                  <div className="bg-red-500/10 border border-red-500/20 p-4 rounded-2xl">
+                    <h3 className="text-[10px] text-red-500 font-bold uppercase tracking-widest mb-1">Se encontraron errores</h3>
+                    <p className="text-[#a0a0a0] text-sm italic">Tu texto necesita mejoras.</p>
+                  </div>
+                  <div className="bg-[#eab308]/10 border border-[#eab308]/20 p-4 rounded-2xl">
+                    <h3 className="text-[10px] text-[#eab308] font-bold uppercase tracking-widest mb-2">Versión Corregida</h3>
+                    <p className="text-white font-medium">{grammarResult.corrected_text}</p>
+                  </div>
+                  <div className="bg-white/5 border border-white/10 p-4 rounded-2xl">
+                    <h3 className="text-[10px] text-[#00c3ff] font-bold uppercase tracking-widest mb-2">Explicación</h3>
+                    <p className="text-[#a0a0a0] text-sm">{grammarResult.explanation}</p>
+                  </div>
+                </>
+              ) : (
+                <div className="bg-[#00ff88]/10 border border-[#00ff88]/20 p-6 rounded-2xl text-center">
+                  <div className="w-16 h-16 rounded-full bg-[#00ff88]/20 flex items-center justify-center mx-auto mb-4">
+                    <FaSpellCheck size={30} className="text-[#00ff88]" />
+                  </div>
+                  <h3 className="text-lg font-black text-[#00ff88] mb-2">¡Excelente Trabajo!</h3>
+                  <p className="text-[#a0a0a0] text-sm">{grammarResult.explanation || "Tu mensaje no tiene errores gramaticales."}</p>
+                </div>
+              )}
             </div>
           </motion.div>
         </div>

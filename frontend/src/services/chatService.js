@@ -16,6 +16,11 @@ export const chatService = {
     return response.data;
   },
 
+  leaveRoom: async (roomId) => {
+    const response = await api.delete(`/api/chat/rooms/${roomId}/leave`);
+    return response.data;
+  },
+
   getMessages: async (roomId) => {
     const response = await api.get(`/api/chat/rooms/${roomId}/messages`);
     return response.data;

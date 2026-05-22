@@ -68,21 +68,15 @@ const FloatingMenu = ({
 
   useEffect(() => {
     const handleSelection = () => {
-      const shadowRoot = document.getElementById('drillexa-extension-root')?.shadowRoot;
-      let text = shadowRoot?.getSelection()?.toString().trim();
-
-      if (!text) {
-        text = window.getSelection()?.toString().trim();
-      }
-
-      if (text && text.length > 0 && !isOpen) {
+      const text = window.getSelection().toString().trim();
+      if (text.length > 0 && !isOpen) {
         setInputValue(text);
       }
     };
-
     document.addEventListener("selectionchange", handleSelection);
     return () => document.removeEventListener("selectionchange", handleSelection);
   }, [isOpen]);
+
 
   const handleToggle = () => {
     if (!isDragging) {

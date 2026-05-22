@@ -5,7 +5,7 @@ from app.core.database import get_db
 from app.core.dependencies import get_current_user, get_current_user_ws
 from app.models.user import User
 from app.services.chat_service import ChatService
-from app.schemas.chat import ChatRoomCreate, ChatRoomUpdate, RoomVocabularyListCreate, AIChatRequest, IcebreakerRequest, ChatParticipantCreate, AIPersonaCreate, AIPersonaUpdate
+from app.schemas.chat import ChatRoomCreate, ChatRoomUpdate, RoomVocabularyListCreate, AIChatRequest, IcebreakerRequest, GrammarCheckRequest, ChatParticipantCreate, AIPersonaCreate, AIPersonaUpdate
 from app.services.ai_service import AIService
 from app.core.limiter import limiter
 from fastapi import Request
@@ -45,6 +45,16 @@ def update_room(
     service: ChatService = Depends(get_chat_service)
 ):
     return service.update_room(room_id, current_user.id, data.name, data.description, data.context)
+
+@router.delete("/rooms/{room_id}/leave")
+@limiter.limit("5/minute")
+def leave_room(
+    request: Request,
+    room_id: int,
+    current_user: User = Depends(get_current_user),
+    service: ChatService = Depends(get_chat_service)
+):
+    return service.leave_room(room_id, current_user.id)
 
 @router.post("/rooms/{room_id}/participants")
 def add_participant(
@@ -166,6 +176,41 @@ async def get_icebreaker(
         participants_info=participants_info
     )
     return {"status": True, "message": message}
+
+@router.post("/grammar-check")
+@limiter.limit("5/minute")
+async def check_grammar(
+    request: Request,
+    payload: GrammarCheckRequest,
+    current_user: User = Depends(get_current_user)
+):
+    ai_service = AIService()
+    
+    prompt = f"""
+    Eres un profesor de idiomas amigable. Un estudiante está escribiendo el siguiente mensaje para enviarlo en un chat: "{payload.message}".
+    El idioma objetivo del chat es: {payload.language}.
+    Por favor, revisa el mensaje en busca de errores gramaticales, ortográficos o de naturalidad.
+    Si hay errores, corrige el mensaje y proporciona una explicación corta y amable de por qué.
+    Si está perfecto, dile que está muy bien escrito.
+    
+    Devuelve la respuesta ESTRICTAMENTE en este formato JSON:
+    {{
+        "has_errors": boolean,
+        "corrected_text": "texto corregido o el mismo si está bien",
+        "explanation": "explicación de la corrección o elogio"
+    }}
+    """
+    try:
+        response_str = await ai_service._call_llm(
+            prompt=prompt,
+            system_prompt="Eres un corrector gramatical estricto pero amable. Siempre devuelves JSON válido.",
+            json_format=True,
+            temp=0.3
+        )
+        data = json.loads(response_str)
+        return {"status": True, "data": data}
+    except Exception as e:
+        return {"status": False, "message": str(e)}
 
 # --- AI Personas Endpoints ---
 

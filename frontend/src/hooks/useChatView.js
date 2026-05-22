@@ -15,6 +15,8 @@ export const useChatView = (roomId, user) => {
   const [sending, setSending] = useState(false);
   const [isRecording, setIsRecording] = useState(false);
   const [loadingIcebreaker, setLoadingIcebreaker] = useState(false);
+  const [checkingGrammar, setCheckingGrammar] = useState(false);
+  const [grammarResult, setGrammarResult] = useState(null);
 
   const [showVocabPanel, setShowVocabPanel] = useState(false);
   const [showListSelector, setShowListSelector] = useState(false);
@@ -270,6 +272,39 @@ export const useChatView = (roomId, user) => {
     }
   };
 
+  const handleLeaveRoom = async () => {
+    try {
+      const res = await chatService.leaveRoom(room.id);
+      return res.status;
+    } catch (e) {
+      console.error("Error leaving room:", e);
+      return false;
+    }
+  };
+
+  const handleGrammarCheck = async () => {
+    if (!input.trim()) return;
+
+    setCheckingGrammar(true);
+    setGrammarResult(null);
+    try {
+      const res = await api.post('/api/chat/grammar-check', {
+        message: input,
+        language: room?.language || "English"
+      });
+      if (res.data.status) {
+        setGrammarResult(res.data.data);
+        if (res.data.data.has_errors && res.data.data.corrected_text) {
+          setInput(res.data.data.corrected_text);
+        }
+      }
+    } catch (e) {
+      console.error(e);
+    } finally {
+      setCheckingGrammar(false);
+    }
+  };
+
   return {
     room,
     messages,
@@ -291,6 +326,11 @@ export const useChatView = (roomId, user) => {
     handleLinkList,
     handleIcebreaker,
     handleUpdateRoomInfo,
+    handleLeaveRoom,
+    handleGrammarCheck,
+    checkingGrammar,
+    grammarResult,
+    setGrammarResult,
     lists
   };
 };
