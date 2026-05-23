@@ -13,6 +13,7 @@ class UserProfile(Base):
     avatar_url = Column(String, nullable=True, default="")
     country = Column(String, nullable=True, default="")
     native_language = Column(String, nullable=True, default="")
+    ai_language = Column(String, nullable=True, default="en")
     learning_languages = Column(ARRAY(String), nullable=True, default=[])
     level = Column(String, nullable=True, default="Beginner")
     created_at = Column(DateTime(timezone=True), server_default=func.now())

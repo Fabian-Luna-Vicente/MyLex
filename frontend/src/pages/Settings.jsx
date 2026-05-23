@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import {
@@ -6,6 +6,7 @@ import {
   FaShieldAlt, FaQuestionCircle, FaSignOutAlt, FaChevronRight
 } from 'react-icons/fa';
 import { useAuth } from '../hooks/useAuth';
+import { profileService } from '../services/profileService';
 
 export default function Settings() {
   const { user, logout } = useAuth();
@@ -13,9 +14,35 @@ export default function Settings() {
   const [settings, setSettings] = useState({
     notifications: true,
     darkMode: true,
-    language: 'English',
+    language: 'en',
     privacy: 'Friends Only'
   });
+
+  useEffect(() => {
+    const fetchProfile = async () => {
+      try {
+        const profile = await profileService.getMyProfile();
+        if (profile) {
+          setSettings(prev => ({ ...prev, language: profile.ai_language || 'en' }));
+        }
+      } catch (err) {
+        console.error("Error fetching profile", err);
+      }
+    };
+    fetchProfile();
+  }, []);
+
+  const handleLanguageChange = async (val) => {
+    console.log("handleLanguageChange called with:", val);
+    setSettings(prev => ({ ...prev, language: val }));
+    try {
+      console.log("Calling profileService.updateProfile with", { ai_language: val });
+      const res = await profileService.updateProfile({ ai_language: val });
+      console.log("API response:", res);
+    } catch (err) {
+      console.error("Error updating AI language", err);
+    }
+  };
 
   const handleLogout = () => {
     logout();
@@ -33,6 +60,13 @@ export default function Settings() {
       items: [
         { label: 'Profile Information', desc: 'Edit your name, bio and avatar', action: () => navigate('/profile') },
         { label: 'Security & Password', desc: 'Manage your login credentials', action: () => { } },
+      ]
+    },
+    {
+      title: 'Preferences',
+      icon: <FaCog />,
+      items: [
+        { label: 'AI Responses Language', desc: 'Set the target language for definitions and grammar', type: 'select', value: settings.language, action: handleLanguageChange },
       ]
     }
   ];
@@ -88,8 +122,8 @@ export default function Settings() {
                         onChange={(e) => item.action(e.target.value)}
                         className="bg-[#1a182c] border border-white/10 rounded-lg px-2 py-1 text-xs text-white outline-none focus:border-[#00c3ff]/50"
                       >
-                        <option>English</option>
-                        <option>Spanish</option>
+                        <option value="en">English</option>
+                        <option value="es">Spanish</option>
                       </select>
                     ) : (
                       <button onClick={item.action} className="text-[#a0a0a0] group-hover:text-white group-hover:translate-x-1 transition-all">

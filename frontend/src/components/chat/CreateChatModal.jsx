@@ -35,6 +35,7 @@ export default function CreateChatModal({ onClose, onSuccess }) {
   }, []);
 
   const handleAddAI = (persona, role) => {
+    if (participants.find(p => p.is_ai && p.ai_name === persona.name)) return;
     setParticipants([...participants, {
       is_ai: true,
       ai_name: persona.name,
@@ -210,8 +211,9 @@ export default function CreateChatModal({ onClose, onSuccess }) {
                     ) : (
                       <div className="space-y-2 max-h-40 overflow-y-auto">
                         {aiPersonas.map(persona => {
+                          const isAdded = participants.some(p => p.is_ai && p.ai_name === persona.name);
                           return (
-                            <div key={persona.id} className="flex items-center justify-between p-2 rounded-lg border border-white/10 bg-[#0e0c1d]">
+                            <div key={persona.id} className={`flex items-center justify-between p-2 rounded-lg border ${isAdded ? 'border-white/5 bg-white/5 opacity-50' : 'border-white/10 bg-[#0e0c1d]'}`}>
                               <div className="flex items-center gap-3">
                                 <div className="w-8 h-8 rounded-full bg-[#00c3ff]/20 flex items-center justify-center text-[#00c3ff]">
                                   {persona.avatar_url ? <img src={persona.avatar_url} className="w-full h-full rounded-full object-cover" /> : <FaRobot />}
@@ -227,13 +229,16 @@ export default function CreateChatModal({ onClose, onSuccess }) {
                                   placeholder="Role..." 
                                   className="w-20 bg-black/50 border border-white/10 rounded-lg p-1.5 text-white text-xs focus:border-[#00c3ff] outline-none"
                                   id={`role-${persona.id}`}
+                                  disabled={isAdded}
                                 />
-                                <button 
-                                  onClick={() => handleAddAI(persona, document.getElementById(`role-${persona.id}`).value)} 
-                                  className="text-xs bg-[#00c3ff]/10 text-[#00c3ff] px-3 py-1.5 rounded-lg font-bold hover:bg-[#00c3ff] hover:text-black transition-all"
-                                >
-                                  Add
-                                </button>
+                                {!isAdded && (
+                                  <button 
+                                    onClick={() => handleAddAI(persona, document.getElementById(`role-${persona.id}`).value)} 
+                                    className="text-xs bg-[#00c3ff]/10 text-[#00c3ff] px-3 py-1.5 rounded-lg font-bold hover:bg-[#00c3ff] hover:text-black transition-all"
+                                  >
+                                    Add
+                                  </button>
+                                )}
                               </div>
                             </div>
                           );

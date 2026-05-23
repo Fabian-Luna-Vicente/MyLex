@@ -8,6 +8,7 @@ class ProfileUpdate(BaseModel):
     avatar_url: Optional[str] = None
     country: Optional[str] = None
     native_language: Optional[str] = None
+    ai_language: Optional[str] = None
     learning_languages: Optional[List[str]] = None
     level: Optional[str] = None
 
@@ -19,6 +20,7 @@ class ProfilePublic(BaseModel):
     avatar_url: str = ""
     country: str = ""
     native_language: str = ""
+    ai_language: str = "en"
     learning_languages: List[str] = []
     level: str = "Beginner"
     created_at: Optional[datetime] = None

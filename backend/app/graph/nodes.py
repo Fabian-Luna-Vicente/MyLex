@@ -34,17 +34,7 @@ class ChatGraphNodes:
             else:
                 return {"ai_respondents_queue": [], "current_ai_index": 0}
 
-        if mentioned_ids:
-            return {
-                "ai_respondents_queue": mentioned_ids,
-                "current_ai_index": 0
-            }
-
-        # If not mentioned, introduce a probability of NOT responding (e.g., 30% ignore rate)
-        if random.random() < 0.30:
-            return {"ai_respondents_queue": [], "current_ai_index": 0}
-            
-        # If there's only one AI, they reply.
+        # If there's 1 user and 1 AI, the AI ALWAYS responds
         if len(ai_participants) == 1:
             return {
                 "ai_respondents_queue": [ai_participants[0]["participant_id"]],
@@ -68,14 +58,23 @@ class ChatGraphNodes:
                 
         dummy_ais = [DummyParticipant(p) for p in ai_participants]
         
-        selected_id = await self.ai_service.select_ai_to_reply(
+        selected_ids = await self.ai_service.select_ai_to_reply(
             state["room_context"],
             last_msg,
             dummy_ais
         )
         
+        # The queue combines explicitly mentioned AIs (which always reply) and those selected by the router
+        queue = []
+        for pid in mentioned_ids:
+            if pid not in queue:
+                queue.append(pid)
+        for pid in selected_ids:
+            if pid not in queue:
+                queue.append(pid)
+                
         return {
-            "ai_respondents_queue": [selected_id],
+            "ai_respondents_queue": queue,
             "current_ai_index": 0
         }
 

@@ -10,7 +10,7 @@ export default function ChatList() {
   const navigate = useNavigate();
   const [rooms, setRooms] = useState([]);
   const [loading, setLoading] = useState(true);
-  
+
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [showAIPersonasModal, setShowAIPersonasModal] = useState(false);
 
@@ -37,20 +37,20 @@ export default function ChatList() {
   return (
     <div className="max-w-4xl mx-auto px-4 pb-32">
       <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5 }}>
-        
+
         <header className="flex justify-between items-center mb-8">
           <div>
             <h1 className="text-3xl font-black text-white tracking-tight">Messages</h1>
             <p className="text-[#a0a0a0] text-sm mt-1">Practice and connect</p>
           </div>
           <div className="flex gap-3">
-            <button 
+            <button
               onClick={() => setShowAIPersonasModal(true)}
               className="px-4 py-2.5 rounded-xl text-sm font-bold bg-[#00c3ff]/10 text-[#00c3ff] border border-[#00c3ff]/20 hover:bg-[#00c3ff]/20 transition-all flex items-center gap-2"
             >
               <FaUsersCog /> AI Menu
             </button>
-            <button 
+            <button
               onClick={() => setShowCreateModal(true)}
               className="px-6 py-2.5 rounded-xl text-sm font-black bg-[#00c3ff] text-black hover:shadow-[0_0_20px_rgba(0,195,255,0.4)] transition-all flex items-center gap-2"
             >
@@ -72,7 +72,7 @@ export default function ChatList() {
         ) : (
           <div className="space-y-3">
             {rooms.map(room => (
-              <motion.div 
+              <motion.div
                 key={room.id}
                 whileHover={{ scale: 1.01 }}
                 onClick={() => navigate(`/chat/${room.id}`)}
@@ -87,7 +87,7 @@ export default function ChatList() {
                     <FaUserCircle size={28} className="text-[#00c3ff]/50" />
                   )}
                 </div>
-                
+
                 <div className="flex-1 min-w-0">
                   <h3 className="text-lg font-black text-white group-hover:text-[#00c3ff] transition-colors truncate">
                     {room.name}
@@ -115,9 +115,9 @@ export default function ChatList() {
       </motion.div>
 
       {showCreateModal && (
-        <CreateChatModal 
-          onClose={() => setShowCreateModal(false)} 
-          onSuccess={handleChatCreated} 
+        <CreateChatModal
+          onClose={() => setShowCreateModal(false)}
+          onSuccess={handleChatCreated}
         />
       )}
 

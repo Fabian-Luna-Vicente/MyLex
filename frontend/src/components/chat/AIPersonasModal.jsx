@@ -39,13 +39,13 @@ export default function AIPersonasModal({ onClose }) {
         gender,
         avatar_url: avatarUrl || null
       };
-      
+
       if (editingId) {
         await chatService.updateAIPersona(editingId, data);
       } else {
         await chatService.createAIPersona(data);
       }
-      
+
       handleCloseForm();
       loadPersonas();
     } catch (e) {
@@ -88,7 +88,7 @@ export default function AIPersonasModal({ onClose }) {
       >
         <div className="p-6 border-b border-white/5 flex items-center justify-between">
           <h2 className="text-2xl font-black text-white flex items-center gap-3">
-            <FaRobot className="text-[#00c3ff]" /> AI Companions
+            AI Companions
           </h2>
           <button onClick={onClose} className="text-[#a0a0a0] hover:text-white transition-colors">
             <FaTimes size={24} />
@@ -98,7 +98,7 @@ export default function AIPersonasModal({ onClose }) {
         <div className="flex-1 overflow-y-auto p-6 space-y-6">
           {!showForm ? (
             <>
-              <button 
+              <button
                 onClick={() => {
                   setEditingId(null);
                   setShowForm(true);
@@ -129,14 +129,14 @@ export default function AIPersonasModal({ onClose }) {
                         </div>
                       </div>
                       <div className="absolute top-3 right-3 opacity-0 group-hover:opacity-100 transition-opacity flex gap-2">
-                        <button 
+                        <button
                           onClick={() => handleEdit(p)}
                           className="text-[#a0a0a0] hover:text-[#00c3ff] transition-colors p-1"
                           title="Edit"
                         >
                           <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" /></svg>
                         </button>
-                        <button 
+                        <button
                           onClick={() => handleDelete(p.id)}
                           className="text-[#a0a0a0] hover:text-red-500 transition-colors p-1"
                           title="Delete"
@@ -174,9 +174,9 @@ export default function AIPersonasModal({ onClose }) {
                 <label className="text-[10px] font-bold text-[#a0a0a0] uppercase tracking-widest block mb-2">Avatar URL (Optional)</label>
                 <input type="text" value={avatarUrl} onChange={e => setAvatarUrl(e.target.value)} className="w-full bg-black/50 border border-white/10 rounded-xl px-4 py-3 text-white text-sm focus:border-[#00c3ff] focus:outline-none" placeholder="https://example.com/image.jpg" />
                 {avatarUrl && (
-                   <div className="mt-3 flex justify-center">
-                     <img src={avatarUrl} alt="Preview" className="w-16 h-16 rounded-full object-cover border border-white/20" onError={(e) => e.target.style.display='none'} />
-                   </div>
+                  <div className="mt-3 flex justify-center">
+                    <img src={avatarUrl} alt="Preview" className="w-16 h-16 rounded-full object-cover border border-white/20" onError={(e) => e.target.style.display = 'none'} />
+                  </div>
                 )}
               </div>
 
