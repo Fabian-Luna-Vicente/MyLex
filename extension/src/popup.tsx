@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react"
 import Login from "./components/Login"
+import { CONFIG } from "./config/constants"
 
 function IndexPopup() {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
@@ -35,7 +36,7 @@ function IndexPopup() {
           
           <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', marginTop: '20px' }}>
             <button 
-              onClick={() => window.open("http://localhost:5173/dashboard", "_blank")}
+              onClick={() => window.open(CONFIG.DASHBOARD_URL, "_blank")}
               style={{
                   background: "linear-gradient(to right, #00c3ff, #0080ff)", 
                   border: "none", padding: "12px", 

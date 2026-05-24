@@ -9,16 +9,14 @@ class ChatRoom(Base):
     id = Column(Integer, primary_key=True, index=True, autoincrement=True)
     name = Column(String, nullable=False, default="New Chat")
     description = Column(String, nullable=True)
-    context = Column(String, nullable=True) # e.g. "Ordering coffee in a cafe"
-    language = Column(String, nullable=False, default="en") # Immutable ideally
+    context = Column(String, nullable=True) 
+    language = Column(String, nullable=False, default="en") 
     created_by = Column(String, ForeignKey("users.id", ondelete="CASCADE"), nullable=False)
     created_at = Column(DateTime(timezone=True), server_default=func.now())
     
-    # Hybrid Memory
     summary = Column(String, nullable=True)
     last_summarized_message_id = Column(Integer, nullable=True)
     
-    # Relationships
     participants = relationship("ChatParticipant", back_populates="room", cascade="all, delete-orphan")
     messages = relationship("ChatMessage", back_populates="room", cascade="all, delete-orphan")
     linked_lists = relationship("RoomVocabularyList", back_populates="room", cascade="all, delete-orphan")
@@ -41,15 +39,13 @@ class ChatParticipant(Base):
     
     id = Column(Integer, primary_key=True, index=True, autoincrement=True)
     room_id = Column(Integer, ForeignKey("chat_rooms.id", ondelete="CASCADE"), nullable=False)
-    user_id = Column(String, ForeignKey("users.id", ondelete="CASCADE"), nullable=True) # Null if AI
+    user_id = Column(String, ForeignKey("users.id", ondelete="CASCADE"), nullable=True) 
     
-    # Common
-    role = Column(String, nullable=True) # The character/role they play in the context
+    role = Column(String, nullable=True) 
     
-    # AI specific
     is_ai = Column(Boolean, default=False)
     ai_name = Column(String, nullable=True)
-    ai_gender = Column(String, nullable=True) # e.g. 'male', 'female'
+    ai_gender = Column(String, nullable=True) 
     ai_personality = Column(String, nullable=True)
     ai_avatar_url = Column(String, nullable=True)
 

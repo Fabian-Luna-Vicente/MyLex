@@ -21,10 +21,6 @@ class ProgressRepository:
         self.db = db
 
     def upsert_progress(self, user_id: str, item: ProgressUpsert) -> WordProgress:
-        """
-        Insert or update a progress record for a word+game combo.
-        Uses PostgreSQL ON CONFLICT ... DO UPDATE for atomic upsert.
-        """
         stmt = (
             pg_insert(WordProgress)
             .values(
@@ -106,15 +102,14 @@ class ProgressRepository:
                     # Everything else (Correctly answered recently)
                     else_=3
                 ).asc(),
-                func.random() # Randomize within each priority group
+                func.random() 
             )
         )
 
         if game == "random":
-            query = query.limit(20) # Keep the limit for random repetition sessions
+            query = query.limit(20) 
         
         rows = query.all()
-        # Extract just the Word objects
         return [row[0] for row in rows]
 
     def get_progress_for_list(self, user_id: str, list_id: int) -> List[WordProgress]:
@@ -131,7 +126,6 @@ class ProgressRepository:
         )
 
     def _get_user_streak(self, user_id: str) -> int:
-        """Calculates consecutive days of activity (adding words or playing games)."""
         # Get all unique days of activity
         query = text("""
             WITH activity_dates AS (
@@ -146,12 +140,9 @@ class ProgressRepository:
         if not result:
             return 0
         
-        # In Python, activity_date from date_trunc is a datetime.
-        # We want to check consecutive days.
         activity_days = [r[0].date() for r in result]
         today = datetime.now(timezone.utc).date()
         
-        # Check if they had activity today or yesterday (to continue a streak)
         if activity_days[0] < today and (today - activity_days[0]).days > 1:
             return 0
             
@@ -165,13 +156,6 @@ class ProgressRepository:
         return streak
 
     def get_overall_stats(self, user_id: str):
-        """
-        Aggregates progress data for dashboard summary.
-        - Total words mastered (Random 'easy' or Hangman 'correct')
-        - Accuracy per game
-        - Recent activity (reviews per day last 7 days)
-        """
-        # 1. Mastery distribution for Random
         random_dist = (
             self.db.query(WordProgress.difficulty, func.count(WordProgress.id))
             .filter(WordProgress.user_id == user_id, WordProgress.game == "random")
@@ -179,7 +163,6 @@ class ProgressRepository:
             .all()
         )
 
-        # 2. Accuracy for all games per list
         game_stats = (
             self.db.query(
                 WordProgress.game,
@@ -195,7 +178,6 @@ class ProgressRepository:
             .all()
         )
 
-        # 3. Activity last 7 days
         activity = (
             self.db.query(
                 func.date_trunc('day', WordProgress.reviewed_at).label('day'),
@@ -210,7 +192,6 @@ class ProgressRepository:
             .all()
         )
 
-        # 4. Total vocabulary size
         total_words = self.db.query(func.count(Word.id)).filter(Word.user_id == user_id).scalar()
 
         return {
@@ -238,9 +219,6 @@ class ProgressRepository:
         start_date: datetime = None,
         end_date: datetime = None
     ):
-        """
-        Returns a filtered list of progress records with word details.
-        """
         query = (
             self.db.query(WordProgress)
             .options(joinedload(WordProgress.word))
@@ -256,7 +234,6 @@ class ProgressRepository:
                          .filter(list_word_association.c.list_id == list_id)
         
         if word_type:
-            # PostgreSQL ARRAY contains check
             query = query.filter(Word.word_types.any(word_type))
 
         if start_date:

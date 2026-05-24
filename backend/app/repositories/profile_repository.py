@@ -150,18 +150,14 @@ class ProfileRepository:
         profile = self.get_or_create_profile(user_id)
         today = date.today()
 
-        # Si ya se actualizó hoy, no hacer nada
         if profile.last_activity_date == today:
             return profile
 
-        # Si la actividad anterior fue exactamente ayer, la racha aumenta
         if profile.last_activity_date == today - timedelta(days=1):
             profile.current_streak = (profile.current_streak or 0) + 1
         else:
-            # Si pasó más de un día, la racha vuelve a 1
             profile.current_streak = 1
 
-        # Comprobar si rompimos el récord de la racha más larga
         if profile.current_streak > (profile.longest_streak or 0):
             profile.longest_streak = profile.current_streak
 

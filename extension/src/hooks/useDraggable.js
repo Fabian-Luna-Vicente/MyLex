@@ -26,11 +26,10 @@ export const useDraggable = (initialTop = 100, initialLeft = 100) => {
     setIsDragging(false);
   };
 
-  // Event Listeners globales para que no se pierda el foco al mover rápido
   useEffect(() => {
     const onMouseMove = (e) => handleMove(e.clientX, e.clientY);
     const onTouchMove = (e) => handleMove(e.touches[0].clientX, e.touches[0].clientY);
-    
+
     if (isDragging) {
       window.addEventListener('mousemove', onMouseMove);
       window.addEventListener('mouseup', handleEnd);
@@ -48,17 +47,17 @@ export const useDraggable = (initialTop = 100, initialLeft = 100) => {
 
   return {
     position,
-    isDragging, // Útil para diferenciar entre "Click" y "Drag"
+    isDragging,
     bind: {
       onMouseDown: (e) => handleStart(e.clientX, e.clientY),
       onTouchStart: (e) => handleStart(e.touches[0].clientX, e.touches[0].clientY),
       style: {
         top: `${position.top}px`,
         left: `${position.left}px`,
-        position: 'fixed', // Fixed para que persista al hacer scroll
+        position: 'fixed',
         zIndex: 100000,
         cursor: isDragging ? 'grabbing' : 'grab',
-        touchAction: 'none' // Importante para móviles
+        touchAction: 'none'
       }
     }
   };

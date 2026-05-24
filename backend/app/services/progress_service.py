@@ -19,15 +19,10 @@ class ProgressService:
         return self.repo.upsert_progress(user_id, item)
 
     def save_progress_bulk(self, user_id: str, payload: ProgressBulkUpsert) -> dict:
-        """Bulk upsert. Called at the end of a game session."""
         count = self.repo.bulk_upsert_progress(user_id, payload.items)
         return {"detail": f"{count} progress records saved."}
 
     def get_words_for_game(self, user_id: str, list_id: int, game: str):
-        """
-        Returns prioritized words for a game session.
-        Applies spaced-repetition ordering.
-        """
         words = self.repo.get_words_for_game(user_id, list_id, game)
         if not words:
             raise HTTPException(
@@ -37,7 +32,6 @@ class ProgressService:
         return words
 
     def get_list_progress(self, user_id: str, list_id: int):
-        """Returns all progress records for a list (useful for stats UI)."""
         return self.repo.get_progress_for_list(user_id, list_id)
 
     def get_overall_stats(self, user_id: str):

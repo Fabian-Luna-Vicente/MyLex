@@ -2,12 +2,7 @@ from deep_translator import GoogleTranslator
 from functools import lru_cache
 
 class PromptService:
-    """
-    Servicio para generar y traducir dinámicamente los prompts según el idioma
-    del chat, evitando así el sesgo de idioma del LLM.
-    """
 
-    # Mapeo básico de nombres de idioma a códigos para el traductor
     LANG_MAP = {
         "english": "en",
         "spanish": "es",
@@ -25,7 +20,7 @@ class PromptService:
     @staticmethod
     def _get_lang_code(language_str: str) -> str:
         clean_lang = language_str.lower().strip()
-        return PromptService.LANG_MAP.get(clean_lang, "en")  # Default to en
+        return PromptService.LANG_MAP.get(clean_lang, "en")  
 
     @staticmethod
     @lru_cache(maxsize=128)
@@ -37,7 +32,7 @@ class PromptService:
             return translator.translate(text)
         except Exception as e:
             print(f"Translation error in PromptService: {e}")
-            return text  # Fallback a inglés si falla
+            return text 
 
     @classmethod
     def get_generate_node_system_context(cls, language: str, name: str, description: str, role: str, review_feedback: str, room_summary: str = None) -> str:
@@ -99,8 +94,4 @@ class PromptService:
             "correction_instructions": "What needs to change" (empty if valid)
         }}
         """
-        # Para el revisor (que requiere formato JSON estricto), a veces es mejor mantener
-        # las instrucciones del JSON en inglés, pero traducimos el contexto.
-        # Aquí dejaremos el prompt del revisor mayormente en inglés ya que es un proceso
-        # interno del sistema y el inglés es más robusto para outputs JSON tipados.
         return base_prompt

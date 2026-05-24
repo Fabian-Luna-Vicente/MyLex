@@ -8,6 +8,7 @@ from app.models.user import User
 from app.services.progress_service import ProgressService
 from app.schemas.vocabulary import ProgressUpsert, ProgressBulkUpsert, ProgressResponse, WordResponse
 from fastapi import Request
+from datetime import datetime
 
 router = APIRouter()
 
@@ -25,13 +26,6 @@ def get_words_for_game(
     current_user: User = Depends(get_current_user),
     service: ProgressService = Depends(get_progress_service)
 ):
-    """
-    Returns a prioritized list of words for a game session.
-    Applies spaced-repetition logic based on past progress.
-    
-    - random: orders by difficulty cooldown, randomizes within groups, limits to 20
-    - hangman: excludes words answered correctly less than 2 days ago
-    """
     return service.get_words_for_game(current_user.id, list_id, game)
 
 
@@ -68,7 +62,6 @@ def get_list_progress(
     current_user: User = Depends(get_current_user),
     service: ProgressService = Depends(get_progress_service)
 ):
-    """Returns all progress records for words in a list (for stats display)."""
     return service.get_list_progress(current_user.id, list_id)
 
 
@@ -78,7 +71,6 @@ def get_overall_stats(
     current_user: User = Depends(get_current_user),
     service: ProgressService = Depends(get_progress_service)
 ):
-    """Summary stats for Dashboard."""
     return service.get_overall_stats(current_user.id)
 
 
@@ -93,9 +85,6 @@ def get_detailed_stats(
     current_user: User = Depends(get_current_user),
     service: ProgressService = Depends(get_progress_service)
 ):
-    """Detailed stats with filters for the Statistics page."""
-    # Convert dates if present
-    from datetime import datetime
     s_date = datetime.fromisoformat(start_date) if start_date else None
     e_date = datetime.fromisoformat(end_date) if end_date else None
     

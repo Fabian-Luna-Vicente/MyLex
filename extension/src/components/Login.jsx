@@ -1,44 +1,17 @@
-import React, { useState } from 'react';
+import React from 'react';
+import { useLogin } from '../hooks/useLogin';
+import { CONFIG } from '../config/constants';
 
 export default function Login({ onLoginSuccess }) {
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState('');
-
-  const handleLogin = async (e) => {
-    e.preventDefault();
-    setLoading(true);
-    setError('');
-
-    try {
-      const response = await fetch('http://localhost:8000/auth/login', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-            email: email,
-            password: password
-        }),
-      });
-
-      const data = await response.json();
-
-      if (response.ok && data.access_token) {
-        chrome.runtime.sendMessage({ 
-          action: "SET_TOKEN", 
-          token: data.access_token 
-        }, () => {
-          onLoginSuccess();
-        });
-      } else {
-        setError(data.detail || 'Login failed');
-      }
-    } catch (err) {
-      setError('Connection error');
-    } finally {
-      setLoading(false);
-    }
-  };
+  const {
+    email,
+    setEmail,
+    password,
+    setPassword,
+    handleLogin,
+    loading,
+    error
+  } = useLogin(onLoginSuccess);
 
   return (
     <div style={{ padding: '15px', color: 'white' }}>
@@ -99,7 +72,7 @@ export default function Login({ onLoginSuccess }) {
       
       <div style={{ marginTop: '15px', textAlign: 'center' }}>
         <a 
-          href="http://localhost:5173/dashboard" 
+          href={CONFIG.DASHBOARD_URL} 
           target="_blank" 
           rel="noreferrer"
           style={{ color: '#00c3ff', fontSize: '0.75rem', textDecoration: 'none' }}

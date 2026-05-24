@@ -1,11 +1,9 @@
-import { useState, useEffect, useContext } from "react";
-import { Context } from "../Contexts/Context";
-import { ListsContext } from "../Contexts/ListsContext";
 import { IoIosArrowForward, IoIosArrowBack, IoMdAdd } from "react-icons/io";
 import { BsXLg } from "react-icons/bs";
 import { CiPlay1 } from "react-icons/ci";
 import { FaImage, FaSearch } from "react-icons/fa";
 import AddWordToList from "./AddWordToList";
+import { useElementCard } from "../hooks/useElementCard";
 
 function ElementCard({
     CurrentListId,
@@ -14,91 +12,33 @@ function ElementCard({
     userLists: propUserLists,
     addWordFunction
 }) {
-    const contextData = useContext(Context);
-    const listContext = useContext(ListsContext);
-
-    const SelectedObjects = propSelectedObjects || contextData?.SelectedObjects || [];
-    const setSelectedObjects = propSetSelectedObjects || contextData?.setSelectedObjects || (() => { });
-    const UserLists = propUserLists || listContext?.UserLists || [];
-
-    const [AddWordB, setAddWordB] = useState(false);
-    const [Index, setIndex] = useState(0);
-
-    const [imageQuery, setImageQuery] = useState("");
-    const [imageResults, setImageResults] = useState([]);
-    const [isSearchingImages, setIsSearchingImages] = useState(false);
-    const [showSearch, setShowSearch] = useState(false);
-
-    useEffect(() => {
-        if (SelectedObjects.length > 0) {
-            const newIndex = SelectedObjects.length - 1;
-            setIndex(newIndex);
-            setImageQuery(SelectedObjects[newIndex]?.name || "");
-            setShowSearch(false);
-        }
-    }, [SelectedObjects.length]);
-
-    useEffect(() => {
-        setImageQuery(SelectedObjects[Index]?.name || "");
-        setImageResults([]);
-        setShowSearch(false);
-    }, [Index, SelectedObjects]);
-
-    const handleClose = () => setSelectedObjects([]);
-    const handleNext = () => setIndex((prev) => (prev < SelectedObjects.length - 1 ? prev + 1 : 0));
-    const handlePrev = () => setIndex((prev) => (prev > 0 ? prev - 1 : SelectedObjects.length - 1));
-
-    const closeTab = (e, i) => {
-        e.stopPropagation();
-        const newObjs = [...SelectedObjects];
-        newObjs.splice(i, 1);
-
-        if (newObjs.length === 0) {
-            setSelectedObjects([]);
-        } else {
-            setSelectedObjects(newObjs);
-            if (Index === i) {
-                setIndex(Math.max(0, i - 1));
-            } else if (Index > i) {
-                setIndex(Index - 1);
-            }
-        }
-    };
+    const {
+        SelectedObjects,
+        UserLists,
+        AddWordB,
+        setAddWordB,
+        Index,
+        setIndex,
+        imageQuery,
+        setImageQuery,
+        showSearch,
+        setShowSearch,
+        imageResults,
+        isSearchingImages,
+        handleClose,
+        closeTab,
+        handleImageSearch,
+        handleSelectImage,
+        handleRemoveImage,
+        playSound
+    } = useElementCard({
+        propSelectedObjects,
+        propSetSelectedObjects,
+        propUserLists
+    });
 
     const currentWord = SelectedObjects[Index] || {};
     if (!currentWord || !currentWord.name) return null;
-
-    const handleImageSearch = (e) => {
-        e?.preventDefault();
-        if (!imageQuery.trim()) return;
-        setIsSearchingImages(true);
-
-        chrome.runtime.sendMessage({
-            action: "SEARCH_IMAGES",
-            payload: { query: imageQuery, start: 1 }
-        }, (response) => {
-            setIsSearchingImages(false);
-            if (response && response.success) {
-                setImageResults(response.data.items || []);
-            } else {
-                console.error("Error buscando imágenes:", response?.error);
-            }
-        });
-    };
-
-    const handleSelectImage = (imgUrl) => {
-        const newObjs = [...SelectedObjects];
-        newObjs[Index] = { ...newObjs[Index], image: imgUrl };
-        setSelectedObjects(newObjs);
-        setImageResults([]);
-    };
-
-    const handleRemoveImage = () => {
-        const newObjs = [...SelectedObjects];
-        newObjs[Index] = { ...newObjs[Index], image: null };
-        setSelectedObjects(newObjs);
-        setImageQuery(currentWord.name);
-    };
 
     const isPhrasal = currentWord.mode == 2;
     const safeString = (val) => (typeof val === 'string' ? val : "");
@@ -120,12 +60,6 @@ function ElementCard({
         antonyms: Array.isArray(currentWord.antonyms) ? currentWord.antonyms.join(",") : safeString(currentWord.antonyms),
         image: currentWord.image
     });
-
-    const playSound = (text) => {
-        const utterance = new SpeechSynthesisUtterance(text);
-        utterance.lang = 'en-US';
-        window.speechSynthesis.speak(utterance);
-    };
 
     return (
         <div className="ElementCardOverlay">

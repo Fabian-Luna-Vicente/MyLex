@@ -12,6 +12,8 @@ import { ListsContext } from "../Contexts/ListsContext";
 import ElementCard from "./ElementCard";
 
 import GrammarCard from "./GrammarCard";
+import { useFloatingMenu } from "../hooks/useFloatingMenu";
+import { CONFIG } from "../config/constants";
 
 const FloatingMenu = ({
   selectedObjects: propSelectedObjects,
@@ -23,184 +25,50 @@ const FloatingMenu = ({
   setGrammarData: propSetGrammarData,
   addWordFunction
 }) => {
-
-  const [localInputValue, setLocalInputValue] = useState("");
-  const inputValue = propInputValue !== undefined ? propInputValue : localInputValue;
-  const setInputValue = propSetInputValue || setLocalInputValue;
-
-  const contextData = useContext(Context);
-  const dictContext = useContext(DiccionaryContext);
-  const listContext = useContext(ListsContext);
-
-  const SelectedObjects = propSelectedObjects || contextData?.SelectedObjects || [];
-  const setSelectedObjects = propSetSelectedObjects || contextData?.setSelectedObjects || (() => { });
-
-  const UserLists = propUserLists || listContext?.UserLists || [];
-  const GetList = listContext?.GetList || (() => {
-    chrome.runtime.sendMessage({ action: "GET_LISTS" }, (response) => {
-      if (response && response.success) {
-        if (propSetUserLists) propSetUserLists(response.data);
-      }
-    });
-  });
-
   const { bind, isDragging } = useDraggable(
     window.innerHeight - 150,
     window.innerWidth - 80
   );
 
-  const [isOpen, setIsOpen] = useState(false);
-  const [showSettings, setShowSettings] = useState(false);
-  const [translation, setTranslation] = useState("");
-  const [useAI, setUseAI] = useState(true);
-  const [sourceLang, setSourceLang] = useState("auto");
-  const [targetLang, setTargetLang] = useState("en");
+  const {
+    inputValue,
+    setInputValue,
+    isOpen,
+    showSettings,
+    setShowSettings,
+    translation,
+    useAI,
+    setUseAI,
+    sourceLang,
+    setSourceLang,
+    targetLang,
+    setTargetLang,
+    handleToggle,
+    handleGrammar,
+    handleTranslate,
+    handleDefinition,
+    handleVoice,
+    GetList
+  } = useFloatingMenu({
+    propSelectedObjects,
+    propSetSelectedObjects,
+    propUserLists,
+    propSetUserLists,
+    propInputValue,
+    propSetInputValue,
+    propSetGrammarData
+  });
 
-  const languages = [
-    { code: "auto", name: "Detect" },
-    { code: "en", name: "English" },
-    { code: "es", name: "Spanish" },
-    { code: "fr", name: "French" },
-    { code: "de", name: "German" },
-    { code: "it", name: "Italian" },
-    { code: "pt", name: "Portuguese" },
-  ];
-
-  useEffect(() => {
-    const handleSelection = () => {
-      const shadowRoot = document.getElementById('drillexa-extension-root')?.shadowRoot;
-      let text = shadowRoot?.getSelection()?.toString().trim();
-
-      if (!text) {
-        text = window.getSelection()?.toString().trim();
-      }
-
-      if (text && text.length > 0 && !isOpen) {
-        setInputValue(text);
-      }
-    };
-
-    document.addEventListener("selectionchange", handleSelection);
-    return () => document.removeEventListener("selectionchange", handleSelection);
-  }, [isOpen]);
-
-  const handleToggle = () => {
-    if (!isDragging) {
-      setIsOpen(!isOpen);
-      setTranslation("");
-      setShowSettings(false);
-      const currentSelection = window.getSelection().toString().trim();
-      if (!isOpen && currentSelection) setInputValue(currentSelection);
-    }
-  };
-
-  const handleGrammar = () => {
-    if (!inputValue) return;
-
-    if (inputValue.trim().split(/\s+/).length < 2) {
-      setTranslation("Select a full phrase for grammar analysis.");
-      return;
-    }
-
-    setTranslation("Analyzing...");
-
-    const langToExplain = targetLang === "auto" ? "en" : targetLang;
-
-    chrome.runtime.sendMessage({
-      action: "ANALYZE_GRAMMAR",
-      payload: {
-        text: inputValue,
-        language: langToExplain
-      }
-    }, (response) => {
-      if (response && response.success) {
-        setIsOpen(false);
-        if (propSetGrammarData) {
-          propSetGrammarData(response.data);
-        }
-        setTranslation("");
-      } else {
-        setTranslation("Error or not logged in.");
-      }
-    });
-  };
-
-  const handleTranslate = () => {
-    if (!inputValue) return;
-    setTranslation("Translating...");
-
-    chrome.runtime.sendMessage({
-      action: "TRANSLATE_TEXT",
-      payload: {
-        text: inputValue,
-        source: sourceLang,
-        target: targetLang
-      }
-    }, (response) => {
-      if (response && response.success) {
-        setTranslation(response.data.translation);
-      } else {
-        setTranslation("Error or not logged in.");
-      }
-    });
-  };
-
-  const handleDefinition = () => {
-    if (!inputValue) return;
-    setTranslation("Searching...");
-
-    const selection = window.getSelection();
-    const contextParagraph = selection.anchorNode?.parentElement?.innerText || "";
-    const contextNode = selection.anchorNode?.nodeType === 3
-      ? selection.anchorNode.textContent
-      : selection.anchorNode?.parentElement?.innerText || "";
-
-    const pageTitle = document.title;
-    const pageUrl = window.location.href;
-    const TlangForDict = targetLang === "auto" ? "en" : targetLang;
-
-    chrome.runtime.sendMessage({
-      action: "PROCESS_DICTIONARY",
-      payload: {
-        word: inputValue,
-        language: sourceLang,
-        t_lang: TlangForDict,
-        use_ai: useAI,
-        context: contextParagraph,
-        title: pageTitle,
-        url: pageUrl
-      }
-    }, (response) => {
-      if (response && response.success && Array.isArray(response.data)) {
-        const result = response.data;
-        if (result.length > 0 && !result[0].error) {
-          setIsOpen(false);
-          setTranslation("");
-          const wordWithContext = {
-            ...result[0],
-            originalContext: contextNode
-          };
-          setSelectedObjects([...SelectedObjects, wordWithContext]);
-        } else {
-          setTranslation(result[0]?.meaning || "Definition not found.");
-        }
-      } else {
-        setTranslation("Error or not logged in.");
-      }
-    });
-  };
-
-  const handleVoice = () => {
-    if (!inputValue) return;
-    const utterance = new SpeechSynthesisUtterance(inputValue);
-    utterance.lang = sourceLang === "auto" ? "en-US" : sourceLang;
-    window.speechSynthesis.speak(utterance);
-  };
+  const languages = CONFIG.SUPPORTED_LANGUAGES;
 
   return (
-    <div {...bind} className="floating-fab-container">
-      <button className="fab-button" onClick={handleToggle}>
-        {isOpen ? <FaTimes /> : <div className="fab-logo">M</div>}
+    <div {...bind} className={`floating-fab-container ${isDragging ? "dragging" : ""}`}>
+      <button 
+        className="fab-button" 
+        onClick={() => handleToggle(isDragging)}
+        style={{ background: '#000000', border: '2px solid #00c3ff', boxShadow: '0 5px 15px rgba(0, 0, 0, 0.5)' }}
+      >
+        {isOpen ? <FaTimes style={{ color: '#00c3ff' }} /> : <div className="fab-logo" style={{ color: '#00c3ff', fontWeight: '900', fontSize: '32px', fontFamily: 'sans-serif' }}>L</div>}
       </button>
 
       {isOpen && (

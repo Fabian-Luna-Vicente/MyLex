@@ -88,7 +88,6 @@ class ChatGraphNodes:
         if not ai:
             return {"current_draft": "Error: AI not found"}
             
-        # Build context
         recent_msgs = state["message_history"][-5:] + state["new_messages"]
         chat_log = "\n".join([f'{m["sender_name"]}: {m["content"]}' for m in recent_msgs])
         
@@ -130,7 +129,6 @@ class ChatGraphNodes:
         ai_id = state["ai_respondents_queue"][state["current_ai_index"]]
         ai = next((p for p in state["ai_participants"] if p["participant_id"] == ai_id), None)
         
-        # Simple determinist validation using LLM
         prompt = PromptService.get_review_node_prompt(
             language=state['conversation_language'],
             role=ai['role_prompt'] if ai else 'None',

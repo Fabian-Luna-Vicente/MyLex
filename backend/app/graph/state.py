@@ -1,7 +1,7 @@
 from typing import TypedDict, Annotated, Optional
 import operator
 
-# Sub-tipos del State
+
 class AIParticipant(TypedDict):
     participant_id: int
     persona_id: Optional[int]

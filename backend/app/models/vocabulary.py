@@ -37,7 +37,6 @@ class Word(Base):
     participle = Column(String, nullable=True)
     meaning = Column(String, nullable=True)
     
-    # Leveraging PostgreSQL ARRAY for types and examples
     word_types = Column(ARRAY(String), nullable=True, default=[])
     examples = Column(ARRAY(String), nullable=True, default=[])
     
@@ -54,17 +53,7 @@ class Word(Base):
 
 
 class WordProgress(Base):
-    """
-    Tracks per-word, per-game progress for each user.
 
-    - game: 'random' | 'hangman' | future games
-    - difficulty: only for 'random' ('easy', 'normal', 'hard', 'ultrahard')
-    - is_correct: only for non-random games (True/False)
-    - reviewed_at: last time this record was updated (used for spaced repetition)
-
-    Unique constraint on (user_id, word_id, game) ensures one record per user/word/game,
-    enabling clean upserts.
-    """
     __tablename__ = "word_progress"
 
     id = Column(Integer, primary_key=True, index=True, autoincrement=True)

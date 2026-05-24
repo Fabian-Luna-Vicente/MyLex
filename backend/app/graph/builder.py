@@ -3,19 +3,14 @@ from app.graph.state import ChatState
 from app.graph.nodes import ChatGraphNodes
 
 def build_chat_graph(ai_service, chat_repo):
-    """
-    Construye y compila el grafo LangGraph para el sistema de chat de MyLex.
-    """
     nodes = ChatGraphNodes(ai_service, chat_repo)
     builder = StateGraph(ChatState)
 
-    # Registrar nodos
-    builder.add_node("orchestrator", nodes.orchestrator_node)   # Nodo 1
-    builder.add_node("generate",     nodes.generate_node)       # Nodo 2
-    builder.add_node("review",       nodes.review_node)         # Nodo 3
-    builder.add_node("send",         nodes.send_node)           # Nodo 4
+    builder.add_node("orchestrator", nodes.orchestrator_node) 
+    builder.add_node("generate",     nodes.generate_node)       
+    builder.add_node("review",       nodes.review_node)         
+    builder.add_node("send",         nodes.send_node)           
 
-    # Routing functions
     def route_after_orchestrator(state: ChatState) -> str:
         if not state.get("ai_respondents_queue"):
             return "no_response"
@@ -37,27 +32,25 @@ def build_chat_graph(ai_service, chat_repo):
             return "more_ais"
         return "done"
 
-    # Flujo de entrada
     builder.add_edge(START, "orchestrator")
 
-    # Orquestador → ¿responde alguna IA?
     builder.add_conditional_edges(
         "orchestrator",
         route_after_orchestrator,
         {"respond": "generate", "no_response": END}
     )
 
-    # Generador → Revisor (siempre)
+    # Generator → Reviewer (always)
     builder.add_edge("generate", "review")
 
-    # Revisor → ¿válida / retry / max_retries?
+    # Reviewer → valid / retry / max_retries?
     builder.add_conditional_edges(
         "review",
         route_after_review,
         {"valid": "send", "retry": "generate", "max_retries": "send"}
     )
 
-    # Envío → ¿más IAs / interrupt / fin?
+    # Shipping → More AIs / Interrupt / End?
     builder.add_conditional_edges(
         "send",
         route_after_send,

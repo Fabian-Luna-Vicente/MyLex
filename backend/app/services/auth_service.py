@@ -17,7 +17,6 @@ from fastapi import BackgroundTasks
 
 API_URL = "https://oauth2.googleapis.com/tokeninfo?id_token="
 
-# Normally load this from settings/env
 CLIENT_ID = os.getenv("GOOGLE_CLIENT_ID") 
 
 class AuthService:

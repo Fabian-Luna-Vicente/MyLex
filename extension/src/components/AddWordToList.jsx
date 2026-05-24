@@ -1,52 +1,15 @@
 import { BsFillSendCheckFill } from "react-icons/bs";
-import { useState, useEffect } from "react";
+import { useAddWord } from "../hooks/useAddWord";
 
 function AddWordToList({ data, ExtraFunction, CurrentListId = "" }) {
-  const [UserLists, setUserLists] = useState([]);
-  const [ListsToPost, setListsToPost] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [saving, setSaving] = useState(false);
-
-  useEffect(() => {
-    chrome.runtime.sendMessage({ action: "GET_LISTS" }, (response) => {
-      setLoading(false);
-      if (response && response.success) {
-        setUserLists(Array.isArray(response.data) ? response.data : []);
-      }
-    });
-  }, []);
-
-  const handleCheckboxChange = (listId) => {
-    if (ListsToPost.includes(listId)) {
-      setListsToPost(ListsToPost.filter((id) => id !== listId));
-    } else {
-      setListsToPost([...ListsToPost, listId]);
-    }
-  };
-
-  const PostData = () => {
-    if (ListsToPost.length === 0) return;
-    setSaving(true);
-
-    const payload = {
-      ...data,
-      list_ids: ListsToPost
-    };
-
-    chrome.runtime.sendMessage(
-      { action: "ADD_WORD", payload: payload },
-      (response) => {
-        setSaving(false);
-        if (response && response.success) {
-          if (ExtraFunction) ExtraFunction();
-        } else {
-          alert("Error saving: " + (response?.error || "Check if you are logged in."));
-        }
-      }
-    );
-  };
-
-  const availableLists = UserLists.filter(list => list.id !== CurrentListId);
+  const {
+    availableLists,
+    ListsToPost,
+    loading,
+    saving,
+    handleCheckboxChange,
+    postData
+  } = useAddWord(data, CurrentListId, ExtraFunction);
 
   return (
     <div className="AW-Container">
@@ -78,7 +41,7 @@ function AddWordToList({ data, ExtraFunction, CurrentListId = "" }) {
 
       <button
         className="AW-BtnSubmit"
-        onClick={PostData}
+        onClick={postData}
         disabled={ListsToPost.length === 0 || saving}
         title="Confirm selection"
       >

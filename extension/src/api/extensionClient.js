@@ -1,6 +1,7 @@
 import axios from "axios";
+import { CONFIG } from "../config/constants";
 
-const BASE_URL = "http://localhost:8000";
+const BASE_URL = CONFIG.API_BASE_URL;
 
 const api = axios.create({
   baseURL: BASE_URL,
@@ -10,7 +11,6 @@ const api = axios.create({
   },
 });
 
-//  Agrega el token actual de la memoria local
 api.interceptors.request.use(async (config) => {
   const result = await chrome.storage.local.get(['access_token']);
   if (result.access_token) {
@@ -19,9 +19,8 @@ api.interceptors.request.use(async (config) => {
   return config;
 });
 
-//  Maneja errores 401 (Token Expirado)
 api.interceptors.response.use(
-  (response) => response, // Si la respuesta es exitosa, se devuelve tal cual
+  (response) => response,
   async (error) => {
     const originalRequest = error.config;
 

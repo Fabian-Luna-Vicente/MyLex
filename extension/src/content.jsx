@@ -1,35 +1,34 @@
 import React, { useState, useEffect } from 'react';
 import { createRoot } from 'react-dom/client';
 
-// 1. IMPORTAMOS TUS ARCHIVOS CSS EXISTENTES (con la magia de ?inline)
 import translateStyles from './styles/translate.css?inline';
 import lyricsStyles from './styles/LyricsAndWords.css?inline';
 import imageSearchStyles from './styles/ImageSearch.css?inline';
-
-// Importa tus componentes (asegúrate de que las rutas sean correctas)
 import FloatingMenu from './components/FloatingMenu';
 import GrammarCard from './components/GrammarCard';
 import AddWordToList from './components/AddWordToList';
 import ElementCard from './components/ElementCard';
+import { listService } from './services/listService';
 
-// --- COMPONENTE PRINCIPAL DE LA EXTENSIÓN ---
 function ContentApp() {
   const [selectedText, setSelectedText] = useState('');
   const [menuPosition, setMenuPosition] = useState({ top: 0, left: 0 });
   const [showMenu, setShowMenu] = useState(false);
-  const [activeModal, setActiveModal] = useState(null); // 'grammar' | 'addWord' | null
-
-  // Estados globales de la extensión
+  const [activeModal, setActiveModal] = useState(null);
   const [selectedObjects, setSelectedObjects] = useState([]);
   const [userLists, setUserLists] = useState([]);
   const [grammarData, setGrammarData] = useState(null);
 
   useEffect(() => {
-    chrome.runtime.sendMessage({ action: "GET_LISTS" }, (response) => {
-      if (response && response.success) {
-        setUserLists(response.data);
+    const fetchInitialLists = async () => {
+      try {
+        const data = await listService.getLists();
+        setUserLists(data);
+      } catch (err) {
+        console.error("Error fetching lists in content script", err);
       }
-    });
+    };
+    fetchInitialLists();
 
     const handleMouseUp = (e) => {
       const path = e.composedPath();
@@ -90,7 +89,6 @@ function ContentApp() {
         />
       )}
 
-      {/* Tarjeta de Gramática (IA) */}
       {grammarData && (
         <div style={{ position: "fixed", top: 0, left: 0, zIndex: 214748365, width: "100vw", height: "100vh" }}>
           <GrammarCard
@@ -100,7 +98,6 @@ function ContentApp() {
         </div>
       )}
 
-      {/* Tarjeta de Vocabulario (Diccionario) */}
       {selectedObjects.length > 0 && (
         <div style={{ position: "fixed", top: 0, left: 0, zIndex: 214748364, width: "100vw", height: "100vh" }}>
           <ElementCard
@@ -112,7 +109,6 @@ function ContentApp() {
         </div>
       )}
 
-      {/* Modales disparados desde menú contextual */}
       {activeModal === 'grammar' && (
         <GrammarCard
           text={selectedText}
@@ -130,7 +126,6 @@ function ContentApp() {
   );
 }
 
-// --- LÓGICA DE INYECCIÓN Y SHADOW DOM ---
 function init() {
   if (document.getElementById('drillexa-extension-root')) return;
 
@@ -143,10 +138,8 @@ function init() {
 
   document.body.appendChild(appContainer);
 
-  // Crear el Shadow DOM para aislar tus estilos de la web host
   const shadowRoot = appContainer.attachShadow({ mode: 'open' });
 
-  // 2. INYECTAR TUS HOJAS DE ESTILO EN EL SHADOW DOM
   const stylesToInject = [translateStyles, lyricsStyles, imageSearchStyles];
 
   stylesToInject.forEach(cssText => {
