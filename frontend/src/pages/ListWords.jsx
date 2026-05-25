@@ -4,6 +4,7 @@ import { FaImage, FaCog } from "react-icons/fa"
 import { MdOutlineModeEdit, MdDeleteOutline, MdOutlineDriveFileMove } from "react-icons/md";
 import { BsXLg } from "react-icons/bs";
 import { GrPrevious, GrNext } from "react-icons/gr";
+import { LANGUAGES } from '../config/constants';
 import { useListWords } from '../hooks/useListWords';
 import { usePaginate } from '../hooks/usePaginate';
 import WordDetailModal from '../components/WordDetailModal';
@@ -243,7 +244,7 @@ export default function ListWords() {
               onChange={(e) => setNewLanguage(e.target.value)}
               className="w-full mb-6 bg-[#071320] border border-[#00c3ff]/30 rounded-[15px] px-4 py-3 text-white focus:outline-none focus:border-[#00c3ff] focus:ring-1 focus:ring-[#00c3ff] transition-all duration-300"
             >
-              {['English', 'Spanish', 'French', 'German', 'Italian', 'Portuguese', 'Japanese', 'Korean', 'Chinese', 'Arabic', 'Russian', 'Hindi', 'Dutch', 'Swedish', 'Turkish', 'Polish', 'Vietnamese', 'Thai'].map(lang => (
+              {LANGUAGES.map(lang => (
                 <option key={lang} value={lang}>{lang}</option>
               ))}
             </select>

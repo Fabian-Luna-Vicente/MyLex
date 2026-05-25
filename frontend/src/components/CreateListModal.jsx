@@ -1,10 +1,6 @@
 import { useState } from 'react';
-
-const LANGUAGES = [
-  'English', 'Spanish', 'French', 'German', 'Italian', 'Portuguese',
-  'Japanese', 'Korean', 'Chinese', 'Arabic', 'Russian', 'Hindi',
-  'Dutch', 'Swedish', 'Turkish', 'Polish', 'Vietnamese', 'Thai'
-];
+import { FaTimes, FaLayerGroup } from 'react-icons/fa';
+import { LANGUAGES } from '../config/constants';
 
 export default function CreateListModal({ isOpen, onClose, onCreate }) {
   const [listName, setListName] = useState('');

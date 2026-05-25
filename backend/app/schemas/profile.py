@@ -1,7 +1,7 @@
-from pydantic import BaseModel
+from pydantic import BaseModel, field_validator
 from typing import Optional, List
 from datetime import datetime, date
-
+from app.core.constants import VALID_LANGUAGES, VALID_COUNTRIES
 
 class ProfileUpdate(BaseModel):
     bio: Optional[str] = None
@@ -11,6 +11,29 @@ class ProfileUpdate(BaseModel):
     ai_language: Optional[str] = None
     learning_languages: Optional[List[str]] = None
     level: Optional[str] = None
+
+    @field_validator("country")
+    @classmethod
+    def validate_country(cls, v):
+        if v is not None and v not in VALID_COUNTRIES:
+            raise ValueError(f"Country must be one of the valid options.")
+        return v
+
+    @field_validator("native_language")
+    @classmethod
+    def validate_native_language(cls, v):
+        if v is not None and v not in VALID_LANGUAGES:
+            raise ValueError(f"Language must be one of the valid options.")
+        return v
+        
+    @field_validator("learning_languages")
+    @classmethod
+    def validate_learning_languages(cls, v):
+        if v is not None:
+            for lang in v:
+                if lang not in VALID_LANGUAGES:
+                    raise ValueError(f"Language must be one of the valid options.")
+        return v
 
 
 class ProfilePublic(BaseModel):

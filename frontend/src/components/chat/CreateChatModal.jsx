@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { FaTimes, FaRobot, FaUserCircle, FaPlus, FaCheck, FaGlobe, FaInfoCircle, FaTheaterMasks, FaUsers, FaUserPlus } from 'react-icons/fa';
+import { LANGUAGES } from '../../config/constants';
 import { chatService } from '../../services/chatService';
 import { profileService } from '../../services/profileService';
 
@@ -132,11 +133,10 @@ export default function CreateChatModal({ onClose, onSuccess }) {
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   <div>
                     <label className="flex items-center gap-2 text-sm font-bold text-[#00c3ff] mb-2 uppercase tracking-widest"><FaGlobe /> Language</label>
-                    <select value={language} onChange={e => setLanguage(e.target.value)} className="w-full bg-black/50 border border-white/10 rounded-xl p-4 text-white focus:border-[#00c3ff] focus:ring-1 focus:ring-[#00c3ff] transition-all outline-none">
-                      <option value="English">English</option>
-                      <option value="Spanish">Spanish</option>
-                      <option value="French">French</option>
-                      <option value="German">German</option>
+                    <select value={language} onChange={e => setLanguage(e.target.value)} className="w-full bg-[#1a182c] border border-white/10 rounded-2xl px-4 py-3 text-white focus:border-[#00ff88]/50 outline-none">
+                      {LANGUAGES.map(lang => (
+                        <option key={lang} value={lang}>{lang}</option>
+                      ))}
                     </select>
                   </div>
                   <div>

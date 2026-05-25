@@ -37,19 +37,22 @@ class WordResponse(WordInDBBase):
 
 
 from typing import Optional, List, Literal
-
-ALLOWED_LANGUAGES = Literal[
-    'English', 'Spanish', 'French', 'German', 'Italian', 'Portuguese',
-    'Japanese', 'Korean', 'Chinese', 'Arabic', 'Russian', 'Hindi',
-    'Dutch', 'Swedish', 'Turkish', 'Polish', 'Vietnamese', 'Thai'
-]
+from pydantic import field_validator
+from app.core.constants import VALID_LANGUAGES
 
 # --- Vocabulary List Schemas ---
 
 class VocabularyListBase(BaseModel):
     name: str
     privacy: Optional[Literal['public', 'private', 'friends']] = 'public'
-    language: Optional[ALLOWED_LANGUAGES] = 'English'
+    language: Optional[str] = 'English'
+
+    @field_validator('language')
+    @classmethod
+    def validate_language(cls, v):
+        if v is not None and v not in VALID_LANGUAGES:
+            raise ValueError(f"Language must be one of the valid options.")
+        return v
 
 class VocabularyListCreate(VocabularyListBase):
     pass
