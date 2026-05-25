@@ -3,7 +3,22 @@ import { useState, useEffect, useRef } from 'react';
 export const useDraggable = (initialTop = 100, initialLeft = 100) => {
   const [position, setPosition] = useState({ top: initialTop, left: initialLeft });
   const [isDragging, setIsDragging] = useState(false);
+  const [isLoaded, setIsLoaded] = useState(false);
   const offset = useRef({ x: 0, y: 0 });
+  const positionRef = useRef(position);
+
+  useEffect(() => {
+    positionRef.current = position;
+  }, [position]);
+
+  useEffect(() => {
+    chrome.storage.local.get(['mylex_fab_position'], (result) => {
+      if (result.mylex_fab_position) {
+        setPosition(result.mylex_fab_position);
+      }
+      setIsLoaded(true);
+    });
+  }, []);
 
   const handleStart = (clientX, clientY) => {
     setIsDragging(true);
@@ -24,6 +39,9 @@ export const useDraggable = (initialTop = 100, initialLeft = 100) => {
 
   const handleEnd = () => {
     setIsDragging(false);
+    if (isLoaded) {
+      chrome.storage.local.set({ mylex_fab_position: positionRef.current });
+    }
   };
 
   useEffect(() => {
@@ -57,7 +75,8 @@ export const useDraggable = (initialTop = 100, initialLeft = 100) => {
         position: 'fixed',
         zIndex: 100000,
         cursor: isDragging ? 'grabbing' : 'grab',
-        touchAction: 'none'
+        touchAction: 'none',
+        visibility: isLoaded ? 'visible' : 'hidden'
       }
     }
   };
