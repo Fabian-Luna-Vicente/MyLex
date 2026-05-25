@@ -7,6 +7,8 @@ import Login from './pages/Login';
 import Dashboard from './pages/Dashboard';
 import AllLists from './pages/AllLists';
 import ListWords from './pages/ListWords';
+import ForgotPassword from './pages/ForgotPassword';
+import ResetPassword from './pages/ResetPassword';
 import VerifyEmail from './pages/VerifyEmail';
 import CreateWord from './pages/CreateWord';
 import EditWord from './pages/EditWord';
@@ -49,6 +51,8 @@ function App() {
             <Routes>
               <Route path="/login" element={<Login />} />
               <Route path="/verify-email" element={<VerifyEmail />} />
+              <Route path="/forgot-password" element={<ForgotPassword />} />
+              <Route path="/reset-password" element={<ResetPassword />} />
 
               <Route path="/dashboard" element={<ProtectedRoute><Layout><Dashboard /></Layout></ProtectedRoute>} />
               <Route path="/lists" element={<ProtectedRoute><Layout><AllLists /></Layout></ProtectedRoute>} />

@@ -1,7 +1,7 @@
 from fastapi import APIRouter, Depends, Body, Response, Cookie, HTTPException, BackgroundTasks, status
 from sqlalchemy.orm import Session
 from app.core.database import get_db
-from app.schemas.user import GoogleAuthRequest, UserRegister, UserLogin, EmailVerification
+from app.schemas.user import GoogleAuthRequest, UserRegister, UserLogin, EmailVerification, ForgotPasswordRequest, ResetPasswordRequest
 from app.services.auth_service import AuthService
 from app.core.config import settings
 from app.core.limiter import limiter
@@ -37,6 +37,31 @@ async def verify_email(
     auth_service: AuthService = Depends(get_auth_service)
 ):
     return auth_service.verify_email(token=data.token)
+
+@router.post("/forgot-password")
+@limiter.limit("5/minute")
+async def forgot_password(
+    request: Request,
+    data: ForgotPasswordRequest,
+    background_tasks: BackgroundTasks,
+    auth_service: AuthService = Depends(get_auth_service)
+):
+    return auth_service.request_password_reset(
+        email=data.email, 
+        background_tasks=background_tasks
+    )
+
+@router.post("/reset-password")
+@limiter.limit("5/minute")
+async def reset_password(
+    request: Request,
+    data: ResetPasswordRequest,
+    auth_service: AuthService = Depends(get_auth_service)
+):
+    return auth_service.reset_password(
+        token=data.token, 
+        new_password=data.new_password
+    )
 
 @router.post("/login")
 @limiter.limit("5/minute")

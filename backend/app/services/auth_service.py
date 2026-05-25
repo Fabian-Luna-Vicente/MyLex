@@ -12,7 +12,7 @@ from jose import jwt, JOSEError
 import uuid
 from app.core.security import get_password_hash, verify_password
 from app.repositories.auth_repository import AuthRepository
-from app.services.email_service import send_registration_verification_email
+from app.services.email_service import send_registration_verification_email, send_password_reset_email
 from fastapi import BackgroundTasks
 
 API_URL = "https://oauth2.googleapis.com/tokeninfo?id_token="
@@ -28,6 +28,11 @@ class AuthService:
     def create_verification_token(self, email: str) -> str:
         expire = datetime.utcnow() + timedelta(hours=24)
         to_encode = {"exp": expire, "sub": email, "type": "verification"}
+        return jwt.encode(to_encode, settings.SECRET_KEY, algorithm="HS256")
+
+    def create_password_reset_token(self, email: str) -> str:
+        expire = datetime.utcnow() + timedelta(hours=1)
+        to_encode = {"exp": expire, "sub": email, "type": "password_reset"}
         return jwt.encode(to_encode, settings.SECRET_KEY, algorithm="HS256")
 
     async def revoke_token(self,token:str):
@@ -87,6 +92,41 @@ class AuthService:
             
         except JOSEError:
             raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Invalid or expired verification token")
+
+    def request_password_reset(self, email: str, background_tasks: BackgroundTasks = None):
+        user = self.user_repo.get_user_by_email(email)
+        if not user:
+            # For security, we don't want to confirm if the user exists
+            return {"status": True, "detail": "If the email is registered, a password reset link has been sent."}
+            
+        token = self.create_password_reset_token(email)
+        
+        if background_tasks:
+            background_tasks.add_task(send_password_reset_email, email, token)
+        else:
+            send_password_reset_email(email, token)
+            
+        return {"status": True, "detail": "If the email is registered, a password reset link has been sent."}
+
+    def reset_password(self, token: str, new_password: str):
+        try:
+            payload = jwt.decode(token, settings.SECRET_KEY, algorithms=["HS256"])
+            if payload.get("type") != "password_reset":
+                raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Invalid token type")
+            
+            email = payload.get("sub")
+            user = self.user_repo.get_user_by_email(email)
+            if not user:
+                raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="User not found")
+            
+            hashed_pw = get_password_hash(new_password)
+            user.hashed_password = hashed_pw
+            self.db.commit()
+            
+            return {"status": True, "detail": "Password has been reset successfully"}
+            
+        except JOSEError:
+            raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Invalid or expired reset token")
 
     def traditional_login(self, email: str, password: str):
         user = self.user_repo.get_user_by_email(email)

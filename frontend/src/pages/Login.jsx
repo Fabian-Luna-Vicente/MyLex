@@ -134,7 +134,18 @@ export default function Login() {
             />
           </div>
           <div>
-            <label className="block text-[11px] font-bold text-[#00c3ff]/80 uppercase tracking-widest mb-2">Password</label>
+            <div className="flex items-center justify-between mb-2">
+              <label className="block text-[11px] font-bold text-[#00c3ff]/80 uppercase tracking-widest">Password</label>
+              {!isRegistering && (
+                <button
+                  type="button"
+                  onClick={() => navigate('/forgot-password')}
+                  className="text-[10px] text-[#00c3ff] hover:text-white font-bold tracking-wider transition-colors"
+                >
+                  Forgot password?
+                </button>
+              )}
+            </div>
             <input
               type="password"
               name="password"

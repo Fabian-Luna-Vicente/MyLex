@@ -41,3 +41,10 @@ class GoogleAuthRequest(BaseModel):
     id_token: str
     username: Optional[str] = None
     age: Optional[int] = None
+
+class ForgotPasswordRequest(BaseModel):
+    email: EmailStr
+
+class ResetPasswordRequest(BaseModel):
+    token: str
+    new_password: str
