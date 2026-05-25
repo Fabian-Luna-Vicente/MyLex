@@ -55,14 +55,6 @@ export default function Settings() {
 
   const sections = [
     {
-      title: 'Account',
-      icon: <FaUser />,
-      items: [
-        { label: 'Profile Information', desc: 'Edit your name, bio and avatar', action: () => navigate('/profile') },
-        { label: 'Security & Password', desc: 'Manage your login credentials', action: () => { } },
-      ]
-    },
-    {
       title: 'Preferences',
       icon: <FaCog />,
       items: [
@@ -79,7 +71,7 @@ export default function Settings() {
         </div>
         <div>
           <h1 className="text-4xl font-black text-white tracking-tight">Settings</h1>
-          <p className="text-[#a0a0a0] font-medium">Manage your account and app experience</p>
+          <p className="text-[#a0a0a0] font-medium">Manage your app experience</p>
         </div>
       </div>
 
