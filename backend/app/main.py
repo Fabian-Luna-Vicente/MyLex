@@ -6,6 +6,10 @@ from app.core.config import settings
 from app.api.routes import auth_routes, vocabulary_routes, ai_routes, progress_routes, google_images_routes, profile_routes, chat_routes
 from app.core.limiter import limiter
 from fastapi import Request
+from fastapi.responses import JSONResponse
+from app.core.exceptions import (
+    ResourceNotFoundError, PermissionDeniedError, ValidationError, AuthenticationError, ExternalServiceError
+)
 
 app = FastAPI(
     title=settings.PROJECT_NAME,
@@ -34,6 +38,26 @@ app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)
 @limiter.limit("10/minute")
 def root(request: Request):
     return {"message": f"Welcome to {settings.PROJECT_NAME}"}
+
+@app.exception_handler(ResourceNotFoundError)
+async def resource_not_found_handler(request: Request, exc: ResourceNotFoundError):
+    return JSONResponse(status_code=404, content={"detail": exc.detail})
+
+@app.exception_handler(PermissionDeniedError)
+async def permission_denied_handler(request: Request, exc: PermissionDeniedError):
+    return JSONResponse(status_code=403, content={"detail": exc.detail})
+
+@app.exception_handler(ValidationError)
+async def validation_error_handler(request: Request, exc: ValidationError):
+    return JSONResponse(status_code=400, content={"detail": exc.detail})
+
+@app.exception_handler(AuthenticationError)
+async def auth_error_handler(request: Request, exc: AuthenticationError):
+    return JSONResponse(status_code=401, content={"detail": exc.detail})
+
+@app.exception_handler(ExternalServiceError)
+async def external_service_error_handler(request: Request, exc: ExternalServiceError):
+    return JSONResponse(status_code=503, content={"detail": exc.detail})
 
 # Include routers
 app.include_router(auth_routes.router, prefix="/auth", tags=["Auth"])

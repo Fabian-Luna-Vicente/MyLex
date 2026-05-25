@@ -1,14 +1,12 @@
 from sqlalchemy.orm import Session
 from sqlalchemy import or_
-from app.models.vocabulary import Word, VocabularyList
-from app.schemas.vocabulary import WordCreate, WordUpdate, VocabularyListCreate, VocabularyListUpdate
+from app.models.vocabulary import VocabularyList, PrivacyLevel
+from app.schemas.vocabulary import VocabularyListCreate, VocabularyListUpdate
 from typing import List, Optional
 
-class VocabularyRepository:
+class ListRepository:
     def __init__(self, db: Session):
         self.db = db
-
-    # --- Lists ---
 
     def create_list(self, user_id: str, list_in: VocabularyListCreate) -> VocabularyList:
         list_data = list_in.model_dump()
@@ -32,10 +30,10 @@ class VocabularyRepository:
         if db_list.user_id == current_user_id:
             return db_list
             
-        if db_list.privacy == "private":
+        if db_list.privacy == PrivacyLevel.PRIVATE.value:
             return None
             
-        if db_list.privacy == "friends":
+        if db_list.privacy == PrivacyLevel.FRIENDS.value:
             from app.repositories.profile_repository import ProfileRepository
             profile_repo = ProfileRepository(self.db)
             if not profile_repo.are_friends(db_list.user_id, current_user_id):
@@ -51,8 +49,8 @@ class VocabularyRepository:
         if is_self:
             return query.all()
         if is_friend:
-            return query.filter(VocabularyList.privacy.in_(["public", "friends"])).all()
-        return query.filter(VocabularyList.privacy == "public").all()
+            return query.filter(VocabularyList.privacy.in_([PrivacyLevel.PUBLIC.value, PrivacyLevel.FRIENDS.value])).all()
+        return query.filter(VocabularyList.privacy == PrivacyLevel.PUBLIC.value).all()
 
     def update_list(self, list_id: int, user_id: str, list_in: VocabularyListUpdate) -> Optional[VocabularyList]:
         db_list = self.get_list(list_id, user_id)
@@ -79,58 +77,3 @@ class VocabularyRepository:
             VocabularyList.id.in_(list_ids),
             VocabularyList.user_id == user_id
         ).all()
-
-    # --- Words ---
-
-    def create_word(self, user_id: str, word_in: WordCreate) -> Word:
-        word_data = word_in.model_dump(exclude={"list_ids"})
-        db_word = Word(**word_data, user_id=user_id)
-        
-        if word_in.list_ids:
-            lists = self.get_lists_by_ids(word_in.list_ids, user_id)
-            db_word.lists = lists
-            
-        self.db.add(db_word)
-        self.db.commit()
-        self.db.refresh(db_word)
-        return db_word
-
-    def get_word(self, word_id: int, user_id: str) -> Optional[Word]:
-        return self.db.query(Word).filter(Word.id == word_id, Word.user_id == user_id).first()
-
-    def get_words_by_user(self, user_id: str, search: str = None) -> List[Word]:
-        query = self.db.query(Word).filter(Word.user_id == user_id)
-        if search:
-            search_pattern = f"%{search}%"
-            query = query.filter(
-                or_(
-                    Word.name.ilike(search_pattern),
-                    Word.meaning.ilike(search_pattern)
-                )
-            )
-        return query.all()
-
-    def update_word(self, word_id: int, user_id: str, word_in: WordUpdate) -> Optional[Word]:
-        db_word = self.get_word(word_id, user_id)
-        if not db_word:
-            return None
-            
-        update_data = word_in.model_dump(exclude_unset=True, exclude={"list_ids"})
-        for field, value in update_data.items():
-            setattr(db_word, field, value)
-            
-        if word_in.list_ids is not None:
-            lists = self.get_lists_by_ids(word_in.list_ids, user_id)
-            db_word.lists = lists
-            
-        self.db.commit()
-        self.db.refresh(db_word)
-        return db_word
-
-    def delete_word(self, word_id: int, user_id: str) -> bool:
-        db_word = self.get_word(word_id, user_id)
-        if db_word:
-            self.db.delete(db_word)
-            self.db.commit()
-            return True
-        return False

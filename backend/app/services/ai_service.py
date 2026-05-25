@@ -1,7 +1,7 @@
 import json
 import logging
 import asyncio
-from fastapi import HTTPException
+from app.core.exceptions import ExternalServiceError
 from groq import AsyncGroq
 from app.schemas.ai import DictionaryRequest, GrammarRequest, CorrectorRequest, TranslationRequest
 from app.core.config import settings
@@ -40,7 +40,7 @@ class AIService:
             )
             return chat_completion.choices[0].message.content
         except Exception as e:
-            raise HTTPException(status_code=503, detail=f"Error AI: {str(e)}")
+            raise ExternalServiceError(f"Error AI: {str(e)}")
 
     # --- Dictionary Methods ---
 

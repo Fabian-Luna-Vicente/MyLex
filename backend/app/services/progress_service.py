@@ -1,4 +1,4 @@
-from fastapi import HTTPException, status
+from app.core.exceptions import ResourceNotFoundError, ValidationError
 from sqlalchemy.orm import Session
 from app.repositories.progress_repository import ProgressRepository
 from app.schemas.vocabulary import ProgressUpsert, ProgressBulkUpsert
@@ -12,10 +12,7 @@ class ProgressService:
     def save_progress(self, user_id: str, item: ProgressUpsert):
         """Upsert a single progress record. Validates game/difficulty combos."""
         if item.game == "random" and item.difficulty not in ("easy", "normal", "hard", "ultrahard", None):
-            raise HTTPException(
-                status_code=status.HTTP_400_BAD_REQUEST,
-                detail=f"Invalid difficulty '{item.difficulty}' for random game."
-            )
+            raise ValidationError(f"Invalid difficulty '{item.difficulty}' for random game.")
         return self.repo.upsert_progress(user_id, item)
 
     def save_progress_bulk(self, user_id: str, payload: ProgressBulkUpsert) -> dict:
@@ -25,10 +22,7 @@ class ProgressService:
     def get_words_for_game(self, user_id: str, list_id: int, game: str):
         words = self.repo.get_words_for_game(user_id, list_id, game)
         if not words:
-            raise HTTPException(
-                status_code=status.HTTP_404_NOT_FOUND,
-                detail="No words available for this game in the selected list."
-            )
+            raise ResourceNotFoundError("No words available for this game in the selected list.")
         return words
 
     def get_list_progress(self, user_id: str, list_id: int):

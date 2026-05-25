@@ -1,5 +1,4 @@
 import re
-from fastapi import HTTPException
 from sqlalchemy.orm import Session
 from datetime import date
 from app.repositories.chat_repository import ChatRepository
@@ -9,6 +8,7 @@ from app.schemas.chat import ChatMessageResponse, ChatRoomResponse, ChatRoomCrea
 from app.graph.builder import build_chat_graph
 from app.graph.state import ChatState, AIParticipant, HumanParticipant, ChatMessagePayload
 from app.core.redis_chat import get_cached_history, cache_new_message
+from app.core.exceptions import ResourceNotFoundError, PermissionDeniedError
 import re
 
 class ChatService:
@@ -68,10 +68,10 @@ class ChatService:
     def update_room(self, room_id: int, user_id: str, name: str = None, description: str = None, context: str = None):
         room = self.repo.get_room_by_id(room_id)
         if not room:
-            raise HTTPException(status_code=404, detail="Room not found")
-
+            raise ResourceNotFoundError("Room not found")
+            
         if not any(p.user_id == user_id for p in room.participants):
-            raise HTTPException(status_code=403, detail="Not a participant")
+            raise PermissionDeniedError("Not a participant")
             
         room = self.repo.update_room(room_id, name, description, context)
         return self._map_room(room)
@@ -79,11 +79,11 @@ class ChatService:
     def leave_room(self, room_id: int, user_id: str):
         room = self.repo.get_room_by_id(room_id)
         if not room:
-            raise HTTPException(status_code=404, detail="Room not found")
+            raise ResourceNotFoundError("Room not found")
 
         participant = next((p for p in room.participants if p.user_id == user_id), None)
         if not participant:
-            raise HTTPException(status_code=403, detail="Not a participant")
+            raise PermissionDeniedError("Not a participant")
 
         self.repo.remove_participant(participant.id)
 
@@ -99,9 +99,9 @@ class ChatService:
     def add_participant(self, room_id: int, user_id: str, data: ChatParticipantCreate):
         room = self.repo.get_room_by_id(room_id)
         if not room:
-            raise HTTPException(status_code=404, detail="Room not found")
+            raise ResourceNotFoundError("Room not found")
         if not any(p.user_id == user_id for p in room.participants):
-            raise HTTPException(status_code=403, detail="Not a participant")
+            raise PermissionDeniedError("Not a participant")
             
         p = self.repo.add_participant(room_id, data)
         return self._map_participant(p)
@@ -109,9 +109,9 @@ class ChatService:
     def get_room_messages(self, room_id: int, user_id: str, limit: int = 50, offset: int = 0):
         room = self.repo.get_room_by_id(room_id)
         if not room:
-            raise HTTPException(status_code=404, detail="Room not found")
+            raise ResourceNotFoundError("Room not found")
         if not any(p.user_id == user_id for p in room.participants):
-            raise HTTPException(status_code=403, detail="Not a participant in this room")
+            raise PermissionDeniedError("Not a participant in this room")
             
         msgs = self.repo.get_messages(room_id, limit, offset)
         result = []
@@ -131,9 +131,9 @@ class ChatService:
     def link_list_to_room(self, room_id: int, list_id: int, user_id: str):
         room = self.repo.get_room_by_id(room_id)
         if not room:
-            raise HTTPException(status_code=404, detail="Room not found")
+            raise ResourceNotFoundError("Room not found")
         if not any(p.user_id == user_id for p in room.participants):
-            raise HTTPException(status_code=403, detail="Not a participant")
+            raise PermissionDeniedError("Not a participant")
             
         self.repo.link_list_to_room(room_id, list_id, user_id)
         return {"status": True, "detail": "List linked successfully"}
@@ -164,11 +164,11 @@ class ChatService:
     def send_human_message(self, room_id: int, user_id: str, content: str, message_type: str = "text"):
         room = self.repo.get_room_by_id(room_id)
         if not room:
-            raise HTTPException(status_code=404, detail="Room not found")
+            raise ResourceNotFoundError("Room not found")
             
         participant = next((p for p in room.participants if p.user_id == user_id), None)
         if not participant:
-            raise HTTPException(status_code=403, detail="Not a participant")
+            raise PermissionDeniedError("Not a participant")
         
         self._check_and_update_vocab_usage(room_id, user_id, content)
         
@@ -187,11 +187,11 @@ class ChatService:
     async def send_ai_message(self, room_id: int, user_id: str, content: str, context_words: list[str] = None, mentioned_ai_participant_ids: list[int] = None, background_tasks = None):
         room = self.repo.get_room_by_id(room_id)
         if not room:
-            raise HTTPException(status_code=404, detail="Room not found")
+            raise ResourceNotFoundError("Room not found")
             
         user_participant = next((p for p in room.participants if p.user_id == user_id), None)
         if not user_participant:
-            raise HTTPException(status_code=403, detail="Not a participant")
+            raise PermissionDeniedError("Not a participant")
 
         message_history = await get_cached_history(room_id, self.repo)
             
@@ -361,17 +361,17 @@ class ChatService:
     def update_ai_persona(self, persona_id: int, user_id: str, data):
         persona = self.repo.get_ai_persona_by_id(persona_id)
         if not persona:
-            raise HTTPException(status_code=404, detail="Persona not found")
+            raise ResourceNotFoundError("Persona not found")
         if persona.user_id != user_id:
-            raise HTTPException(status_code=403, detail="Not authorized")
+            raise PermissionDeniedError("Not authorized")
         return self.repo.update_ai_persona(persona_id, data)
 
     def delete_ai_persona(self, persona_id: int, user_id: str):
         persona = self.repo.get_ai_persona_by_id(persona_id)
         if not persona:
-            raise HTTPException(status_code=404, detail="Persona not found")
+            raise ResourceNotFoundError("Persona not found")
         if persona.user_id != user_id:
-            raise HTTPException(status_code=403, detail="Not authorized")
+            raise PermissionDeniedError("Not authorized")
         self.repo.delete_ai_persona(persona_id)
         return {"status": True, "detail": "Persona deleted"}
 

@@ -1,4 +1,4 @@
-from fastapi import HTTPException, status
+from app.core.exceptions import ResourceNotFoundError, PermissionDeniedError, ValidationError
 from sqlalchemy.orm import Session
 from app.repositories.profile_repository import ProfileRepository
 from app.schemas.profile import (
@@ -14,7 +14,7 @@ class ProfileService:
     def get_my_profile(self, user_id: str) -> ProfilePublic:
         user = self.repo.get_user_by_id(user_id)
         if not user:
-            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="User not found")
+            raise ResourceNotFoundError("User not found")
 
         profile = self.repo.get_or_create_profile(user_id)
         return ProfilePublic(
@@ -38,7 +38,7 @@ class ProfileService:
     def get_public_profile(self, target_user_id: str, current_user_id: str) -> ProfilePublic:
         user = self.repo.get_user_by_id(target_user_id)
         if not user:
-            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="User not found")
+            raise ResourceNotFoundError("User not found")
 
         profile = self.repo.get_or_create_profile(target_user_id)
         is_friend = self.repo.are_friends(current_user_id, target_user_id)
@@ -71,18 +71,18 @@ class ProfileService:
 
     def send_friend_request(self, sender_id: str, receiver_id: str):
         if sender_id == receiver_id:
-            raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Cannot send request to yourself")
+            raise ValidationError("Cannot send request to yourself")
 
         receiver = self.repo.get_user_by_id(receiver_id)
         if not receiver:
-            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="User not found")
+            raise ResourceNotFoundError("User not found")
 
         existing = self.repo.get_existing_request(sender_id, receiver_id)
         if existing:
             if existing.status == "accepted":
-                raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Already friends")
-            if existing.status == "pending":
-                raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Request already pending")
+                raise ValidationError("Already friends")
+            elif existing.status == "pending":
+                raise ValidationError("Request already pending")
             if existing.status == "rejected":
                 existing.status = "pending"
                 existing.sender_id = sender_id
@@ -96,16 +96,16 @@ class ProfileService:
     def respond_to_request(self, request_id: int, user_id: str, action: str):
         request = self.repo.get_friend_request_by_id(request_id)
         if not request:
-            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Request not found")
+            raise ResourceNotFoundError("Request not found")
 
         if request.receiver_id != user_id:
-            raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Not your request")
+            raise PermissionDeniedError("Not your request")
 
         if request.status != "pending":
-            raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Request already processed")
+            raise ValidationError("Request already processed")
 
-        if action not in ("accept", "reject"):
-            raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Invalid action")
+        if action not in ["accept", "reject"]:
+            raise ValidationError("Invalid action")
 
         new_status = "accepted" if action == "accept" else "rejected"
         self.repo.update_request_status(request_id, new_status)
@@ -148,7 +148,7 @@ class ProfileService:
     def remove_friend(self, user_id: str, friend_id: str):
         deleted = self.repo.delete_friend(user_id, friend_id)
         if not deleted:
-            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Friendship not found")
+            raise ResourceNotFoundError("Friendship not found")
         return {"status": True, "detail": "Friend removed"}
 
     # --- Search ---

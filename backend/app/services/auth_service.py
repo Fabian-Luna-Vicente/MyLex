@@ -1,5 +1,4 @@
-import httpx
-from fastapi import HTTPException, status
+from app.core.exceptions import ResourceNotFoundError, ValidationError, AuthenticationError
 from sqlalchemy.orm import Session
 from jose import jwt, JOSEError
 from app.core.config import settings
@@ -49,7 +48,7 @@ class AuthService:
     def register(self, email: str, name: str, password: str, age: int | None = None, background_tasks: BackgroundTasks = None):
         existing_user = self.user_repo.get_user_by_email(email)
         if existing_user:
-            raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Email already registered")
+            raise ValidationError("Email already registered")
         
         hashed_pw = get_password_hash(password)
         user_id = str(uuid.uuid4())
@@ -76,12 +75,12 @@ class AuthService:
         try:
             payload = jwt.decode(token, settings.SECRET_KEY, algorithms=["HS256"])
             if payload.get("type") != "verification":
-                raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Invalid token type")
+                raise ValidationError("Invalid token type")
             
             email = payload.get("sub")
             user = self.user_repo.get_user_by_email(email)
             if not user:
-                raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="User not found")
+                raise ResourceNotFoundError("User not found")
             
             if user.is_verified:
                 return {"status": True, "detail": "User already verified"}
@@ -91,7 +90,7 @@ class AuthService:
             return {"status": True, "detail": "Email verified successfully"}
             
         except JOSEError:
-            raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Invalid or expired verification token")
+            raise ValidationError("Invalid or expired verification token")
 
     def request_password_reset(self, email: str, background_tasks: BackgroundTasks = None):
         user = self.user_repo.get_user_by_email(email)
@@ -112,12 +111,12 @@ class AuthService:
         try:
             payload = jwt.decode(token, settings.SECRET_KEY, algorithms=["HS256"])
             if payload.get("type") != "password_reset":
-                raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Invalid token type")
+                raise ValidationError("Invalid token type")
             
             email = payload.get("sub")
             user = self.user_repo.get_user_by_email(email)
             if not user:
-                raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="User not found")
+                raise ResourceNotFoundError("User not found")
             
             hashed_pw = get_password_hash(new_password)
             user.hashed_password = hashed_pw
@@ -126,21 +125,21 @@ class AuthService:
             return {"status": True, "detail": "Password has been reset successfully"}
             
         except JOSEError:
-            raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Invalid or expired reset token")
+            raise ValidationError("Invalid or expired reset token")
 
     def traditional_login(self, email: str, password: str):
         user = self.user_repo.get_user_by_email(email)
         if not user:
-            raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid credentials")
+            raise AuthenticationError("Invalid credentials")
         
         if not user.hashed_password or not verify_password(password, user.hashed_password):
-            raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid credentials")
+            raise AuthenticationError("Invalid credentials")
             
         if not user.is_active:
-            raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Inactive user")
+            raise ValidationError("Inactive user")
             
         if not user.is_verified:
-            raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Please verify your email first")
+            raise ValidationError("Please verify your email first")
 
         access_token = create_access_token(
             subject=user.id, 
@@ -157,10 +156,11 @@ class AuthService:
         }
 
     async def verify_google_token(self, id_token: str) -> dict:
+        import httpx
         async with httpx.AsyncClient() as client:
             response = await client.get(API_URL + id_token)
             if response.status_code != 200:
-                raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid Google token")
+                raise AuthenticationError("Invalid Google token")
             return response.json()
 
     async def login_with_google(self, id_token: str):
@@ -169,14 +169,14 @@ class AuthService:
         sub = user_info.get("sub")
 
         if not email or not sub:
-            raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Missing email or sub in token")
+            raise ValidationError("Missing email or sub in token")
 
         user = self.user_repo.get_user_by_id(sub)
         if not user:
-            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="User does not exist, please sign in")
+            raise ResourceNotFoundError("User does not exist, please sign in")
         
         if not user.is_active:
-            raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Inactive user")
+            raise ValidationError("Inactive user")
 
         # Create access token
         access_token = create_access_token(
@@ -208,16 +208,16 @@ class AuthService:
             old_jti = payload.get("jti")
             
             if not user_id or not old_jti:
-                raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid token payload")
+                raise AuthenticationError("Invalid token payload")
 
             # Verify and delete old token (Rotation)
             deleted = self.user_repo.delete_refresh_token(jti=old_jti, user_id=user_id)
             if not deleted:
-                raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Token already used or invalid")
+                raise AuthenticationError("Token already used or invalid")
             
             user = self.user_repo.get_user_by_id(user_id)
             if not user or not user.is_active:
-                 raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="User not found or inactive")
+                 raise AuthenticationError("User not found or inactive")
 
             # Generate new tokens
             new_access_token = create_access_token(
@@ -233,7 +233,7 @@ class AuthService:
                 "refresh_token": new_refresh_token
             }
         except JOSEError:
-            raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid refresh token")
+            raise AuthenticationError("Invalid refresh token")
 
     def logout(self, refresh_token: str | None, access_token: str | None):
         # We can implement a Redis blacklist here if needed for access_token,

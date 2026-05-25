@@ -6,6 +6,9 @@ export default function ScrollToTop() {
 
     useEffect(() => {
         window.scrollTo(0, 0);
+        if (window.speechSynthesis) {
+            window.speechSynthesis.cancel();
+        }
     }, [pathname]);
 
     return null;

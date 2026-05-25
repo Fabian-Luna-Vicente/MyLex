@@ -39,12 +39,13 @@ class WordResponse(WordInDBBase):
 from typing import Optional, List, Literal
 from pydantic import field_validator
 from app.core.constants import VALID_LANGUAGES
+from app.models.vocabulary import PrivacyLevel
 
 # --- Vocabulary List Schemas ---
 
 class VocabularyListBase(BaseModel):
     name: str
-    privacy: Optional[Literal['public', 'private', 'friends']] = 'public'
+    privacy: Optional[PrivacyLevel] = PrivacyLevel.PUBLIC
     language: Optional[str] = 'English'
 
     @field_validator('language')

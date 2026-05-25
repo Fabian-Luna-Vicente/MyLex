@@ -3,6 +3,12 @@ from sqlalchemy.orm import relationship
 from sqlalchemy.sql import func
 from sqlalchemy.dialects.postgresql import ARRAY
 from app.core.database import Base
+from enum import Enum
+
+class PrivacyLevel(str, Enum):
+    PRIVATE = "private"
+    FRIENDS = "friends"
+    PUBLIC = "public"
 
 # Many-to-Many association table for Lists and Words
 list_word_association = Table(
