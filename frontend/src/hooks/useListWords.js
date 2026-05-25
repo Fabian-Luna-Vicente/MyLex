@@ -17,6 +17,8 @@ export const useListWords = () => {
 
     // --- ESTADOS TEMPORALES PARA ACCIONES ---
     const [newTitle, setNewTitle] = useState("");
+    const [newPrivacy, setNewPrivacy] = useState("public");
+    const [newLanguage, setNewLanguage] = useState("English");
     const [wordToMove, setWordToMove] = useState(null);
     const [wordToDelete, setWordToDelete] = useState(null);
     const [wordForDetail, setWordForDetail] = useState(null);
@@ -51,8 +53,8 @@ export const useListWords = () => {
     const handleEditList = async () => {
         if (!newTitle.trim()) return;
         try {
-            await editList(id, newTitle);
-            setList(prev => ({ ...prev, name: newTitle }));
+            await editList(id, { name: newTitle, privacy: newPrivacy, language: newLanguage });
+            setList(prev => ({ ...prev, name: newTitle, privacy: newPrivacy, language: newLanguage }));
             setShowEditListMenu(false);
         } catch (error) {
             console.error(error);
@@ -100,6 +102,8 @@ export const useListWords = () => {
         showConfirmDelete, setShowConfirmDelete, 
         showDetailModal, setShowDetailModal,
         newTitle, setNewTitle, 
+        newPrivacy, setNewPrivacy,
+        newLanguage, setNewLanguage, 
         wordToMove, setWordToMove, 
         wordToDelete, setWordToDelete, 
         wordForDetail, setWordForDetail,

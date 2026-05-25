@@ -35,6 +35,15 @@ def get_lists(
 ):
     return vocab_service.get_lists(current_user.id)
 
+@router.get("/users/{user_id}/lists", response_model=List[VocabularyListBasic])
+def get_user_lists(
+    request: Request,
+    user_id: str,
+    current_user: User = Depends(get_current_user),
+    vocab_service: VocabularyService = Depends(get_vocab_service)
+):
+    return vocab_service.get_user_lists_with_privacy(user_id, current_user.id)
+
 @router.get("/lists/{list_id}", response_model=VocabularyListResponse)
 def get_list(
     request: Request,

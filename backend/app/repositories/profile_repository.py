@@ -41,8 +41,21 @@ class ProfileRepository:
     def get_user_word_count(self, user_id: str) -> int:
         return self.db.query(func.count(Word.id)).filter(Word.user_id == user_id).scalar() or 0
 
-    def get_user_list_count(self, user_id: str) -> int:
-        return self.db.query(func.count(VocabularyList.id)).filter(VocabularyList.user_id == user_id).scalar() or 0
+    def get_user_list_count(self, user_id: str, current_user_id: str) -> int:
+        if user_id == current_user_id:
+            return self.db.query(func.count(VocabularyList.id)).filter(VocabularyList.user_id == user_id).scalar() or 0
+        
+        is_friend = self.are_friends(user_id, current_user_id)
+        if is_friend:
+            return self.db.query(func.count(VocabularyList.id)).filter(
+                VocabularyList.user_id == user_id,
+                VocabularyList.privacy.in_(["public", "friends"])
+            ).scalar() or 0
+            
+        return self.db.query(func.count(VocabularyList.id)).filter(
+            VocabularyList.user_id == user_id,
+            VocabularyList.privacy == "public"
+        ).scalar() or 0
 
     # --- Friend Requests ---
 

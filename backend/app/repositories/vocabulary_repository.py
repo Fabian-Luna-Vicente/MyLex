@@ -11,7 +11,8 @@ class VocabularyRepository:
     # --- Lists ---
 
     def create_list(self, user_id: str, list_in: VocabularyListCreate) -> VocabularyList:
-        db_list = VocabularyList(user_id=user_id, name=list_in.name)
+        list_data = list_in.model_dump()
+        db_list = VocabularyList(user_id=user_id, **list_data)
         self.db.add(db_list)
         self.db.commit()
         self.db.refresh(db_list)
@@ -26,10 +27,20 @@ class VocabularyRepository:
     def get_lists_by_user(self, user_id: str) -> List[VocabularyList]:
         return self.db.query(VocabularyList).filter(VocabularyList.user_id == user_id).all()
 
+    def get_user_lists_with_privacy(self, target_user_id: str, is_friend: bool, is_self: bool) -> List[VocabularyList]:
+        query = self.db.query(VocabularyList).filter(VocabularyList.user_id == target_user_id)
+        if is_self:
+            return query.all()
+        if is_friend:
+            return query.filter(VocabularyList.privacy.in_(["public", "friends"])).all()
+        return query.filter(VocabularyList.privacy == "public").all()
+
     def update_list(self, list_id: int, user_id: str, list_in: VocabularyListUpdate) -> Optional[VocabularyList]:
         db_list = self.get_list(list_id, user_id)
         if db_list:
-            db_list.name = list_in.name
+            update_data = list_in.model_dump(exclude_unset=True)
+            for field, value in update_data.items():
+                setattr(db_list, field, value)
             self.db.commit()
             self.db.refresh(db_list)
         return db_list

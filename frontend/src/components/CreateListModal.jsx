@@ -1,7 +1,15 @@
 import { useState } from 'react';
 
+const LANGUAGES = [
+  'English', 'Spanish', 'French', 'German', 'Italian', 'Portuguese',
+  'Japanese', 'Korean', 'Chinese', 'Arabic', 'Russian', 'Hindi',
+  'Dutch', 'Swedish', 'Turkish', 'Polish', 'Vietnamese', 'Thai'
+];
+
 export default function CreateListModal({ isOpen, onClose, onCreate }) {
   const [listName, setListName] = useState('');
+  const [privacy, setPrivacy] = useState('public');
+  const [language, setLanguage] = useState('English');
   const [loading, setLoading] = useState(false);
 
   if (!isOpen) return null;
@@ -12,8 +20,10 @@ export default function CreateListModal({ isOpen, onClose, onCreate }) {
 
     setLoading(true);
     try {
-      await onCreate({ name: listName });
+      await onCreate({ name: listName, privacy, language });
       setListName('');
+      setPrivacy('public');
+      setLanguage('English');
       onClose();
     } catch (error) {
       console.error(error);
@@ -50,6 +60,36 @@ export default function CreateListModal({ isOpen, onClose, onCreate }) {
               placeholder="e.g. Travel Vocabulary, Irregular Verbs..."
               autoFocus
             />
+          </div>
+
+          <div className="mb-4">
+            <label className="block text-[11px] font-bold text-[#00c3ff]/80 uppercase tracking-widest mb-2">
+              Privacy
+            </label>
+            <select
+              value={privacy}
+              onChange={(e) => setPrivacy(e.target.value)}
+              className="w-full bg-[#071320] border border-[#00c3ff]/30 rounded-[15px] px-4 py-3 text-white focus:outline-none focus:border-[#00c3ff] focus:ring-1 focus:ring-[#00c3ff] transition-all duration-300"
+            >
+              <option value="public">Public</option>
+              <option value="friends">Friends Only</option>
+              <option value="private">Private</option>
+            </select>
+          </div>
+
+          <div className="mb-8">
+            <label className="block text-[11px] font-bold text-[#00c3ff]/80 uppercase tracking-widest mb-2">
+              Language
+            </label>
+            <select
+              value={language}
+              onChange={(e) => setLanguage(e.target.value)}
+              className="w-full bg-[#071320] border border-[#00c3ff]/30 rounded-[15px] px-4 py-3 text-white focus:outline-none focus:border-[#00c3ff] focus:ring-1 focus:ring-[#00c3ff] transition-all duration-300"
+            >
+              {LANGUAGES.map(lang => (
+                <option key={lang} value={lang}>{lang}</option>
+              ))}
+            </select>
           </div>
 
           {/* Botones */}

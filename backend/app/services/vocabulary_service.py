@@ -15,6 +15,13 @@ class VocabularyService:
     def get_lists(self, user_id: str):
         return self.repo.get_lists_by_user(user_id)
 
+    def get_user_lists_with_privacy(self, target_user_id: str, current_user_id: str):
+        from app.repositories.profile_repository import ProfileRepository
+        profile_repo = ProfileRepository(self.repo.db)
+        is_self = (target_user_id == current_user_id)
+        is_friend = False if is_self else profile_repo.are_friends(target_user_id, current_user_id)
+        return self.repo.get_user_lists_with_privacy(target_user_id, is_friend, is_self)
+
     def get_list(self, list_id: int, user_id: str):
         db_list = self.repo.get_list(list_id, user_id)
         if not db_list:

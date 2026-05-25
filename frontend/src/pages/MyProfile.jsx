@@ -6,6 +6,7 @@ import {
   FaBookOpen, FaUsers, FaLayerGroup, FaTrophy, FaFlag
 } from 'react-icons/fa';
 import { profileService } from '../services/profileService';
+import { vocabularyService } from '../services/vocabularyService';
 
 const LANGUAGES = [
   'English', 'Spanish', 'French', 'German', 'Italian', 'Portuguese',
@@ -18,6 +19,7 @@ const LEVELS = ['Beginner', 'Elementary', 'Intermediate', 'Upper Intermediate', 
 export default function MyProfile() {
   const navigate = useNavigate();
   const [profile, setProfile] = useState(null);
+  const [lists, setLists] = useState([]);
   const [loading, setLoading] = useState(true);
   const [editing, setEditing] = useState(false);
   const [form, setForm] = useState({});
@@ -31,6 +33,8 @@ export default function MyProfile() {
     try {
       const data = await profileService.getMyProfile();
       setProfile(data);
+      const userLists = await vocabularyService.getUserLists(data.user_id);
+      setLists(userLists);
       setForm({
         bio: data.bio || '',
         country: data.country || '',
@@ -290,6 +294,26 @@ export default function MyProfile() {
                 </div>
               </div>
             )}
+          </div>
+        )}
+
+        {/* Lists Section */}
+        {!editing && lists.length > 0 && (
+          <div className="bg-[#0e0c1d] border border-white/5 rounded-3xl p-8 mt-6">
+            <h2 className="text-[10px] font-bold text-[#a0a0a0] uppercase tracking-widest mb-4">
+              <FaLayerGroup className="inline mr-1.5 text-[#00c3ff]" /> My Lists
+            </h2>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              {lists.map(list => (
+                <div key={list.id} onClick={() => navigate(`/list/${list.id}`)} className="cursor-pointer bg-white/5 border border-white/10 rounded-2xl p-5 hover:border-[#00c3ff]/50 transition-colors">
+                  <h3 className="font-bold text-white text-lg">{list.name}</h3>
+                  <div className="flex gap-2 mt-2">
+                    <span className="text-[10px] uppercase font-bold px-2 py-1 bg-[#00c3ff]/10 text-[#00c3ff] rounded-md">{list.language || 'English'}</span>
+                    <span className="text-[10px] uppercase font-bold px-2 py-1 bg-white/10 text-[#a0a0a0] rounded-md">{list.privacy === 'friends' ? 'Friends Only' : list.privacy || 'Public'}</span>
+                  </div>
+                </div>
+              ))}
+            </div>
           </div>
         )}
       </motion.div>

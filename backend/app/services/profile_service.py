@@ -29,7 +29,7 @@ class ProfileService:
             level=profile.level or "Beginner",
             created_at=user.created_at,
             total_words=self.repo.get_user_word_count(user_id),
-            total_lists=self.repo.get_user_list_count(user_id),
+            total_lists=self.repo.get_user_list_count(user_id, user_id),
             friend_count=self.repo.get_friend_count(user_id),
             is_friend=False,
             request_status=None
@@ -56,7 +56,7 @@ class ProfileService:
             level=profile.level or "Beginner",
             created_at=user.created_at,
             total_words=self.repo.get_user_word_count(target_user_id),
-            total_lists=self.repo.get_user_list_count(target_user_id),
+            total_lists=self.repo.get_user_list_count(target_user_id, current_user_id),
             friend_count=self.repo.get_friend_count(target_user_id),
             is_friend=is_friend,
             request_status=request_status

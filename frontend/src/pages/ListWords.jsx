@@ -1,6 +1,6 @@
 import { IoAddCircleSharp } from "react-icons/io5";
 import { CiPlay1 } from "react-icons/ci";
-import { FaImage } from "react-icons/fa"
+import { FaImage, FaCog } from "react-icons/fa"
 import { MdOutlineModeEdit, MdDeleteOutline, MdOutlineDriveFileMove } from "react-icons/md";
 import { BsXLg } from "react-icons/bs";
 import { GrPrevious, GrNext } from "react-icons/gr";
@@ -17,6 +17,8 @@ export default function ListWords() {
     showConfirmDelete, setShowConfirmDelete,
     showDetailModal, setShowDetailModal,
     newTitle, setNewTitle,
+    newPrivacy, setNewPrivacy,
+    newLanguage, setNewLanguage,
     wordToMove, setWordToMove,
     wordToDelete, setWordToDelete,
     wordForDetail, setWordForDetail,
@@ -70,15 +72,28 @@ export default function ListWords() {
             <h1 className="text-3xl md:text-[2.5rem] font-bold text-white drop-shadow-[0_0_10px_rgba(0,195,255,0.5)] tracking-wide flex items-center gap-3">
               {list.name}
               {/* Botones rápidos de lista */}
-              <button onClick={() => { setNewTitle(list.name); setShowEditListMenu(true); }} className="text-[#a0a0a0] hover:text-[#00c3ff] transition-colors text-xl" title="Edit List">
-                <MdOutlineModeEdit />
-              </button>
-              <button onClick={handleDeleteList} className="text-[#a0a0a0] hover:text-red-500 transition-colors text-xl" title="Delete List">
-                <MdDeleteOutline />
+              <button onClick={() => { 
+                setNewTitle(list.name); 
+                setNewPrivacy(list.privacy || 'public');
+                setNewLanguage(list.language || 'English');
+                setShowEditListMenu(true); 
+              }} className="text-[#a0a0a0] hover:text-[#00c3ff] transition-colors text-xl" title="Settings">
+                <FaCog />
               </button>
             </h1>
 
-            <p className="text-[#a0a0a0] mt-2 font-medium tracking-wide">
+            <div className="flex gap-2 mt-3 mb-2">
+              <span 
+                 className="text-[10px] uppercase font-bold px-2 py-1 bg-[#00c3ff]/10 text-[#00c3ff] border border-[#00c3ff]/30 rounded-md"
+              >
+                {list.language || 'English'}
+              </span>
+              <span className="text-[10px] uppercase font-bold px-2 py-1 bg-white/10 text-[#a0a0a0] border border-white/20 rounded-md">
+                {list.privacy === 'friends' ? 'Friends Only' : list.privacy || 'Public'}
+              </span>
+            </div>
+
+            <p className="text-[#a0a0a0] mt-1 font-medium tracking-wide">
               <span className="text-[#00c3ff] font-bold">{list.words?.length || 0}</span> words in this list
             </p>
           </div>
@@ -202,21 +217,57 @@ export default function ListWords() {
         <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
           <div className="absolute inset-0 bg-[#071320]/80 backdrop-blur-md" onClick={() => setShowEditListMenu(false)}></div>
           <div className="relative bg-[#0e0c1d]/80 backdrop-blur-[15px] rounded-[20px] w-full max-w-sm p-8 shadow-[0_10px_30px_rgba(0,0,0,0.8)] border border-[#00c3ff]/30">
-            <h3 className="text-[1.5rem] font-bold mb-6 text-white drop-shadow-[0_0_10px_rgba(0,195,255,0.5)]">Rename <span className="text-[#00c3ff]">List</span></h3>
+            <h3 className="text-[1.5rem] font-bold mb-6 text-white drop-shadow-[0_0_10px_rgba(0,195,255,0.5)]">Edit <span className="text-[#00c3ff]">List</span></h3>
+            
+            <label className="block text-[11px] font-bold text-[#00c3ff]/80 uppercase tracking-widest mb-2">Name</label>
             <input
               type="text"
               placeholder="New List Name"
               value={newTitle}
               onChange={(e) => setNewTitle(e.target.value)}
-              className="w-full mb-6 bg-[#071320] border border-[#00c3ff]/30 rounded-[15px] px-4 py-3 text-white placeholder-[#a0a0a0]/40 focus:outline-none focus:border-[#00c3ff] focus:ring-1 focus:ring-[#00c3ff] transition-all duration-300"
+              className="w-full mb-4 bg-[#071320] border border-[#00c3ff]/30 rounded-[15px] px-4 py-3 text-white placeholder-[#a0a0a0]/40 focus:outline-none focus:border-[#00c3ff] focus:ring-1 focus:ring-[#00c3ff] transition-all duration-300"
             />
-            <div className="flex gap-4 justify-end">
-              <button onClick={() => setShowEditListMenu(false)} className="px-5 py-2.5 rounded-full font-bold text-[#a0a0a0] hover:text-[#00c3ff] hover:bg-[#00c3ff]/10 transition-colors">
-                Cancel
-              </button>
-              <button onClick={handleEditList} className="px-5 py-2.5 rounded-full font-bold bg-[#0e0c1d]/60 border border-[#00c3ff]/50 text-[#00c3ff] hover:bg-[#00c3ff]/20 hover:shadow-[0_0_15px_rgba(0,195,255,0.4)] transition-all">
-                Save
-              </button>
+
+            <label className="block text-[11px] font-bold text-[#00c3ff]/80 uppercase tracking-widest mb-2">Privacy</label>
+            <select
+              value={newPrivacy}
+              onChange={(e) => setNewPrivacy(e.target.value)}
+              className="w-full mb-4 bg-[#071320] border border-[#00c3ff]/30 rounded-[15px] px-4 py-3 text-white focus:outline-none focus:border-[#00c3ff] focus:ring-1 focus:ring-[#00c3ff] transition-all duration-300"
+            >
+              <option value="public">Public</option>
+              <option value="friends">Friends Only</option>
+              <option value="private">Private</option>
+            </select>
+
+            <label className="block text-[11px] font-bold text-[#00c3ff]/80 uppercase tracking-widest mb-2">Language</label>
+            <select
+              value={newLanguage}
+              onChange={(e) => setNewLanguage(e.target.value)}
+              className="w-full mb-6 bg-[#071320] border border-[#00c3ff]/30 rounded-[15px] px-4 py-3 text-white focus:outline-none focus:border-[#00c3ff] focus:ring-1 focus:ring-[#00c3ff] transition-all duration-300"
+            >
+              {['English', 'Spanish', 'French', 'German', 'Italian', 'Portuguese', 'Japanese', 'Korean', 'Chinese', 'Arabic', 'Russian', 'Hindi', 'Dutch', 'Swedish', 'Turkish', 'Polish', 'Vietnamese', 'Thai'].map(lang => (
+                <option key={lang} value={lang}>{lang}</option>
+              ))}
+            </select>
+
+            <div className="flex flex-col gap-4">
+              <div className="flex gap-4 justify-end">
+                <button onClick={() => setShowEditListMenu(false)} className="px-5 py-2.5 rounded-full font-bold text-[#a0a0a0] hover:text-[#00c3ff] hover:bg-[#00c3ff]/10 transition-colors">
+                  Cancel
+                </button>
+                <button onClick={handleEditList} className="px-5 py-2.5 rounded-full font-bold bg-[#0e0c1d]/60 border border-[#00c3ff]/50 text-[#00c3ff] hover:bg-[#00c3ff]/20 hover:shadow-[0_0_15px_rgba(0,195,255,0.4)] transition-all">
+                  Save
+                </button>
+              </div>
+              <div className="border-t border-[#00c3ff]/20 pt-4 mt-2 flex justify-between items-center">
+                 <span className="text-xs text-[#a0a0a0]">Danger Zone</span>
+                 <button onClick={() => {
+                   setShowEditListMenu(false);
+                   handleDeleteList();
+                 }} className="px-4 py-2 rounded-full text-xs font-bold bg-red-500/20 text-red-500 border border-red-500/50 hover:bg-red-500/40 transition-colors">
+                   Delete List
+                 </button>
+              </div>
             </div>
           </div>
         </div>

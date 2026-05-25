@@ -96,11 +96,11 @@ export const VocabularyProvider = ({ children }) => {
     }
   };
 
-  const editList = async (id, newTitle) => {
-    if (!newTitle.trim()) return;
+  const editList = async (id, listData) => {
+    if (!listData.name.trim()) return;
     try {
-      const data = await vocabularyService.updateList(id, { name: newTitle });
-      setLists(prev => prev.map(l => l.id === id ? { ...l, name: newTitle } : l));
+      const data = await vocabularyService.updateList(id, listData);
+      setLists(prev => prev.map(l => l.id === id ? { ...l, ...listData } : l));
       return data;
     } catch (error) {
       console.error("Error updating list", error);

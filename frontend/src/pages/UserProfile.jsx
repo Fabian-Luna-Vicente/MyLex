@@ -7,11 +7,13 @@ import {
   FaClock, FaUserMinus, FaArrowLeft
 } from 'react-icons/fa';
 import { profileService } from '../services/profileService';
+import { vocabularyService } from '../services/vocabularyService';
 
 export default function UserProfile() {
   const { userId } = useParams();
   const navigate = useNavigate();
   const [profile, setProfile] = useState(null);
+  const [lists, setLists] = useState([]);
   const [loading, setLoading] = useState(true);
   const [actionLoading, setActionLoading] = useState(false);
 
@@ -24,6 +26,8 @@ export default function UserProfile() {
     try {
       const data = await profileService.getUserProfile(userId);
       setProfile(data);
+      const userLists = await vocabularyService.getUserLists(userId);
+      setLists(userLists);
     } catch (e) {
       console.error(e);
     } finally {
@@ -188,6 +192,26 @@ export default function UserProfile() {
                 </div>
               </div>
             )}
+          </div>
+        )}
+
+        {/* Lists Section */}
+        {lists.length > 0 && (
+          <div className="bg-[#0e0c1d] border border-white/5 rounded-3xl p-8 mt-6">
+            <h2 className="text-[10px] font-bold text-[#a0a0a0] uppercase tracking-widest mb-4">
+              <FaLayerGroup className="inline mr-1.5 text-[#00c3ff]" /> Public & Friends Lists
+            </h2>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              {lists.map(list => (
+                <div key={list.id} onClick={() => navigate(`/list/${list.id}`)} className="cursor-pointer bg-white/5 border border-white/10 rounded-2xl p-5 hover:border-[#00c3ff]/50 transition-colors">
+                  <h3 className="font-bold text-white text-lg">{list.name}</h3>
+                  <div className="flex gap-2 mt-2">
+                    <span className="text-[10px] uppercase font-bold px-2 py-1 bg-[#00c3ff]/10 text-[#00c3ff] rounded-md">{list.language || 'English'}</span>
+                    <span className="text-[10px] uppercase font-bold px-2 py-1 bg-white/10 text-[#a0a0a0] rounded-md">{list.privacy === 'friends' ? 'Friends Only' : list.privacy || 'Public'}</span>
+                  </div>
+                </div>
+              ))}
+            </div>
           </div>
         )}
 

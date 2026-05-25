@@ -36,10 +36,20 @@ class WordResponse(WordInDBBase):
     lists: List["VocabularyListBasic"] = []
 
 
+from typing import Optional, List, Literal
+
+ALLOWED_LANGUAGES = Literal[
+    'English', 'Spanish', 'French', 'German', 'Italian', 'Portuguese',
+    'Japanese', 'Korean', 'Chinese', 'Arabic', 'Russian', 'Hindi',
+    'Dutch', 'Swedish', 'Turkish', 'Polish', 'Vietnamese', 'Thai'
+]
+
 # --- Vocabulary List Schemas ---
 
 class VocabularyListBase(BaseModel):
     name: str
+    privacy: Optional[Literal['public', 'private', 'friends']] = 'public'
+    language: Optional[ALLOWED_LANGUAGES] = 'English'
 
 class VocabularyListCreate(VocabularyListBase):
     pass

@@ -18,6 +18,8 @@ class VocabularyList(Base):
     id = Column(Integer, primary_key=True, index=True, autoincrement=True)
     user_id = Column(String, ForeignKey("users.id", ondelete="CASCADE"), nullable=False)
     name = Column(String, nullable=False)
+    privacy = Column(String, nullable=False, default="public") # public, private, friends
+    language = Column(String, nullable=False, default="English")
     created_at = Column(DateTime(timezone=True), server_default=func.now())
     updated_at = Column(DateTime(timezone=True), onupdate=func.now())
 
