@@ -23,7 +23,7 @@ class VocabularyService:
         return self.repo.get_user_lists_with_privacy(target_user_id, is_friend, is_self)
 
     def get_list(self, list_id: int, user_id: str):
-        db_list = self.repo.get_list(list_id, user_id)
+        db_list = self.repo.get_list_with_privacy_check(list_id, user_id)
         if not db_list:
             raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="List not found")
         return db_list

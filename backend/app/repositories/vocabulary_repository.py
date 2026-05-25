@@ -24,6 +24,25 @@ class VocabularyRepository:
             VocabularyList.user_id == user_id
         ).first()
 
+    def get_list_with_privacy_check(self, list_id: int, current_user_id: str) -> Optional[VocabularyList]:
+        db_list = self.db.query(VocabularyList).filter(VocabularyList.id == list_id).first()
+        if not db_list:
+            return None
+            
+        if db_list.user_id == current_user_id:
+            return db_list
+            
+        if db_list.privacy == "private":
+            return None
+            
+        if db_list.privacy == "friends":
+            from app.repositories.profile_repository import ProfileRepository
+            profile_repo = ProfileRepository(self.db)
+            if not profile_repo.are_friends(db_list.user_id, current_user_id):
+                return None
+                
+        return db_list
+
     def get_lists_by_user(self, user_id: str) -> List[VocabularyList]:
         return self.db.query(VocabularyList).filter(VocabularyList.user_id == user_id).all()
 

@@ -4,7 +4,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import {
   FaHome, FaListUl, FaChartLine, FaGamepad,
   FaUserCircle, FaCog, FaSignOutAlt, FaChevronDown,
-  FaPlusCircle, FaComments
+  FaPlusCircle, FaComments, FaGlobe, FaUsers, FaSearch
 } from 'react-icons/fa';
 import { useAuth } from '../hooks/useAuth';
 
@@ -18,8 +18,10 @@ export default function Navbar() {
     { name: 'Dashboard', path: '/dashboard', icon: <FaHome /> },
     { name: 'My Lists', path: '/lists', icon: <FaListUl /> },
     { name: 'Statistics', path: '/statistics', icon: <FaChartLine /> },
-    { name: 'Chat', path: '/chat', icon: <FaComments /> },
   ];
+
+  const [isCommunityOpen, setIsCommunityOpen] = useState(false);
+  const isCommunityActive = ['/friends', '/search', '/chat'].includes(location.pathname);
 
   const handleLogout = () => {
     logout();
@@ -56,6 +58,55 @@ export default function Navbar() {
               {link.name}
             </Link>
           ))}
+
+          {/* Community Dropdown */}
+          <div className="relative">
+            <button
+              onClick={() => setIsCommunityOpen(!isCommunityOpen)}
+              className={`flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-bold transition-all duration-300 ${isCommunityActive
+                  ? 'bg-[#00c3ff]/10 text-[#00c3ff] border border-[#00c3ff]/20'
+                  : 'text-[#a0a0a0] hover:text-white hover:bg-white/5'
+                }`}
+            >
+              <span className={isCommunityActive ? 'text-[#00c3ff]' : 'text-[#a0a0a0]'}>
+                <FaGlobe />
+              </span>
+              Community
+              <FaChevronDown className={`text-[10px] transition-transform duration-300 ${isCommunityOpen ? 'rotate-180' : ''}`} />
+            </button>
+            <AnimatePresence>
+              {isCommunityOpen && (
+                <>
+                  <div className="fixed inset-0 z-[-1]" onClick={() => setIsCommunityOpen(false)}></div>
+                  <motion.div
+                    initial={{ opacity: 0, y: 10, scale: 0.95 }}
+                    animate={{ opacity: 1, y: 0, scale: 1 }}
+                    exit={{ opacity: 0, y: 10, scale: 0.95 }}
+                    className="absolute right-0 mt-3 w-56 bg-[#0e0c1d] border border-white/10 rounded-2xl p-2 shadow-[0_10px_40px_rgba(0,0,0,0.5)] overflow-hidden"
+                  >
+                    <button
+                      onClick={() => { setIsCommunityOpen(false); navigate('/friends'); }}
+                      className="w-full flex items-center gap-3 px-4 py-2.5 text-sm font-bold text-[#a0a0a0] hover:text-white hover:bg-white/5 rounded-xl transition-all"
+                    >
+                      <FaUsers className="text-[#00c3ff]" /> Friends
+                    </button>
+                    <button
+                      onClick={() => { setIsCommunityOpen(false); navigate('/search'); }}
+                      className="w-full flex items-center gap-3 px-4 py-2.5 text-sm font-bold text-[#a0a0a0] hover:text-white hover:bg-white/5 rounded-xl transition-all"
+                    >
+                      <FaSearch className="text-[#00c3ff]" /> Search Users
+                    </button>
+                    <button
+                      onClick={() => { setIsCommunityOpen(false); navigate('/chat'); }}
+                      className="w-full flex items-center gap-3 px-4 py-2.5 text-sm font-bold text-[#a0a0a0] hover:text-white hover:bg-white/5 rounded-xl transition-all"
+                    >
+                      <FaComments className="text-[#00c3ff]" /> Chats
+                    </button>
+                  </motion.div>
+                </>
+              )}
+            </AnimatePresence>
+          </div>
 
           <Link
             to="/create-word"
@@ -140,6 +191,50 @@ export default function Navbar() {
             <span className="text-[8px] font-black uppercase tracking-widest">{link.name}</span>
           </Link>
         ))}
+
+        {/* Mobile Community Menu Toggle */}
+        <div className="relative">
+          <button
+            onClick={() => setIsCommunityOpen(!isCommunityOpen)}
+            className={`flex flex-col items-center gap-1 p-3 rounded-xl transition-all ${isCommunityActive ? 'text-[#00c3ff]' : 'text-[#a0a0a0]'}`}
+          >
+            <FaGlobe size={16} />
+            <span className="text-[8px] font-black uppercase tracking-widest">Comm</span>
+          </button>
+          <AnimatePresence>
+              {isCommunityOpen && (
+                <>
+                  <div className="fixed inset-0 z-[90]" onClick={() => setIsCommunityOpen(false)}></div>
+                  <motion.div
+                    initial={{ opacity: 0, y: 10, scale: 0.95 }}
+                    animate={{ opacity: 1, y: 0, scale: 1 }}
+                    exit={{ opacity: 0, y: 10, scale: 0.95 }}
+                    className="absolute bottom-full mb-3 right-[-50px] w-48 bg-[#0e0c1d] border border-white/10 rounded-2xl p-2 shadow-[0_10px_40px_rgba(0,0,0,0.5)] overflow-hidden z-[100]"
+                  >
+                    <button
+                      onClick={() => { setIsCommunityOpen(false); navigate('/friends'); }}
+                      className="w-full flex items-center gap-3 px-4 py-2.5 text-sm font-bold text-[#a0a0a0] hover:text-white hover:bg-white/5 rounded-xl transition-all"
+                    >
+                      <FaUsers className="text-[#00c3ff]" /> Friends
+                    </button>
+                    <button
+                      onClick={() => { setIsCommunityOpen(false); navigate('/search'); }}
+                      className="w-full flex items-center gap-3 px-4 py-2.5 text-sm font-bold text-[#a0a0a0] hover:text-white hover:bg-white/5 rounded-xl transition-all"
+                    >
+                      <FaSearch className="text-[#00c3ff]" /> Search
+                    </button>
+                    <button
+                      onClick={() => { setIsCommunityOpen(false); navigate('/chat'); }}
+                      className="w-full flex items-center gap-3 px-4 py-2.5 text-sm font-bold text-[#a0a0a0] hover:text-white hover:bg-white/5 rounded-xl transition-all"
+                    >
+                      <FaComments className="text-[#00c3ff]" /> Chats
+                    </button>
+                  </motion.div>
+                </>
+              )}
+          </AnimatePresence>
+        </div>
+
         <Link
           to="/create-word"
           className="bg-gradient-to-tr from-[#00c3ff] to-[#00ff88] p-3 rounded-xl text-black shadow-lg"

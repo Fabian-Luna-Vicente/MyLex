@@ -40,7 +40,6 @@ export default function ListWords() {
     );
   }
 
-  // --- RENDER DE ERROR/NO ENCONTRADO ---
   if (!list) {
     return (
       <div className="min-h-screen bg-[#071320] flex flex-col items-center justify-center text-white">
@@ -52,9 +51,8 @@ export default function ListWords() {
     );
   }
 
-  // --- VISTA PRINCIPAL ---
   return (
-    <div className="min-h-screen bg-[#071320] text-white p-6 md:p-12 font-sans relative z-[150] overflow-hidden">
+    <div className="min-h-screen bg-[#071320] text-white p-6 md:p-12 font-sans relative z-[1] overflow-hidden">
 
       <div className="max-w-7xl mx-auto relative z-10">
 
@@ -72,19 +70,19 @@ export default function ListWords() {
             <h1 className="text-3xl md:text-[2.5rem] font-bold text-white drop-shadow-[0_0_10px_rgba(0,195,255,0.5)] tracking-wide flex items-center gap-3">
               {list.name}
               {/* Botones rápidos de lista */}
-              <button onClick={() => { 
-                setNewTitle(list.name); 
+              <button onClick={() => {
+                setNewTitle(list.name);
                 setNewPrivacy(list.privacy || 'public');
                 setNewLanguage(list.language || 'English');
-                setShowEditListMenu(true); 
+                setShowEditListMenu(true);
               }} className="text-[#a0a0a0] hover:text-[#00c3ff] transition-colors text-xl" title="Settings">
                 <FaCog />
               </button>
             </h1>
 
             <div className="flex gap-2 mt-3 mb-2">
-              <span 
-                 className="text-[10px] uppercase font-bold px-2 py-1 bg-[#00c3ff]/10 text-[#00c3ff] border border-[#00c3ff]/30 rounded-md"
+              <span
+                className="text-[10px] uppercase font-bold px-2 py-1 bg-[#00c3ff]/10 text-[#00c3ff] border border-[#00c3ff]/30 rounded-md"
               >
                 {list.language || 'English'}
               </span>
@@ -218,7 +216,7 @@ export default function ListWords() {
           <div className="absolute inset-0 bg-[#071320]/80 backdrop-blur-md" onClick={() => setShowEditListMenu(false)}></div>
           <div className="relative bg-[#0e0c1d]/80 backdrop-blur-[15px] rounded-[20px] w-full max-w-sm p-8 shadow-[0_10px_30px_rgba(0,0,0,0.8)] border border-[#00c3ff]/30">
             <h3 className="text-[1.5rem] font-bold mb-6 text-white drop-shadow-[0_0_10px_rgba(0,195,255,0.5)]">Edit <span className="text-[#00c3ff]">List</span></h3>
-            
+
             <label className="block text-[11px] font-bold text-[#00c3ff]/80 uppercase tracking-widest mb-2">Name</label>
             <input
               type="text"
@@ -260,13 +258,13 @@ export default function ListWords() {
                 </button>
               </div>
               <div className="border-t border-[#00c3ff]/20 pt-4 mt-2 flex justify-between items-center">
-                 <span className="text-xs text-[#a0a0a0]">Danger Zone</span>
-                 <button onClick={() => {
-                   setShowEditListMenu(false);
-                   handleDeleteList();
-                 }} className="px-4 py-2 rounded-full text-xs font-bold bg-red-500/20 text-red-500 border border-red-500/50 hover:bg-red-500/40 transition-colors">
-                   Delete List
-                 </button>
+                <span className="text-xs text-[#a0a0a0]">Danger Zone</span>
+                <button onClick={() => {
+                  setShowEditListMenu(false);
+                  handleDeleteList();
+                }} className="px-4 py-2 rounded-full text-xs font-bold bg-red-500/20 text-red-500 border border-red-500/50 hover:bg-red-500/40 transition-colors">
+                  Delete List
+                </button>
               </div>
             </div>
           </div>
