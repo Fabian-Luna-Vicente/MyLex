@@ -178,7 +178,7 @@ class AIService:
     async def generate_icebreaker_message(self, chat_context: str, vocabulary: list[str], language: str, participants_info: str, ai_language: str = "es") -> str:
         vocab_str = ", ".join(vocabulary) if vocabulary else "vocabulario básico"
         prompt = get_icebreaker_prompt(chat_context, vocab_str, language, participants_info, ai_language)
-        sys_prompt = "You are a creative writer." if ai_language == "en" else "Eres un escritor creativo."
+        sys_prompt = f"You are a creative writer. You must generate the text ONLY in {language}." if ai_language == "en" else f"Eres un escritor creativo. Debes generar el texto ÚNICAMENTE en {language}."
         
         try:
             response = await self.client.chat.completions.create(

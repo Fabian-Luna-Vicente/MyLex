@@ -209,26 +209,30 @@ def get_icebreaker_prompt(chat_context: str, vocab_str: str, language: str, part
     if ai_language == "en":
         return f"""
         The context of our situation or conversation is: {chat_context}.
-        The language in which you must generate the icebreaker is: {language}.
+        The target language of the chat room is: {language}.
         The participants and their roles are: {participants_info}
 
         Your task is to generate a short, natural, and creative message to "break the ice" and start the conversation immersively.
         It can be from the perspective of any of the participants (or as a narrator if you prefer) setting the scene.
         
-        STRICT RULE: You must try to naturally include some of these words in your message: {vocab_str}.
+        STRICT RULES:
+        1. The generated message MUST be EXCLUSIVELY in {language}. Do not use any other language.
+        2. You must try to naturally include some of these words in your message: {vocab_str}.
 
         Only return the exact message you would send in the chat, without extra quotes, without generic AI greetings, and without explanatory text.
         """
     else:
         return f"""
         El contexto de nuestra situación o conversación es: {chat_context}.
-        El idioma en el que debes generar el rompehielos es: {language}.
+        El idioma objetivo de la sala de chat es: {language}.
         Los participantes y sus roles son: {participants_info}
 
         Tu tarea es generar un mensaje corto, natural y creativo para "romper el hielo" y comenzar la conversación de forma inmersiva.
         Puede ser desde la perspectiva de cualquiera de los participantes (o como un narrador si prefieres) que establezca la escena.
         
-        REGLA ESTRICTA: Debes intentar incluir de forma natural algunas de estas palabras en tu mensaje: {vocab_str}.
+        REGLAS ESTRICTAS:
+        1. El mensaje generado DEBE estar EXCLUSIVAMENTE en el idioma {language}. No uses ningún otro idioma bajo ninguna circunstancia.
+        2. Debes intentar incluir de forma natural algunas de estas palabras en tu mensaje: {vocab_str}.
 
         Solo devuelve el mensaje exacto que enviarías en el chat, sin comillas adicionales, sin saludos genéricos de IA y sin texto explicativo.
         """
