@@ -48,7 +48,9 @@ export default function ChatView() {
     checkingGrammar,
     grammarResult,
     setGrammarResult,
-    lists
+    lists,
+    interimResult,
+    speechStatus
   } = useChatView(roomId, user);
 
   // Handle Scroll positions for Room Info vs Messages
@@ -322,7 +324,34 @@ export default function ChatView() {
             )}
           </AnimatePresence>
 
-          <div className="flex items-center gap-2 bg-[#1a182c] p-1.5 rounded-full border border-white/10 shadow-2xl">
+          <AnimatePresence>
+            {isRecording && (
+              <motion.div
+                initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: 10 }}
+                className="absolute bottom-full mb-4 left-1/2 transform -translate-x-1/2 flex flex-col items-center gap-2 z-10 w-full px-4"
+              >
+                {interimResult && (
+                  <div className="bg-black/60 backdrop-blur-md border border-[#00c3ff]/30 px-4 py-2 rounded-2xl max-w-full truncate shadow-lg">
+                    <p className="text-sm text-[#00c3ff] italic animate-pulse text-center">
+                      {interimResult}
+                    </p>
+                  </div>
+                )}
+                <div className="flex items-center gap-2 bg-[#1a182c] border border-red-500/30 px-4 py-1.5 rounded-full shadow-lg">
+                  <div className={`w-2 h-2 rounded-full bg-red-500 ${speechStatus === 'speaking' || speechStatus === 'detecting_sound' ? 'animate-ping' : ''}`}></div>
+                  <span className="text-[10px] font-bold text-red-500 uppercase tracking-widest">
+                    {speechStatus === 'listening' ? 'Escuchando ambiente...' : 
+                     speechStatus === 'detecting_sound' ? 'Detectando sonido...' : 
+                     speechStatus === 'speaking' ? 'Capturando voz...' : 
+                     speechStatus === 'processing' ? 'Procesando frase...' : 
+                     speechStatus === 'no_match' ? 'No se entendió, repite' : 'Iniciando micro...'}
+                  </span>
+                </div>
+              </motion.div>
+            )}
+          </AnimatePresence>
+
+          <div className="flex items-center gap-2 bg-[#1a182c] p-1.5 rounded-full border border-white/10 shadow-2xl relative z-20">
             <button
               onClick={toggleRecording}
               className={`w-11 h-11 rounded-full flex-none flex items-center justify-center transition-all ${isRecording

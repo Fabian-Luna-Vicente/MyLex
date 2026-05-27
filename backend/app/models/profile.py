@@ -1,4 +1,4 @@
-from sqlalchemy import Column, String, Integer, DateTime, ForeignKey, UniqueConstraint,Date
+from sqlalchemy import Column, String, Integer, DateTime, ForeignKey, UniqueConstraint, Date, JSON
 from sqlalchemy.orm import relationship
 from sqlalchemy.sql import func
 from sqlalchemy.dialects.postgresql import ARRAY
@@ -14,7 +14,7 @@ class UserProfile(Base):
     country = Column(String, nullable=True, default="")
     native_language = Column(String, nullable=True, default="")
     ai_language = Column(String, nullable=True, default="en")
-    learning_languages = Column(ARRAY(String), nullable=True, default=[])
+    learning_languages = Column(JSON().with_variant(ARRAY(String), "postgresql"), nullable=True, default=[])
     level = Column(String, nullable=True, default="Beginner")
     created_at = Column(DateTime(timezone=True), server_default=func.now())
     updated_at = Column(DateTime(timezone=True), onupdate=func.now())

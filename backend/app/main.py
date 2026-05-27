@@ -61,7 +61,7 @@ async def external_service_error_handler(request: Request, exc: ExternalServiceE
 
 # Include routers
 app.include_router(auth_routes.router, prefix="/auth", tags=["Auth"])
-app.include_router(vocabulary_routes.router, prefix="/api", tags=["Vocabulary"])
+app.include_router(vocabulary_routes.router, prefix="/api/vocabulary", tags=["Vocabulary"])
 app.include_router(ai_routes.router, prefix="/api/ai", tags=["AI Tools"])
 app.include_router(progress_routes.router, prefix="/api", tags=["Game Progress"])
 app.include_router(google_images_routes.router, prefix="/api", tags=["Google Images"])

@@ -1,12 +1,12 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
+import React from 'react';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import { MemoryRouter } from 'react-router-dom';
-import axios from 'axios';
+import api from '../services/api';
 import Login from './Login';
-import { AuthProvider } from '../context/AuthContext';
+import { AuthProvider } from '../contexts/AuthContext';
 
-// Mock axios completely
-vi.mock('axios');
+vi.mock('../services/api');
 
 describe('Login Page Integration', () => {
     beforeEach(() => {
@@ -15,7 +15,7 @@ describe('Login Page Integration', () => {
 
     it('should show error message on invalid credentials', async () => {
         // Mock a 401 Unauthorized response from backend
-        axios.post.mockRejectedValue({
+        api.post.mockRejectedValue({
             response: {
                 data: { detail: 'Invalid credentials' }
             }
@@ -30,10 +30,10 @@ describe('Login Page Integration', () => {
         );
 
         // Fill out form
-        fireEvent.change(screen.getByPlaceholderText(/your email/i), {
+        fireEvent.change(screen.getByPlaceholderText(/you@example\.com/i), {
             target: { value: 'test@example.com' }
         });
-        fireEvent.change(screen.getByPlaceholderText(/your password/i), {
+        fireEvent.change(screen.getByPlaceholderText(/••••••••/i), {
             target: { value: 'wrongpassword' }
         });
 
@@ -48,14 +48,14 @@ describe('Login Page Integration', () => {
 
     it('should login successfully and redirect', async () => {
         // Mock a successful login response
-        axios.post.mockResolvedValue({
+        api.post.mockResolvedValue({
             data: {
                 access_token: 'fake_token',
                 refresh_token: 'fake_refresh'
             }
         });
         
-        axios.get.mockResolvedValue({
+        api.get.mockResolvedValue({
             data: {
                 id: '1',
                 email: 'test@example.com',
@@ -71,18 +71,18 @@ describe('Login Page Integration', () => {
             </MemoryRouter>
         );
 
-        fireEvent.change(screen.getByPlaceholderText(/your email/i), {
+        fireEvent.change(screen.getByPlaceholderText(/you@example\.com/i), {
             target: { value: 'test@example.com' }
         });
-        fireEvent.change(screen.getByPlaceholderText(/your password/i), {
+        fireEvent.change(screen.getByPlaceholderText(/••••••••/i), {
             target: { value: 'correctpassword' }
         });
 
         fireEvent.click(screen.getByRole('button', { name: /sign in/i }));
 
         await waitFor(() => {
-            // Check if axios was called
-            expect(axios.post).toHaveBeenCalled();
+            // Check if api was called
+            expect(api.post).toHaveBeenCalled();
         });
     });
 });

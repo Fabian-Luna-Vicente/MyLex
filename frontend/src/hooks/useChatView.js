@@ -21,9 +21,13 @@ export const useChatView = (roomId, user) => {
   const [showVocabPanel, setShowVocabPanel] = useState(false);
   const [showListSelector, setShowListSelector] = useState(false);
 
+  const [interimResult, setInterimResult] = useState('');
+  const [speechStatus, setSpeechStatus] = useState('idle');
+
   const messagesEndRef = useRef(null);
   const wsRef = useRef(null);
   const recognitionRef = useRef(null);
+  const startTimeoutRef = useRef(null);
 
   useEffect(() => {
     fetchLists();
@@ -151,33 +155,117 @@ export const useChatView = (roomId, user) => {
     }
   };
 
+  const getLanguageCode = (langName) => {
+    if (!langName) return 'en-US';
+    const map = {
+      'english': 'en-US',
+      'spanish': 'es-ES',
+      'french': 'fr-FR',
+      'german': 'de-DE',
+      'italian': 'it-IT',
+      'portuguese': 'pt-BR',
+      'russian': 'ru-RU',
+      'japanese': 'ja-JP',
+      'korean': 'ko-KR',
+      'chinese': 'zh-CN'
+    };
+    return map[langName.toLowerCase()] || 'en-US';
+  };
+
   const initSpeechRecognition = () => {
     const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
     if (!SpeechRecognition) {
-      alert("Your browser does not support Speech Recognition.");
+      alert("Tu navegador actual no soporta el reconocimiento de voz. Esta función está optimizada y solo funciona correctamente en Google Chrome y Microsoft Edge.");
       return null;
     }
     const recognition = new SpeechRecognition();
-    recognition.continuous = false;
+    recognition.continuous = true;
     recognition.interimResults = true;
-    recognition.lang = 'en-US';
+    recognition.lang = room?.language ? getLanguageCode(room.language) : 'en-US';
+
+    recognition.onstart = () => {
+      console.log("SpeechRecognition: onstart");
+      setSpeechStatus('listening');
+      if (startTimeoutRef.current) {
+        clearTimeout(startTimeoutRef.current);
+        startTimeoutRef.current = null;
+      }
+    };
+    recognition.onaudiostart = () => {
+      console.log("SpeechRecognition: onaudiostart");
+    };
+    recognition.onsoundstart = () => {
+      console.log("SpeechRecognition: onsoundstart");
+      setSpeechStatus('detecting_sound');
+    };
+    recognition.onspeechstart = () => {
+      console.log("SpeechRecognition: onspeechstart");
+      setSpeechStatus('speaking');
+    };
+    recognition.onspeechend = () => {
+      console.log("SpeechRecognition: onspeechend");
+      setSpeechStatus('processing');
+    };
+    recognition.onsoundend = () => {
+      console.log("SpeechRecognition: onsoundend");
+      setSpeechStatus('listening');
+    };
+    recognition.onnomatch = () => {
+      console.log("SpeechRecognition: onnomatch");
+      setSpeechStatus('no_match');
+      setTimeout(() => setSpeechStatus('listening'), 2000);
+    };
 
     recognition.onresult = (event) => {
       let finalTranscript = '';
+      let currentInterim = '';
       for (let i = event.resultIndex; i < event.results.length; ++i) {
         if (event.results[i].isFinal) {
           finalTranscript += event.results[i][0].transcript;
+        } else {
+          currentInterim += event.results[i][0].transcript;
         }
       }
+      
       if (finalTranscript) {
+        console.log("SpeechRecognition: final text: ", finalTranscript);
         setInput(prev => prev + (prev ? ' ' : '') + finalTranscript);
+      }
+      if (currentInterim) {
+        console.log("SpeechRecognition: interim text: ", currentInterim);
+      }
+      setInterimResult(currentInterim);
+    };
+
+    recognition.onend = () => {
+      console.log("SpeechRecognition: onend");
+      setIsRecording(false);
+      setSpeechStatus('idle');
+      setInterimResult('');
+      if (startTimeoutRef.current) {
+        clearTimeout(startTimeoutRef.current);
+        startTimeoutRef.current = null;
       }
     };
 
-    recognition.onend = () => setIsRecording(false);
     recognition.onerror = (e) => {
-      console.error(e);
+      console.error("Speech recognition error:", e);
+      if (startTimeoutRef.current) {
+        clearTimeout(startTimeoutRef.current);
+        startTimeoutRef.current = null;
+      }
+      if (e.error === 'network') {
+        alert("Error de red en el reconocimiento de voz. Asegúrate de tener conexión a internet y de estar usando localhost o HTTPS (requerido por el navegador).");
+      } else if (e.error === 'not-allowed') {
+        alert("Acceso al micrófono denegado. Por favor, permite el acceso al micrófono en tu navegador.");
+      } else if (e.error === 'audio-capture') {
+        alert("Error de captura de audio: El navegador no puede acceder al hardware del micrófono. Asegúrate de que tienes un micrófono conectado, que no está desactivado en Windows, y que ninguna otra aplicación (como Zoom o Teams) lo está usando en exclusiva.");
+      } else {
+        alert("Error en el reconocimiento de voz: " + e.error);
+      }
       setIsRecording(false);
+      setSpeechStatus('idle');
+      setInterimResult('');
     };
 
     return recognition;
@@ -185,15 +273,35 @@ export const useChatView = (roomId, user) => {
 
   const toggleRecording = () => {
     if (isRecording) {
+      if (startTimeoutRef.current) {
+        clearTimeout(startTimeoutRef.current);
+        startTimeoutRef.current = null;
+      }
       recognitionRef.current?.stop();
       setIsRecording(false);
+      setSpeechStatus('idle');
     } else {
-      if (!recognitionRef.current) {
-        recognitionRef.current = initSpeechRecognition();
-      }
-      if (recognitionRef.current) {
-        recognitionRef.current.start();
-        setIsRecording(true);
+      try {
+        if (!recognitionRef.current) {
+          recognitionRef.current = initSpeechRecognition();
+        }
+        if (recognitionRef.current) {
+          recognitionRef.current.start();
+          setIsRecording(true);
+          setSpeechStatus('idle');
+
+          // Timeout to detect if the browser's speech engine hangs silently
+          startTimeoutRef.current = setTimeout(() => {
+            if (speechStatus === 'idle') {
+              alert("El micrófono no responde. Recuerda que esta función nativa solo está soportada al 100% en Google Chrome y Microsoft Edge. Navegadores como Opera, Brave o Firefox bloquearán el acceso de voz.");
+              recognitionRef.current?.stop();
+              setIsRecording(false);
+            }
+          }, 4000);
+        }
+      } catch (e) {
+        console.error("Error starting recognition:", e);
+        alert("No se pudo iniciar el micrófono: " + e.message);
       }
     }
   };
@@ -331,6 +439,8 @@ export const useChatView = (roomId, user) => {
     checkingGrammar,
     grammarResult,
     setGrammarResult,
-    lists
+    lists,
+    interimResult,
+    speechStatus
   };
 };

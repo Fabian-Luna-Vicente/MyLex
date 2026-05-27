@@ -1,4 +1,4 @@
-from sqlalchemy import Column, String, Integer, DateTime, Boolean, ForeignKey, Table, UniqueConstraint
+from sqlalchemy import Column, String, Integer, DateTime, Boolean, ForeignKey, Table, UniqueConstraint, JSON
 from sqlalchemy.orm import relationship
 from sqlalchemy.sql import func
 from sqlalchemy.dialects.postgresql import ARRAY
@@ -45,8 +45,8 @@ class Word(Base):
     participle = Column(String, nullable=True)
     meaning = Column(String, nullable=True)
     
-    word_types = Column(ARRAY(String), nullable=True, default=[])
-    examples = Column(ARRAY(String), nullable=True, default=[])
+    word_types = Column(JSON().with_variant(ARRAY(String), "postgresql"), nullable=True, default=[])
+    examples = Column(JSON().with_variant(ARRAY(String), "postgresql"), nullable=True, default=[])
     
     image = Column(String, nullable=True)
     synonyms = Column(String, nullable=True)

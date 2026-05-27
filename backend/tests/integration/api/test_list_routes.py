@@ -1,5 +1,5 @@
 from app.main import app
-from app.api.dependencies import get_current_active_user
+from app.core.dependencies import get_current_user
 from app.models.user import User
 
 # Mock User for Authentication
@@ -11,10 +11,10 @@ mock_user = User(
     is_verified=True
 )
 
-def override_get_current_active_user():
+def override_get_current_user():
     return mock_user
 
-app.dependency_overrides[get_current_active_user] = override_get_current_active_user
+app.dependency_overrides[get_current_user] = override_get_current_user
 
 def test_get_user_lists_empty(client):
     response = client.get("/api/vocabulary/lists")
@@ -25,7 +25,7 @@ def test_create_list(client):
     payload = {
         "name": "My Integration Test List",
         "description": "Integration Test",
-        "language": "en",
+        "language": "English",
         "privacy": "public"
     }
     
