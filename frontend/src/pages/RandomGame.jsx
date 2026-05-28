@@ -1,3 +1,4 @@
+import React from 'react';
 import { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useRandomGame } from '../hooks/useRandomGame';

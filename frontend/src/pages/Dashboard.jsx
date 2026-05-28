@@ -1,3 +1,4 @@
+import React from 'react';
 import { useAuth } from '../hooks/useAuth';
 import { useVocabulary } from '../hooks/useVocabulary';
 import { useEffect, useState } from 'react';

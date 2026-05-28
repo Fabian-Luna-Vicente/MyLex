@@ -1,3 +1,4 @@
+import React from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { useVocabulary } from '../hooks/useVocabulary';
 import { useAi } from '../hooks/useAi';

@@ -1,3 +1,4 @@
+import React from 'react';
 import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { FaTimes, FaRobot, FaUserCircle, FaPlus, FaCheck, FaGlobe, FaInfoCircle, FaTheaterMasks, FaUsers, FaUserPlus } from 'react-icons/fa';

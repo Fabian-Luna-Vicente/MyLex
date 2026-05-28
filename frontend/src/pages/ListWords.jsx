@@ -1,3 +1,4 @@
+import React from 'react';
 import { IoAddCircleSharp } from "react-icons/io5";
 import { CiPlay1 } from "react-icons/ci";
 import { FaImage, FaCog } from "react-icons/fa"

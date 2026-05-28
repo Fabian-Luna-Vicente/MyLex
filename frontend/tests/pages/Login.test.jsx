@@ -2,11 +2,11 @@ import { describe, it, expect, vi, beforeEach } from 'vitest';
 import React from 'react';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import { MemoryRouter } from 'react-router-dom';
-import api from '../services/api';
-import Login from './Login';
-import { AuthProvider } from '../contexts/AuthContext';
+import api from '../../src/services/api';
+import Login from '../../src/pages/Login';
+import { AuthProvider } from '../../src/contexts/AuthContext';
 
-vi.mock('../services/api');
+vi.mock('../../src/services/api');
 
 describe('Login Page Integration', () => {
     beforeEach(() => {

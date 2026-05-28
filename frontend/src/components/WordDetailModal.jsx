@@ -1,3 +1,4 @@
+import React from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { BsXLg } from 'react-icons/bs';
 import { CiPlay1 } from 'react-icons/ci';

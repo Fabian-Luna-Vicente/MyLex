@@ -1,3 +1,4 @@
+import React from 'react';
 import { useState } from 'react';
 import { FaTimes, FaLayerGroup } from 'react-icons/fa';
 import { LANGUAGES } from '../config/constants';
