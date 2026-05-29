@@ -55,7 +55,7 @@ export default function ResetPassword() {
         animate={{ opacity: 1, y: 0 }}
         className="w-full max-w-md bg-[#0e0c1d] border border-white/5 rounded-[30px] p-8 shadow-2xl relative overflow-hidden"
       >
-        <div className="absolute top-0 left-0 w-64 h-64 bg-[#00ff88]/10 rounded-full blur-[80px] pointer-events-none" />
+        <div className="absolute top-0 left-0 w-64 h-64 bg-[#00c3ff]/10 rounded-full blur-[80px] pointer-events-none" />
 
         <h1 className="text-3xl font-black text-[#00c3ff] mb-2 tracking-tight">Set New Password</h1>
         <p className="text-sm text-[#a0a0a0] mb-8 font-medium">
@@ -64,10 +64,10 @@ export default function ResetPassword() {
 
         {status === 'success' ? (
           <div className="text-center">
-            <div className="w-16 h-16 bg-[#00ff88]/10 text-[#00ff88] rounded-full flex items-center justify-center mx-auto mb-4 text-2xl">
+            <div className="w-16 h-16 bg-[#00c3ff]/10 text-[#00c3ff] rounded-full flex items-center justify-center mx-auto mb-4 text-2xl">
               ✓
             </div>
-            <p className="text-[#00ff88] font-bold mb-6">{message}</p>
+            <p className="text-[#00c3ff] font-bold mb-6">{message}</p>
             <button
               onClick={() => navigate('/login')}
               className="w-full py-4 rounded-2xl font-black text-sm bg-[#00c3ff] text-black hover:shadow-[0_0_30px_rgba(0,195,255,0.3)] transition-all"
@@ -87,7 +87,7 @@ export default function ResetPassword() {
                 onChange={(e) => setPassword(e.target.value)}
                 required
                 disabled={!token}
-                className="w-full bg-[#1a182c] border border-white/5 rounded-2xl px-5 py-4 text-white text-sm focus:border-[#00ff88]/50 focus:shadow-[0_0_20px_rgba(0,255,136,0.15)] outline-none transition-all"
+                className="w-full bg-[#1a182c] border border-white/5 rounded-2xl px-5 py-4 text-white text-sm focus:border-[#00c3ff]/50 focus:shadow-[0_0_20px_rgba(0,195,255,0.15)] outline-none transition-all"
                 placeholder="••••••••"
               />
             </div>
@@ -102,13 +102,13 @@ export default function ResetPassword() {
                 onChange={(e) => setConfirmPassword(e.target.value)}
                 required
                 disabled={!token}
-                className="w-full bg-[#1a182c] border border-white/5 rounded-2xl px-5 py-4 text-white text-sm focus:border-[#00ff88]/50 focus:shadow-[0_0_20px_rgba(0,255,136,0.15)] outline-none transition-all"
+                className="w-full bg-[#1a182c] border border-white/5 rounded-2xl px-5 py-4 text-white text-sm focus:border-[#00c3ff]/50 focus:shadow-[0_0_20px_rgba(0,195,255,0.15)] outline-none transition-all"
                 placeholder="••••••••"
               />
             </div>
 
             {status === 'error' && (
-              <p className="text-red-500 text-xs font-bold bg-red-500/10 px-4 py-3 rounded-xl border border-red-500/20">
+              <p className="text-white text-xs font-bold bg-blue-600/10 px-4 py-3 rounded-xl border border-blue-500/20">
                 {message}
               </p>
             )}

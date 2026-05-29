@@ -134,7 +134,7 @@ export default function CreateChatModal({ onClose, onSuccess }) {
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   <div>
                     <label className="flex items-center gap-2 text-sm font-bold text-[#00c3ff] mb-2 uppercase tracking-widest"><FaGlobe /> Language</label>
-                    <select value={language} onChange={e => setLanguage(e.target.value)} className="w-full bg-[#1a182c] border border-white/10 rounded-2xl px-4 py-3 text-white focus:border-[#00ff88]/50 outline-none">
+                    <select value={language} onChange={e => setLanguage(e.target.value)} className="w-full bg-[#1a182c] border border-white/10 rounded-2xl px-4 py-3 text-white focus:border-[#00c3ff]/50 outline-none">
                       {LANGUAGES.map(lang => (
                         <option key={lang} value={lang}>{lang}</option>
                       ))}
@@ -180,7 +180,7 @@ export default function CreateChatModal({ onClose, onSuccess }) {
                             <p className="text-[#a0a0a0] text-[10px] uppercase">{p.role}</p>
                           </div>
                         </div>
-                        <button onClick={() => removeParticipant(idx)} className="text-red-500 opacity-0 group-hover:opacity-100 transition-opacity p-2 hover:bg-red-500/10 rounded-lg">
+                        <button onClick={() => removeParticipant(idx)} className="text-white opacity-0 group-hover:opacity-100 transition-opacity p-2 hover:bg-white/10 rounded-lg">
                           <FaTimes />
                         </button>
                       </div>
@@ -265,7 +265,7 @@ export default function CreateChatModal({ onClose, onSuccess }) {
                           return (
                             <div key={friend.user_id} className={`flex items-center justify-between p-2 rounded-lg border ${isAdded ? 'border-white/5 bg-white/5 opacity-50' : 'border-white/10 bg-[#0e0c1d]'}`}>
                               <div className="flex items-center gap-3">
-                                <div className="w-8 h-8 rounded-full bg-[#00ff88]/20 flex items-center justify-center text-[#00ff88]">
+                                <div className="w-8 h-8 rounded-full bg-[#00c3ff]/20 flex items-center justify-center text-[#00c3ff]">
                                   {friend.avatar_url ? <img src={friend.avatar_url} className="w-full h-full rounded-full object-cover" /> : <FaUserCircle />}
                                 </div>
                                 <span className="text-white text-sm font-bold">{friend.username}</span>

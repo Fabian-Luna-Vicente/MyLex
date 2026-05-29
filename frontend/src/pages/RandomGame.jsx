@@ -20,10 +20,10 @@ export default function RandomGame() {
   const word = shuffledWords[index];
 
   const diffLabels = [
-    { key: 'easy',      icon: <FaGrinSquint />, color: 'bg-yellow-400 text-black',  label: 'Easy' },
-    { key: 'normal',    icon: <FaLaugh />,      color: 'bg-orange-400 text-black',  label: 'Normal' },
-    { key: 'hard',      icon: <FaMeh />,        color: 'bg-red-500 text-white',     label: 'Hard' },
-    { key: 'ultrahard', icon: <FaDizzy />,      color: 'bg-red-900 text-white',     label: 'Ultra' },
+    { key: 'easy',      icon: <FaGrinSquint />, color: 'bg-blue-300 text-black',  label: 'Easy' },
+    { key: 'normal',    icon: <FaLaugh />,      color: 'bg-blue-500 text-white',  label: 'Normal' },
+    { key: 'hard',      icon: <FaMeh />,        color: 'bg-white text-black',     label: 'Hard' },
+    { key: 'ultrahard', icon: <FaDizzy />,      color: 'bg-transparent border-2 border-white text-white',     label: 'Ultra' },
   ];
 
   const totalByDiff = (key) => difficulty[key]?.length || 0;

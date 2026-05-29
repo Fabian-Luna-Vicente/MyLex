@@ -146,7 +146,7 @@ export default function ChatView() {
                   {room.name}
                 </button>
                 <div
-                  className="text-[#00ff88] text-[10px] font-bold uppercase tracking-widest text-left"
+                  className="text-[#00c3ff] text-[10px] font-bold uppercase tracking-widest text-left"
                 >
                   {room.participants?.length || 0} Participants
                 </div>
@@ -169,7 +169,7 @@ export default function ChatView() {
                 <h3 className="text-3xl font-black text-white tracking-wide">Room Details</h3>
                 <div className="flex gap-2">
                   {isEditingInfo ? (
-                    <button onClick={saveEditing} className="bg-[#00ff88] text-black px-4 py-2 rounded-full font-bold flex items-center gap-2 hover:scale-105 transition-transform"><FaSave /> Save</button>
+                    <button onClick={saveEditing} className="bg-[#00c3ff] text-black px-4 py-2 rounded-full font-bold flex items-center gap-2 hover:scale-105 transition-transform"><FaSave /> Save</button>
                   ) : (
                     <button onClick={startEditing} className="bg-white/10 text-white px-4 py-2 rounded-full font-bold flex items-center gap-2 hover:bg-white/20 transition-colors"><FaEdit /> Edit</button>
                   )}
@@ -180,7 +180,7 @@ export default function ChatView() {
                         if (success) navigate('/chat');
                       }
                     }} 
-                    className="bg-red-500/10 text-red-500 px-4 py-2 rounded-full font-bold flex items-center gap-2 hover:bg-red-500/20 transition-colors"
+                    className="bg-white/5 text-white px-4 py-2 rounded-full font-bold flex items-center gap-2 hover:bg-white/10 transition-colors"
                   >
                     <FaSignOutAlt /> Leave
                   </button>
@@ -205,7 +205,7 @@ export default function ChatView() {
                 </div>
               ) : (
                 <div className="mb-8">
-                  <h2 className="text-4xl font-black text-transparent bg-clip-text bg-gradient-to-r from-[#00c3ff] to-[#00ff88] mb-4">{room.name}</h2>
+                  <h2 className="text-4xl font-black text-transparent bg-clip-text bg-gradient-to-r from-blue-500 to-[#00c3ff] mb-4">{room.name}</h2>
                   <p className="text-[#a0a0a0] text-lg leading-relaxed">{room.description || "No description provided."}</p>
                 </div>
               )}
@@ -216,9 +216,9 @@ export default function ChatView() {
                   <h4 className="text-xs font-bold text-[#00c3ff] uppercase tracking-widest mb-2 relative z-10">Current Context</h4>
                   <p className="text-white font-medium text-lg relative z-10">{room.context || "General conversation"}</p>
                 </div>
-                <div className="bg-gradient-to-br from-[#00ff88]/10 to-transparent border border-[#00ff88]/20 p-6 rounded-3xl relative overflow-hidden group">
-                  <div className="absolute top-0 right-0 p-4 opacity-10 group-hover:opacity-20 transition-opacity"><FaGlobe size={80} /></div>
-                  <h4 className="text-xs font-bold text-[#00ff88] uppercase tracking-widest mb-2 relative z-10">Target Language</h4>
+                <div className="bg-gradient-to-br from-[#00c3ff]/10 to-transparent border border-[#00c3ff]/20 p-6 rounded-3xl relative overflow-hidden group">
+                  <div className="absolute top-0 right-0 w-32 h-32 bg-[#00c3ff]/5 rounded-full blur-[30px] group-hover:bg-[#00c3ff]/10 transition-colors duration-500"></div>
+                  <h4 className="text-xs font-bold text-[#00c3ff] uppercase tracking-widest mb-2 relative z-10">Target Language</h4>
                   <p className="text-white font-medium text-lg capitalize relative z-10">{room.language || "English"}</p>
                 </div>
               </div>
@@ -338,9 +338,9 @@ export default function ChatView() {
                     </p>
                   </div>
                 )}
-                <div className="flex items-center gap-2 bg-[#1a182c] border border-red-500/30 px-4 py-1.5 rounded-full shadow-lg">
-                  <div className={`w-2 h-2 rounded-full bg-red-500 ${speechStatus === 'speaking' || speechStatus === 'detecting_sound' ? 'animate-ping' : ''}`}></div>
-                  <span className="text-[10px] font-bold text-red-500 uppercase tracking-widest">
+                <div className="flex items-center gap-2 bg-[#1a182c] border border-white/30 px-4 py-1.5 rounded-full shadow-lg">
+                  <div className={`w-2 h-2 rounded-full bg-white ${speechStatus === 'speaking' || speechStatus === 'detecting_sound' ? 'animate-ping' : ''}`}></div>
+                  <span className="text-[10px] font-bold text-white uppercase tracking-widest">
                     {speechStatus === 'listening' ? 'Escuchando ambiente...' : 
                      speechStatus === 'detecting_sound' ? 'Detectando sonido...' : 
                      speechStatus === 'speaking' ? 'Capturando voz...' : 
@@ -356,7 +356,7 @@ export default function ChatView() {
             <button
               onClick={toggleRecording}
               className={`w-11 h-11 rounded-full flex-none flex items-center justify-center transition-all ${isRecording
-                ? 'bg-red-500/20 text-red-500 animate-pulse'
+                ? 'bg-white/20 text-white animate-pulse'
                 : 'bg-white/5 text-[#a0a0a0] hover:bg-[#00c3ff]/10 hover:text-[#00c3ff]'
                 }`}
             >
@@ -365,7 +365,7 @@ export default function ChatView() {
             <button
               onClick={handleIcebreaker}
               disabled={loadingIcebreaker}
-              className="w-11 h-11 rounded-full flex-none bg-white/5 text-[#00ff88] flex items-center justify-center transition-all hover:bg-[#00ff88]/10 hover:scale-105 disabled:opacity-50"
+              className="w-11 h-11 rounded-full flex-none bg-white/5 text-[#00c3ff] flex items-center justify-center transition-all hover:bg-[#00c3ff]/10 hover:scale-105 disabled:opacity-50"
             >
               <GiMeltingIceCube size={18} className={loadingIcebreaker ? "animate-spin" : ""} />
             </button>
@@ -453,16 +453,15 @@ export default function ChatView() {
                         {list.words.map(w => {
                           const used = w.usage_count > 0;
                           return (
-                            <div key={w.id} className={`p-3 rounded-xl border flex items-center justify-between transition-all ${used ? 'bg-[#00ff88]/5 border-[#00ff88]/20' : 'bg-white/5 border-transparent'
-                              }`}>
+                            <div key={w.id} className={`p-3 rounded-xl border flex items-center justify-between transition-all ${used ? 'bg-[#00c3ff]/5 border-[#00c3ff]/20' : 'bg-white/5 border-transparent'} hover:border-[#00c3ff]/30`}>
                               <div>
-                                <p className={`font-bold text-sm ${used ? 'text-[#00ff88] line-through opacity-70' : 'text-white'}`}>
+                                <p className={`font-bold text-sm ${used ? 'text-[#00c3ff] line-through opacity-70' : 'text-white'}`}>
                                   {w.name}
                                 </p>
                                 <p className="text-[10px] text-[#a0a0a0] truncate max-w-[150px]">{w.meaning}</p>
                               </div>
                               {used && (
-                                <div className="text-[10px] font-bold text-black bg-[#00ff88] px-2 py-0.5 rounded-full">
+                                <div className="text-[10px] font-bold text-black bg-[#00c3ff] px-2 py-0.5 rounded-full">
                                   {w.usage_count}
                                 </div>
                               )}
@@ -583,13 +582,13 @@ export default function ChatView() {
             <div className="space-y-4 relative z-10">
               {grammarResult.has_errors ? (
                 <>
-                  <div className="bg-red-500/10 border border-red-500/20 p-4 rounded-2xl">
-                    <h3 className="text-[10px] text-red-500 font-bold uppercase tracking-widest mb-1">Se encontraron errores</h3>
+                  <div className="bg-white/10 border border-white/20 p-4 rounded-2xl">
+                    <h3 className="text-[10px] text-white font-bold uppercase tracking-widest mb-1">Se encontraron errores</h3>
                     <p className="text-[#a0a0a0] text-sm italic">Tu texto necesita mejoras.</p>
                   </div>
-                  <div className="bg-[#eab308]/10 border border-[#eab308]/20 p-4 rounded-2xl">
-                    <h3 className="text-[10px] text-[#eab308] font-bold uppercase tracking-widest mb-2">Versión Corregida</h3>
-                    <p className="text-white font-medium">{grammarResult.corrected_text}</p>
+                  <div className="bg-blue-600/10 border border-blue-500/20 p-4 rounded-2xl">
+                    <h3 className="text-[10px] text-white font-bold uppercase tracking-widest mb-1">Corrección Sugerida</h3>
+                    <p className="text-white font-medium text-lg leading-relaxed">{grammarResult.corrected_text}</p>
                   </div>
                   <div className="bg-white/5 border border-white/10 p-4 rounded-2xl">
                     <h3 className="text-[10px] text-[#00c3ff] font-bold uppercase tracking-widest mb-2">Explicación</h3>
@@ -597,11 +596,11 @@ export default function ChatView() {
                   </div>
                 </>
               ) : (
-                <div className="bg-[#00ff88]/10 border border-[#00ff88]/20 p-6 rounded-2xl text-center">
-                  <div className="w-16 h-16 rounded-full bg-[#00ff88]/20 flex items-center justify-center mx-auto mb-4">
-                    <FaSpellCheck size={30} className="text-[#00ff88]" />
+                <div className="bg-[#00c3ff]/10 border border-[#00c3ff]/20 p-6 rounded-2xl text-center">
+                  <div className="w-16 h-16 rounded-full bg-[#00c3ff]/20 flex items-center justify-center mx-auto mb-4">
+                    <FaSpellCheck size={30} className="text-[#00c3ff]" />
                   </div>
-                  <h3 className="text-lg font-black text-[#00ff88] mb-2">¡Excelente Trabajo!</h3>
+                  <h3 className="text-lg font-black text-[#00c3ff] mb-2">¡Excelente Trabajo!</h3>
                   <p className="text-[#a0a0a0] text-sm">{grammarResult.explanation || "Tu mensaje no tiene errores gramaticales."}</p>
                 </div>
               )}

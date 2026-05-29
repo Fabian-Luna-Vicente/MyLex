@@ -152,7 +152,7 @@ export default function WritingGame() {
               </div>
 
               {aiError && (
-                <div className="bg-red-500/10 border border-red-500/50 text-red-500 p-4 rounded-[15px] flex items-center gap-3">
+                <div className="bg-white/10 border border-white/50 text-white p-4 rounded-[15px] flex items-center gap-3">
                   <FaExclamationCircle /> {aiError}
                 </div>
               )}
@@ -197,11 +197,11 @@ export default function WritingGame() {
 
                     <div className="flex items-center pt-4 border-t border-[#ffffff10]">
                       {aiFeedback.words_used_correctly ? (
-                        <span className="flex items-center gap-2 text-[#00ff88] text-xs font-bold uppercase tracking-wider">
+                        <span className="flex items-center gap-2 text-[#00c3ff] text-xs font-bold uppercase tracking-wider">
                           <FaCheckCircle size={14} /> Required words used correctly
                         </span>
                       ) : (
-                        <span className="flex items-center gap-2 text-red-400 text-xs font-bold uppercase tracking-wider">
+                        <span className="flex items-center gap-2 text-white text-xs font-bold uppercase tracking-wider">
                           <FaExclamationCircle size={14} /> Missing or incorrect usage
                         </span>
                       )}

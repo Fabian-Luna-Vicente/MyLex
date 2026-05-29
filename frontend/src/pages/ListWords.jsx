@@ -167,7 +167,7 @@ export default function ListWords() {
                   <button onClick={() => { setWordToMove(word); setShowMoveMenu(true); }} className="text-[#a0a0a0] hover:text-[#00c3ff] transition-colors" title="Move/Copy">
                     <MdOutlineDriveFileMove size={22} />
                   </button>
-                  <button onClick={() => { setWordToDelete(word); setShowConfirmDelete(true); }} className="text-[#a0a0a0] hover:text-red-500 transition-colors" title="Delete">
+                  <button onClick={() => { setWordToDelete(word); setShowConfirmDelete(true); }} className="text-[#a0a0a0] hover:text-white transition-colors" title="Delete">
                     <MdDeleteOutline size={22} />
                   </button>
                 </div>
@@ -264,7 +264,7 @@ export default function ListWords() {
                 <button onClick={() => {
                   setShowEditListMenu(false);
                   handleDeleteList();
-                }} className="px-4 py-2 rounded-full text-xs font-bold bg-red-500/20 text-red-500 border border-red-500/50 hover:bg-red-500/40 transition-colors">
+                }} className="px-4 py-2 rounded-full text-xs font-bold bg-white/10 text-white border border-white/30 hover:bg-white/20 transition-colors">
                   Delete List
                 </button>
               </div>
@@ -315,7 +315,7 @@ export default function ListWords() {
               <button onClick={() => setShowConfirmDelete(false)} className="px-6 py-2.5 rounded-full font-bold text-[#a0a0a0] hover:text-white hover:bg-slate-800 transition-colors">
                 Cancel
               </button>
-              <button onClick={handleDeleteWord} className="px-6 py-2.5 rounded-full font-bold bg-red-500/20 text-red-500 border border-red-500/50 hover:bg-red-500/40 transition-colors">
+              <button onClick={handleDeleteWord} className="px-6 py-2.5 rounded-full font-bold bg-white/10 text-white border border-white/30 hover:bg-white/20 transition-colors">
                 Delete
               </button>
             </div>

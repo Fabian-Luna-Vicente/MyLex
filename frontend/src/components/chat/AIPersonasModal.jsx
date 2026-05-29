@@ -139,7 +139,7 @@ export default function AIPersonasModal({ onClose }) {
                         </button>
                         <button
                           onClick={() => handleDelete(p.id)}
-                          className="text-[#a0a0a0] hover:text-red-500 transition-colors p-1"
+                          className="text-[#a0a0a0] hover:text-white transition-colors p-1"
                           title="Delete"
                         >
                           <FaTrash size={14} />

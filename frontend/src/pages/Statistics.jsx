@@ -11,7 +11,7 @@ import { FaFilter, FaCalendarAlt, FaGamepad, FaListUl, FaTags, FaCheckCircle, Fa
 import { progressService } from '../services/progressService';
 import { useVocabulary } from '../hooks/useVocabulary';
 
-const COLORS = ['#00c3ff', '#00ff88', '#ffcc00', '#ff4d4d', '#a0a0a0'];
+const COLORS = ['#00c3ff', '#0080ff', '#ffffff', '#0040ff', '#a0a0a0'];
 
 export default function Statistics() {
   const navigate = useNavigate();
@@ -85,21 +85,21 @@ export default function Statistics() {
       {/* Background Decor */}
       <div className="fixed top-0 left-0 w-full h-full pointer-events-none z-0">
         <div className="absolute top-[-10%] right-[-10%] w-[50%] h-[50%] bg-[#00c3ff]/5 blur-[120px] rounded-full"></div>
-        <div className="absolute bottom-[-10%] left-[-10%] w-[50%] h-[50%] bg-[#00ff88]/5 blur-[120px] rounded-full"></div>
+        <div className="absolute bottom-[-10%] left-[-10%] w-[50%] h-[50%] bg-[#00c3ff]/5 blur-[120px] rounded-full"></div>
       </div>
 
-      <header className="relative z-10 flex items-center justify-between px-6 md:px-12 pt-8 pb-6 border-b border-[#00c3ff]/20 backdrop-blur-md sticky top-0 bg-[#071320]/80">
+      <header className="relative z-10 flex items-center justify-between px-4 md:px-12 pt-8 pb-6 border-b border-[#00c3ff]/20 backdrop-blur-md sticky top-0 bg-[#071320]/80">
         <button
           onClick={() => navigate('/dashboard')}
           className="group flex items-center text-[#a0a0a0] hover:text-[#00c3ff] transition-colors font-bold uppercase tracking-widest text-xs"
         >
           <GrPrevious className="mr-2 group-hover:-translate-x-1 transition-transform" />
-          Dashboard
+          <span className="hidden sm:inline">Dashboard</span>
         </button>
-        <h1 className="text-2xl font-extrabold drop-shadow-[0_0_10px_rgba(0,195,255,0.5)]">
+        <h1 className="text-lg sm:text-2xl font-extrabold drop-shadow-[0_0_10px_rgba(0,195,255,0.5)] text-center flex-1 sm:flex-none">
           Performance <span className="text-[#00c3ff]">Analytics</span>
         </h1>
-        <div className="w-24 md:block hidden" />
+        <div className="w-8 sm:w-24 hidden sm:block" />
       </header>
 
       <main className="relative z-10 max-w-7xl mx-auto px-6 py-10">
@@ -113,24 +113,26 @@ export default function Statistics() {
             animate={{ opacity: 1, y: 0 }}
             className="lg:col-span-2 bg-[#0e0c1d]/60 backdrop-blur-xl border border-[#00c3ff]/20 rounded-[30px] p-6 shadow-xl"
           >
-            <div className="flex justify-between items-center mb-6">
+            <div className="flex flex-col xl:flex-row justify-between items-start xl:items-center mb-6 gap-4">
               <h2 className="text-lg font-bold flex items-center gap-2">
                 <FaCalendarAlt className="text-[#00c3ff]" /> Recent Activity (7 Days)
               </h2>
-              <div className="bg-[#0e0c1d]/60 backdrop-blur-md border border-[#00c3ff]/20 rounded-[20px] p-6 shadow-xl flex items-center justify-between">
-                <div>
-                  <h3 className="text-[#00c3ff] font-bold uppercase tracking-widest text-xs mb-2">Racha Actual</h3>
-                  <p className="text-3xl font-black text-white">{overall?.streak || 0} Días</p>
+              <div className="flex flex-col sm:flex-row gap-4 w-full xl:w-auto">
+                <div className="bg-[#0e0c1d]/60 backdrop-blur-md border border-[#00c3ff]/20 rounded-[20px] p-4 shadow-xl flex items-center justify-between flex-1">
+                  <div>
+                    <h3 className="text-[#00c3ff] font-bold uppercase tracking-widest text-xs mb-1">Racha Actual</h3>
+                    <p className="text-2xl font-black text-white">{overall?.streak || 0} Días</p>
+                  </div>
+                  <FaFire className="text-[#00c3ff] opacity-50 ml-4" size={30} />
                 </div>
-                <FaFire className="text-[#00c3ff] opacity-50" size={40} />
-              </div>
 
-              <div className="bg-[#0e0c1d]/60 backdrop-blur-md border border-[#00c3ff]/20 rounded-[20px] p-6 shadow-xl flex items-center justify-between">
-                <div>
-                  <h3 className="text-[#a0a0a0] font-bold uppercase tracking-widest text-xs mb-2">Mejor Racha</h3>
-                  <p className="text-3xl font-black text-white">{overall?.longest_streak || 0} Días</p>
+                <div className="bg-[#0e0c1d]/60 backdrop-blur-md border border-[#00c3ff]/20 rounded-[20px] p-4 shadow-xl flex items-center justify-between flex-1">
+                  <div>
+                    <h3 className="text-[#a0a0a0] font-bold uppercase tracking-widest text-xs mb-1">Mejor Racha</h3>
+                    <p className="text-2xl font-black text-white">{overall?.longest_streak || 0} Días</p>
+                  </div>
+                  <FaFire className="text-white opacity-50 ml-4" size={30} />
                 </div>
-                <FaFire className="text-orange-500 opacity-50" size={40} />
               </div>
             </div>
             <div className="h-[250px] w-full">
@@ -201,7 +203,7 @@ export default function Statistics() {
             <FaFilter /> <h2 className="font-bold uppercase tracking-[2px] text-sm">Filter Detailed Data</h2>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-5 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
 
             <div className="space-y-2">
               <label className="text-[10px] uppercase font-bold text-[#a0a0a0] ml-2 flex items-center gap-1">
@@ -265,10 +267,10 @@ export default function Statistics() {
               />
             </div>
 
-            <div className="flex items-end">
+            <div className="flex items-end sm:col-span-2 lg:col-span-1 mt-2 lg:mt-0">
               <button
                 onClick={applyFilters}
-                className="w-full py-2.5 bg-[#00c3ff] text-black font-bold rounded-xl hover:bg-[#00ff88] transition-all hover:shadow-[0_0_20px_rgba(0,255,136,0.4)] active:scale-95"
+                className="w-full py-3 sm:py-2.5 bg-[#00c3ff] text-black font-bold rounded-xl hover:bg-white transition-all hover:shadow-[0_0_20px_rgba(255,255,255,0.4)] active:scale-95"
               >
                 Apply Filters
               </button>
@@ -284,15 +286,15 @@ export default function Statistics() {
               <span className="text-[10px] text-[#a0a0a0] font-bold uppercase tracking-widest mb-1">Total Played</span>
               <span className="text-2xl font-black text-white">{stats.length}</span>
             </div>
-            <div className="bg-[#0e0c1d]/60 border border-[#00ff88]/10 p-4 rounded-2xl flex flex-col items-center">
+            <div className="bg-[#0e0c1d]/60 border border-[#00c3ff]/10 p-4 rounded-2xl flex flex-col items-center">
               <span className="text-[10px] text-[#a0a0a0] font-bold uppercase tracking-widest mb-1">Avg Accuracy</span>
-              <span className="text-2xl font-black text-[#00ff88]">
+              <span className="text-2xl font-black text-[#00c3ff]">
                 {Math.round((stats.filter(s => s.is_correct).length / stats.filter(s => s.is_correct !== null).length || 0) * 100)}%
               </span>
             </div>
-            <div className="bg-[#0e0c1d]/60 border border-[#ff4d4d]/10 p-4 rounded-2xl flex flex-col items-center">
+            <div className="bg-[#0e0c1d]/60 border border-white/10 p-4 rounded-2xl flex flex-col items-center">
               <span className="text-[10px] text-[#a0a0a0] font-bold uppercase tracking-widest mb-1">Mistakes</span>
-              <span className="text-2xl font-black text-red-500">{stats.filter(s => s.is_correct === false).length}</span>
+              <span className="text-2xl font-black text-white">{stats.filter(s => s.is_correct === false).length}</span>
             </div>
             <div className="bg-[#0e0c1d]/60 border border-[#00c3ff]/10 p-4 rounded-2xl flex flex-col items-center">
               <span className="text-[10px] text-[#a0a0a0] font-bold uppercase tracking-widest mb-1">Active Words</span>
@@ -352,14 +354,14 @@ export default function Statistics() {
                       </td>
                       <td className="px-6 py-4">
                         {row.game === 'random' ? (
-                          <span className={`text-[11px] font-bold uppercase ${row.difficulty === 'easy' ? 'text-yellow-400' :
-                            row.difficulty === 'normal' ? 'text-orange-400' :
-                              row.difficulty === 'hard' ? 'text-red-400' : 'text-red-700'
+                          <span className={`text-[11px] font-bold uppercase ${row.difficulty === 'easy' ? 'text-blue-300' :
+                            row.difficulty === 'normal' ? 'text-blue-500' :
+                              row.difficulty === 'hard' ? 'text-white' : 'text-white/70'
                             }`}>
                             {row.difficulty}
                           </span>
                         ) : (
-                          <span className={`text-[11px] font-bold uppercase ${row.is_correct ? 'text-[#00ff88]' : 'text-red-500'}`}>
+                          <span className={`text-[11px] font-bold uppercase ${row.is_correct ? 'text-[#00c3ff]' : 'text-white'}`}>
                             {row.is_correct ? 'Correct' : 'Mistake'}
                           </span>
                         )}

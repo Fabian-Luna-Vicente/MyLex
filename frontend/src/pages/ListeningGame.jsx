@@ -70,7 +70,7 @@ export default function ListeningGame() {
 
   return (
     <div className="min-h-screen bg-[#071320] text-white font-sans relative overflow-hidden">
-      <div className="absolute top-[-20%] right-[-10%] w-[50%] h-[50%] bg-[#00ff88]/5 blur-[120px] rounded-full"></div>
+      <div className="absolute top-[-20%] right-[-10%] w-[50%] h-[50%] bg-[#00c3ff]/5 blur-[120px] rounded-full"></div>
       <div className="absolute bottom-[-20%] left-[-10%] w-[50%] h-[50%] bg-[#00c3ff]/5 blur-[120px] rounded-full"></div>
 
       <header className="relative z-10 flex items-center justify-between px-6 md:px-12 pt-8 pb-4 border-b border-[#00c3ff]/20 backdrop-blur-md sticky top-0 bg-[#071320]/80">
@@ -86,8 +86,8 @@ export default function ListeningGame() {
         </h1>
         {showGame ? (
           <div className="flex items-center gap-4 text-xs font-bold uppercase tracking-widest">
-            <span className="text-[#00ff88]">✓ {score.correct}</span>
-            <span className="text-[#ff4d4d]">✗ {score.wrong}</span>
+            <span className="text-[#00c3ff]">✓ {score.correct}</span>
+            <span className="text-white">✗ {score.wrong}</span>
             <span className="text-[#a0a0a0] ml-2">{index + 1}/{shuffledWords.length}</span>
           </div>
         ) : <div className="w-24 md:block hidden" />}
@@ -112,8 +112,8 @@ export default function ListeningGame() {
                         key={list.id}
                         onClick={() => setSelectedListId(list.id)}
                         className={`px-4 py-2.5 rounded-xl text-sm font-bold tracking-wide transition-all border ${selectedListId === list.id
-                          ? 'bg-[#00ff88]/20 border-[#00ff88] text-[#00ff88] shadow-[0_0_15px_rgba(0,255,136,0.3)]'
-                          : 'bg-[#071320] border-[#00c3ff]/20 text-[#a0a0a0] hover:border-[#00ff88]/50 hover:text-white'
+                          ? 'bg-[#00c3ff]/20 border-[#00c3ff] text-[#00c3ff] shadow-[0_0_15px_rgba(0,195,255,0.3)]'
+                          : 'bg-[#071320] border-[#00c3ff]/20 text-[#a0a0a0] hover:border-[#00c3ff]/50 hover:text-white'
                           }`}
                       >
                         {list.name}
@@ -123,10 +123,10 @@ export default function ListeningGame() {
                   <button
                     disabled={!selectedListId || loading}
                     onClick={() => { startGame(selectedListId); setSubIndex(0); }}
-                    className="w-full flex items-center justify-center gap-3 px-6 py-4 bg-gradient-to-r from-[#00ff88]/10 to-[#00c3ff]/10 border border-[#00ff88]/50 text-[#00ff88] hover:from-[#00ff88]/20 hover:to-[#00c3ff]/20 shadow-[0_0_20px_rgba(0,255,136,0.2)] font-bold uppercase tracking-wider rounded-full transition-all active:scale-95 disabled:opacity-50"
+                    className="w-full flex items-center justify-center gap-3 px-6 py-4 bg-gradient-to-r from-blue-500/10 to-[#00c3ff]/10 border border-[#00c3ff]/50 text-[#00c3ff] hover:from-blue-500/20 hover:to-[#00c3ff]/20 shadow-[0_0_20px_rgba(0,195,255,0.2)] font-bold uppercase tracking-wider rounded-full transition-all active:scale-95 disabled:opacity-50"
                   >
                     {loading ? (
-                      <div className="h-5 w-5 animate-spin rounded-full border-2 border-[#00ff88] border-t-transparent" />
+                      <div className="h-5 w-5 animate-spin rounded-full border-2 border-[#00c3ff] border-t-transparent" />
                     ) : (
                       <><MdNotStarted size={22} /> Play Now</>
                     )}
@@ -193,10 +193,10 @@ export default function ListeningGame() {
                               placeholder={item.isMain ? '???' : '...'}
                               style={{ width: `${(item.correct.length * 1.2) + 2}ch` }}
                               className={`bg-[#071320] border-b-2 px-3 py-0.5 text-center transition-all outline-none font-bold ${gameStatus === 'playing'
-                                ? item.isMain ? 'border-[#00c3ff] text-white' : 'border-[#00c3ff]/30 focus:border-[#00c3ff] text-[#00ff88]'
+                                ? item.isMain ? 'border-[#00c3ff] text-white' : 'border-[#00c3ff]/30 focus:border-[#00c3ff] text-[#00c3ff]'
                                 : (userAnswers[item.id] || '').trim().toLowerCase() === item.correct.toLowerCase()
-                                  ? 'border-[#00ff88] text-[#00ff88]'
-                                  : 'border-red-500 text-red-500'
+                                  ? 'border-[#00c3ff] text-[#00c3ff]'
+                                  : 'border-white text-white'
                                 }`}
                             />
                             {item.suffix && <span className="text-white/20 ml-1">{item.suffix}</span>}
@@ -214,7 +214,7 @@ export default function ListeningGame() {
                         value={userAnswers['main'] || ''}
                         onChange={(e) => setUserAnswers(prev => ({ ...prev, 'main': e.target.value }))}
                         disabled={gameStatus !== 'playing'}
-                        className={`bg-[#071320] border-4 rounded-3xl px-10 py-5 text-center text-3xl font-black outline-none transition-all ${gameStatus === 'playing' ? 'border-[#00c3ff]/30 focus:border-[#00c3ff] text-white' : (userAnswers['main'] || '').trim().toLowerCase() === currentWord.name.toLowerCase() ? 'border-[#00ff88] text-[#00ff88]' : 'border-red-500 text-red-500'
+                        className={`bg-[#071320] border-4 rounded-3xl px-10 py-5 text-center text-3xl font-black outline-none transition-all ${gameStatus === 'playing' ? 'border-[#00c3ff]/30 focus:border-[#00c3ff] text-white' : (userAnswers['main'] || '').trim().toLowerCase() === currentWord.name.toLowerCase() ? 'border-[#00c3ff] text-[#00c3ff]' : 'border-white text-white'
                           }`}
                         placeholder="???"
                       />
@@ -246,7 +246,7 @@ export default function ListeningGame() {
                     animate={{ opacity: 1, scale: 1 }}
                     className="flex flex-col items-center gap-4"
                   >
-                    <div className={`text-xl font-black uppercase tracking-widest ${gameStatus === 'won' ? 'text-[#00ff88]' : 'text-red-500'}`}>
+                    <div className={`text-xl font-black uppercase tracking-widest ${gameStatus === 'won' ? 'text-[#00c3ff]' : 'text-white'}`}>
                       {gameStatus === 'won' ? '✓ Perfectly Done!' : '✗ Check your mistakes'}
                     </div>
                     {subIndex + 1 < (puzzle?.examples.length || 0) ? (
@@ -255,7 +255,7 @@ export default function ListeningGame() {
                           setSubIndex(subIndex + 1);
                           setGameStatus('playing');
                         }}
-                        className="w-full py-6 bg-white text-black font-black rounded-full uppercase tracking-[2px] flex items-center justify-center gap-4 hover:bg-[#00ff88] transition-all shadow-xl"
+                        className="w-full py-6 bg-white text-black font-black rounded-full uppercase tracking-[2px] flex items-center justify-center gap-4 hover:bg-[#00c3ff] transition-all shadow-xl"
                       >
                         Next Example <GrLinkNext />
                       </button>
@@ -265,7 +265,7 @@ export default function ListeningGame() {
                           setSubIndex(0);
                           nextLevel();
                         }}
-                        className="w-full py-6 bg-[#00ff88] text-black font-black rounded-full uppercase tracking-[2px] flex items-center justify-center gap-4 hover:shadow-[0_0_40px_rgba(0,255,136,0.5)] transition-all"
+                        className="w-full py-6 bg-[#00c3ff] text-black font-black rounded-full uppercase tracking-[2px] flex items-center justify-center gap-4 hover:shadow-[0_0_40px_rgba(0,195,255,0.5)] transition-all"
                       >
                         Complete Round <GrLinkNext />
                       </button>
@@ -291,7 +291,7 @@ export default function ListeningGame() {
                 <span className="text-[10px] text-[#a0a0a0] font-bold uppercase tracking-widest">Progress</span>
                 <div className="flex gap-1.5">
                   {shuffledWords.map((_, i) => (
-                    <div key={i} className={`h-1.5 w-4 rounded-full transition-all ${i < index ? 'bg-[#00ff88]' : i === index ? 'bg-white scale-y-150' : 'bg-[#a0a0a0]/10'}`} />
+                    <div key={i} className={`h-1.5 w-4 rounded-full transition-all ${i < index ? 'bg-[#00c3ff]' : i === index ? 'bg-white scale-y-150' : 'bg-[#a0a0a0]/10'}`} />
                   ))}
                 </div>
               </div>

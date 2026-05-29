@@ -26,7 +26,7 @@ const AccuracyCarousel = ({ accuracies }) => {
     return (
       <div className="h-full flex flex-col justify-center">
         <p className="text-[#a0a0a0] text-xs font-bold uppercase tracking-widest mb-1">Game Accuracy</p>
-        <h3 className="text-4xl font-extrabold text-[#00ff88]">0%</h3>
+        <h3 className="text-4xl font-extrabold text-[#00c3ff]">0%</h3>
         <p className="text-[10px] text-[#a0a0a0] mt-2">No games played yet</p>
       </div>
     );
@@ -47,14 +47,14 @@ const AccuracyCarousel = ({ accuracies }) => {
           <p className="text-[#a0a0a0] text-[10px] font-bold uppercase tracking-widest mb-1">
             {current.game.replace('_', ' ')} · {current.list_name}
           </p>
-          <h3 className="text-4xl font-extrabold text-[#00ff88]">
+          <h3 className="text-4xl font-extrabold text-[#00c3ff]">
             {Math.round(current.accuracy)}%
           </h3>
           <div className="w-full bg-[#ffffff05] h-1.5 rounded-full mt-4 overflow-hidden">
             <motion.div
               initial={{ width: 0 }}
               animate={{ width: `${current.accuracy}%` }}
-              className="bg-[#00ff88] h-full rounded-full transition-all duration-1000"
+              className="bg-[#00c3ff] h-full rounded-full transition-all duration-1000"
             />
           </div>
         </motion.div>
@@ -135,7 +135,7 @@ export default function Dashboard() {
                </button>
                <button 
                  onClick={() => { logout(); navigate('/login'); }}
-                 className="p-3 rounded-full bg-red-500/10 border border-red-500/10 text-red-400 hover:bg-red-500 hover:text-white transition-all shadow-lg"
+                 className="p-3 rounded-full bg-white/5 border border-white/10 text-[#a0a0a0] hover:bg-white hover:text-black transition-all shadow-lg"
                  title="Log Out"
                >
                  <FaSignOutAlt size={20} />

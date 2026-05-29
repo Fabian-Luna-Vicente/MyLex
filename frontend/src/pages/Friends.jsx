@@ -127,7 +127,7 @@ export default function Friends() {
                       ))}
                     </div>
                   </div>
-                  <FaUserCheck className="text-[#00ff88] flex-shrink-0" />
+                  <FaUserCheck className="text-[#00c3ff] flex-shrink-0" />
                 </motion.div>
               ))
             )}
@@ -167,13 +167,13 @@ export default function Friends() {
                   <div className="flex gap-2 flex-shrink-0">
                     <button
                       onClick={() => handleRespondRequest(req.id, 'accept')}
-                      className="w-10 h-10 rounded-xl bg-[#00ff88]/10 border border-[#00ff88]/20 text-[#00ff88] flex items-center justify-center hover:bg-[#00ff88]/20 transition-all"
+                      className="w-10 h-10 rounded-xl bg-[#00c3ff]/10 border border-[#00c3ff]/20 text-[#00c3ff] flex items-center justify-center hover:bg-[#00c3ff]/20 transition-all"
                     >
                       <FaCheck />
                     </button>
                     <button
                       onClick={() => handleRespondRequest(req.id, 'reject')}
-                      className="w-10 h-10 rounded-xl bg-red-500/10 border border-red-500/20 text-red-400 flex items-center justify-center hover:bg-red-500/20 transition-all"
+                      className="w-10 h-10 rounded-xl bg-white/5 border border-white/10 text-white flex items-center justify-center hover:bg-white/10 transition-all"
                     >
                       <FaTimes />
                     </button>

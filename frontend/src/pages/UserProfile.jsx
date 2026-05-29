@@ -66,7 +66,7 @@ export default function UserProfile() {
         <button
           onClick={handleRemoveFriend}
           disabled={actionLoading}
-          className="px-5 py-2.5 rounded-xl font-bold text-sm bg-red-500/10 border border-red-500/20 text-red-400 hover:bg-red-500/20 transition-all flex items-center gap-2"
+          className="px-5 py-2.5 rounded-xl font-bold text-sm bg-white/5 border border-white/20 text-white hover:bg-white/10 transition-all flex items-center gap-2"
         >
           <FaUserMinus /> Remove Friend
         </button>
@@ -74,7 +74,7 @@ export default function UserProfile() {
     }
     if (profile?.request_status === 'pending') {
       return (
-        <span className="px-5 py-2.5 rounded-xl font-bold text-sm bg-yellow-500/10 border border-yellow-500/20 text-yellow-400 flex items-center gap-2">
+        <span className="px-5 py-2.5 rounded-xl font-bold text-sm bg-blue-500/10 border border-blue-500/20 text-blue-400 flex items-center gap-2">
           <FaClock /> Request Pending
         </span>
       );
@@ -175,7 +175,7 @@ export default function UserProfile() {
             {profile.native_language && (
               <div className="mb-4">
                 <span className="text-[10px] font-bold text-[#a0a0a0] uppercase tracking-widest">Native:</span>
-                <span className="ml-2 px-3 py-1 rounded-lg text-sm font-bold bg-[#00ff88]/10 text-[#00ff88] border border-[#00ff88]/20">
+                <span className="ml-2 px-3 py-1 rounded-lg text-sm font-bold bg-[#00c3ff]/10 text-[#00c3ff] border border-[#00c3ff]/20">
                   {profile.native_language}
                 </span>
               </div>

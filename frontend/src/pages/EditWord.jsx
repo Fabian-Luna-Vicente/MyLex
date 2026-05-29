@@ -48,7 +48,7 @@ export default function EditWord() {
         </header>
 
         {error && (
-          <div className="bg-red-500/10 border border-red-500/50 text-red-500 p-4 rounded-[15px] mb-8">
+          <div className="bg-blue-600/10 border border-blue-500/50 text-white font-bold p-4 rounded-[15px] mb-8">
             {error}
           </div>
         )}

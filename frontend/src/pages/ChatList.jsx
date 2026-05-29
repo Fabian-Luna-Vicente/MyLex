@@ -39,23 +39,23 @@ export default function ChatList() {
     <div className="max-w-4xl mx-auto px-4 pb-32">
       <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5 }}>
 
-        <header className="flex justify-between items-center mb-8">
+        <header className="flex flex-col sm:flex-row sm:justify-between items-start sm:items-center mb-8 gap-4">
           <div>
             <h1 className="text-3xl font-black text-white tracking-tight">Messages</h1>
             <p className="text-[#a0a0a0] text-sm mt-1">Practice and connect</p>
           </div>
-          <div className="flex gap-3">
+          <div className="flex gap-2 sm:gap-3 w-full sm:w-auto">
             <button
               onClick={() => setShowAIPersonasModal(true)}
-              className="px-4 py-2.5 rounded-xl text-sm font-bold bg-[#00c3ff]/10 text-[#00c3ff] border border-[#00c3ff]/20 hover:bg-[#00c3ff]/20 transition-all flex items-center gap-2"
+              className="flex-1 sm:flex-none justify-center px-3 py-2 sm:px-4 sm:py-2.5 rounded-lg sm:rounded-xl text-xs sm:text-sm font-bold bg-[#00c3ff]/10 text-[#00c3ff] border border-[#00c3ff]/20 hover:bg-[#00c3ff]/20 transition-all flex items-center gap-1.5 sm:gap-2"
             >
-              <FaUsersCog /> AI Menu
+              <FaUsersCog size={14} className="sm:w-4 sm:h-4" /> <span className="whitespace-nowrap">AI Menu</span>
             </button>
             <button
               onClick={() => setShowCreateModal(true)}
-              className="px-6 py-2.5 rounded-xl text-sm font-black bg-[#00c3ff] text-black hover:shadow-[0_0_20px_rgba(0,195,255,0.4)] transition-all flex items-center gap-2"
+              className="flex-1 sm:flex-none justify-center px-3 py-2 sm:px-6 sm:py-2.5 rounded-lg sm:rounded-xl text-xs sm:text-sm font-black bg-[#00c3ff] text-black hover:shadow-[0_0_20px_rgba(0,195,255,0.4)] transition-all flex items-center gap-1.5 sm:gap-2"
             >
-              <FaPlus /> Custom Chat
+              <FaPlus size={12} className="sm:w-4 sm:h-4" /> <span className="whitespace-nowrap">Custom Chat</span>
             </button>
           </div>
         </header>
@@ -98,7 +98,7 @@ export default function ChatList() {
                       {room.participants?.length || 0} PARTICIPANTS
                     </span>
                     {room.participants?.some(p => p.is_ai) && (
-                      <span className="text-[10px] font-bold px-2 py-0.5 rounded bg-[#ff00ff]/10 text-[#ff00ff] border border-[#ff00ff]/20">
+                      <span className="text-[10px] font-bold px-2 py-0.5 rounded bg-[#00c3ff]/10 text-[#00c3ff] border border-[#00c3ff]/20">
                         AI INSIDE
                       </span>
                     )}

@@ -22,8 +22,8 @@ export default function SynAntGame() {
     <div className="min-h-screen bg-[#071320] text-white font-sans relative overflow-hidden">
       
       {/* Background Decor */}
-      <div className="absolute top-[-10%] right-[-10%] w-[45%] h-[45%] bg-[#ffcc00]/5 blur-[100px] rounded-full"></div>
-      <div className="absolute bottom-[-10%] left-[-10%] w-[45%] h-[45%] bg-[#ff4d4d]/5 blur-[100px] rounded-full"></div>
+      <div className="absolute top-[-10%] right-[-10%] w-[45%] h-[45%] bg-[#00c3ff]/5 blur-[100px] rounded-full"></div>
+      <div className="absolute bottom-[-10%] left-[-10%] w-[45%] h-[45%] bg-[#00c3ff]/5 blur-[100px] rounded-full"></div>
 
       {/* Header */}
       <header className="relative z-10 flex items-center justify-between px-6 md:px-12 pt-8 pb-4 border-b border-[#00c3ff]/20 backdrop-blur-md sticky top-0 bg-[#071320]/80">
@@ -39,8 +39,8 @@ export default function SynAntGame() {
         </h1>
         {showGame ? (
           <div className="flex items-center gap-4 text-xs font-bold uppercase tracking-widest">
-            <span className="text-green-400">✓ {score.correct}</span>
-            <span className="text-red-400">✗ {score.wrong}</span>
+            <span className="text-[#00c3ff]">✓ {score.correct}</span>
+            <span className="text-white">✗ {score.wrong}</span>
             <span className="text-[#a0a0a0] ml-2">{index + 1}/{shuffledWords.length}</span>
           </div>
         ) : <div className="w-24 md:block hidden" />}
@@ -79,10 +79,10 @@ export default function SynAntGame() {
                   <button
                     disabled={!selectedListId || loading}
                     onClick={() => startGame(selectedListId)}
-                    className="w-full flex items-center justify-center gap-3 px-6 py-4 bg-gradient-to-r from-[#ffcc00]/10 to-[#ff4d4d]/10 border border-[#ffcc00]/50 text-[#ffcc00] hover:from-[#ffcc00]/20 hover:to-[#ff4d4d]/20 shadow-[0_0_20px_rgba(255,204,0,0.2)] font-bold uppercase tracking-wider rounded-full transition-all active:scale-95 disabled:opacity-50"
+                    className="w-full flex items-center justify-center gap-3 px-6 py-4 bg-gradient-to-r from-blue-500/10 to-[#00c3ff]/10 border border-blue-500/50 text-blue-500 hover:from-blue-500/20 hover:to-[#00c3ff]/20 shadow-[0_0_20px_rgba(59,130,246,0.2)] font-bold uppercase tracking-wider rounded-full transition-all active:scale-95 disabled:opacity-50"
                   >
                     {loading ? (
-                      <div className="h-5 w-5 animate-spin rounded-full border-2 border-[#ffcc00] border-t-transparent" />
+                      <div className="h-5 w-5 animate-spin rounded-full border-2 border-blue-500 border-t-transparent" />
                     ) : (
                       <><MdNotStarted size={22} /> Play Now</>
                     )}
@@ -105,7 +105,7 @@ export default function SynAntGame() {
             >
               <div className="text-center space-y-2">
                 <h2 className="text-[#a0a0a0] uppercase tracking-[4px] font-bold text-sm">
-                  Find the <span className={synOrAnt === 'Syn' ? 'text-[#00ff88]' : 'text-[#ff4d4d]'}>{synOrAnt === 'Syn' ? 'Synonym' : 'Antonym'}</span> of:
+                  Find the <span className={synOrAnt === 'Syn' ? 'text-[#00c3ff]' : 'text-blue-500'}>{synOrAnt === 'Syn' ? 'Synonym' : 'Antonym'}</span> of:
                 </h2>
                 <h3 className="text-5xl font-black text-white drop-shadow-[0_0_20px_rgba(255,255,255,0.2)]">
                   "{targetRelation}"
@@ -119,8 +119,8 @@ export default function SynAntGame() {
                     let statusColor = "bg-[#071320] border-[#ffffff10] text-[#a0a0a0] hover:border-[#00c3ff] hover:text-[#00c3ff] hover:bg-[#00c3ff]/5";
                     
                     if (gameStatus !== 'playing') {
-                      if (choice.id === currentWord.id) statusColor = "bg-[#00ff88]/10 border-[#00ff88] text-[#00ff88] shadow-[0_0_20px_rgba(0,255,136,0.2)]";
-                      else statusColor = "bg-red-500/5 border-red-500/20 text-red-500/40";
+                      if (choice.id === currentWord.id) statusColor = "bg-[#00c3ff]/10 border-[#00c3ff] text-[#00c3ff] shadow-[0_0_20px_rgba(0,195,255,0.2)]";
+                      else statusColor = "bg-white/5 border-white/20 text-white/40";
                     }
 
                     return (
@@ -146,7 +146,7 @@ export default function SynAntGame() {
                   animate={{ opacity: 1, y: 0 }}
                   className="flex flex-col items-center gap-5 text-center"
                 >
-                  <div className={`px-8 py-3 rounded-full text-sm font-black uppercase tracking-[4px] ${gameStatus === 'won' ? 'bg-[#00ff88]/20 text-[#00ff88]' : 'bg-red-500/20 text-red-500'}`}>
+                  <div className={`px-8 py-3 rounded-full text-sm font-black uppercase tracking-[4px] ${gameStatus === 'won' ? 'bg-[#00c3ff]/20 text-[#00c3ff]' : 'bg-white/20 text-white'}`}>
                     {gameStatus === 'won' ? 'Correct!' : 'Incorrect'}
                   </div>
                   <p className="text-xl">

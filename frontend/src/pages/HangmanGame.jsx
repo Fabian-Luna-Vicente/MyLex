@@ -15,17 +15,17 @@ const HangmanFigure = ({ mistakes }) => (
     <line x1="60" y1="20" x2="130" y2="20" stroke="#00c3ff" strokeWidth="4" />
     <line x1="130" y1="20" x2="130" y2="50" stroke="#00c3ff" strokeWidth="4" />
     {/* Head */}
-    {mistakes >= 1 && <circle cx="130" cy="70" r="20" stroke="#ff4d4d" strokeWidth="3" fill="none" />}
+    {mistakes >= 1 && <circle cx="130" cy="70" r="20" stroke="white" strokeWidth="3" fill="none" />}
     {/* Body */}
-    {mistakes >= 2 && <line x1="130" y1="90" x2="130" y2="155" stroke="#ff4d4d" strokeWidth="3" />}
+    {mistakes >= 2 && <line x1="130" y1="90" x2="130" y2="155" stroke="white" strokeWidth="3" />}
     {/* Left Arm */}
-    {mistakes >= 3 && <line x1="130" y1="105" x2="100" y2="135" stroke="#ff4d4d" strokeWidth="3" />}
+    {mistakes >= 3 && <line x1="130" y1="105" x2="100" y2="135" stroke="white" strokeWidth="3" />}
     {/* Right Arm */}
-    {mistakes >= 4 && <line x1="130" y1="105" x2="160" y2="135" stroke="#ff4d4d" strokeWidth="3" />}
+    {mistakes >= 4 && <line x1="130" y1="105" x2="160" y2="135" stroke="white" strokeWidth="3" />}
     {/* Left Leg */}
-    {mistakes >= 5 && <line x1="130" y1="155" x2="100" y2="195" stroke="#ff4d4d" strokeWidth="3" />}
+    {mistakes >= 5 && <line x1="130" y1="155" x2="100" y2="195" stroke="white" strokeWidth="3" />}
     {/* Right Leg */}
-    {mistakes >= 6 && <line x1="130" y1="155" x2="160" y2="195" stroke="#ff4d4d" strokeWidth="3" />}
+    {mistakes >= 6 && <line x1="130" y1="155" x2="160" y2="195" stroke="white" strokeWidth="3" />}
   </svg>
 );
 
@@ -76,9 +76,9 @@ export default function HangmanGame() {
         </h1>
         {showGame ? (
           <div className="flex items-center gap-4 text-xs font-bold uppercase tracking-widest">
-            <span className="text-green-400">✓ {score.correct}</span>
-            <span className="text-red-400">✗ {score.wrong}</span>
-            <button onClick={() => { quitGame(); }} className="text-[#a0a0a0] hover:text-red-400 transition-colors">
+            <span className="text-[#00c3ff]">✓ {score.correct}</span>
+            <span className="text-white">✗ {score.wrong}</span>
+            <button onClick={() => { quitGame(); }} className="text-[#a0a0a0] hover:text-white transition-colors">
               <FaArrowLeft />
             </button>
           </div>
@@ -140,7 +140,7 @@ export default function HangmanGame() {
                 {/* Mistakes bar */}
                 <div className="flex gap-1.5 mt-3 mb-5">
                   {[1,2,3,4,5,6].map(n => (
-                    <div key={n} className={`h-2 w-6 rounded-full transition-colors ${n <= mistakes ? 'bg-red-500' : 'bg-[#a0a0a0]/20'}`} />
+                    <div key={n} className={`h-2 w-6 rounded-full transition-colors ${n <= mistakes ? 'bg-white' : 'bg-[#a0a0a0]/20'}`} />
                   ))}
                 </div>
 
@@ -156,7 +156,7 @@ export default function HangmanGame() {
                           foundLetters.includes(char)
                             ? 'border-[#00c3ff] text-[#00c3ff] drop-shadow-[0_0_5px_rgba(0,195,255,0.5)]'
                             : isLost
-                            ? 'border-red-500 text-red-500'
+                            ? 'border-white text-white'
                             : 'border-[#a0a0a0]/40 text-transparent'
                         }`}
                       >
@@ -209,12 +209,12 @@ export default function HangmanGame() {
 
             {/* Win panel */}
             {isWon && (
-              <div className="bg-green-500/10 border border-green-500/50 rounded-[20px] p-6 text-center flex flex-col items-center gap-4 w-full max-w-sm">
-                <p className="text-green-400 text-3xl font-extrabold">🎉 You Found It!</p>
-                <p className="text-[#a0a0a0]">Word: <span className="text-white font-bold">{currentWord.name}</span></p>
+              <div className="bg-[#00c3ff]/10 border border-[#00c3ff]/50 rounded-[20px] p-6 text-center flex flex-col items-center gap-4 w-full max-w-sm">
+                <p className="text-[#00c3ff] text-3xl font-extrabold">🎉 You Found It!</p>
+                <p className="text-[#a0a0a0] mb-4">You successfully guessed the word.</p>
                 <button
                   onClick={goNext}
-                  className="flex items-center gap-2 px-6 py-3 bg-green-600/30 border border-green-500/50 text-green-400 hover:bg-green-500/30 font-bold uppercase tracking-wider rounded-full transition-all"
+                  className="flex items-center gap-2 px-6 py-3 bg-[#00c3ff]/20 border border-[#00c3ff]/50 text-[#00c3ff] hover:bg-[#00c3ff]/30 font-bold uppercase tracking-wider rounded-full transition-all"
                 >
                   <GrLinkNext /> Next Word
                 </button>
@@ -223,12 +223,12 @@ export default function HangmanGame() {
 
             {/* Lose panel */}
             {isLost && (
-              <div className="bg-red-500/10 border border-red-500/50 rounded-[20px] p-6 text-center flex flex-col items-center gap-4 w-full max-w-sm">
-                <p className="text-red-400 text-3xl font-extrabold">💀 You Lost</p>
-                <p className="text-[#a0a0a0]">The word was: <span className="text-white font-bold">{currentWord.name}</span></p>
+              <div className="bg-white/10 border border-white/50 rounded-[20px] p-6 text-center flex flex-col items-center gap-4 w-full max-w-sm">
+                <p className="text-white text-3xl font-extrabold">💀 You Lost</p>
+                <p className="text-[#a0a0a0] mb-4">The word was: <span className="text-white font-bold">{currentWord.name}</span></p>
                 <button
                   onClick={goNext}
-                  className="flex items-center gap-2 px-6 py-3 bg-red-600/30 border border-red-500/50 text-red-400 hover:bg-red-500/30 font-bold uppercase tracking-wider rounded-full transition-all"
+                  className="flex items-center gap-2 px-6 py-3 bg-white/20 border border-white/50 text-white hover:bg-white/30 font-bold uppercase tracking-wider rounded-full transition-all"
                 >
                   <GrLinkNext /> Next Word
                 </button>

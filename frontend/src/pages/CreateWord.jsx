@@ -42,7 +42,7 @@ export default function CreateWord() {
         </header>
 
         {error && (
-          <div className="bg-red-500/10 border border-red-500/50 text-red-500 p-4 rounded-[15px] mb-8 shadow-[0_0_15px_rgba(239,68,68,0.2)]">
+          <div className="bg-blue-600/10 border border-blue-500/50 text-white font-bold p-4 rounded-[15px] mb-8 shadow-[0_0_15px_rgba(59,130,246,0.2)]">
             {error}
           </div>
         )}
@@ -131,7 +131,7 @@ export default function CreateWord() {
             {/* Row 1: Word & Types */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div>
-                <label className="block text-xs font-bold text-[#00c3ff] uppercase tracking-widest mb-2">Word <span className="text-red-500">*</span></label>
+                <label className="block text-xs font-bold text-[#00c3ff] uppercase tracking-widest mb-2">Word <span className="text-white">*</span></label>
                 <input
                   type="text"
                   value={formData.name}
@@ -216,7 +216,7 @@ export default function CreateWord() {
                       const newMeanings = formData.meaning.filter((_, index) => index !== i);
                       setFormData({ ...formData, meaning: newMeanings });
                     }}
-                    className="text-[#a0a0a0] hover:text-red-500 transition-colors"
+                    className="text-[#a0a0a0] hover:text-white transition-colors"
                     title="Delete meaning"
                   >
                     <MdDeleteOutline size={22} />

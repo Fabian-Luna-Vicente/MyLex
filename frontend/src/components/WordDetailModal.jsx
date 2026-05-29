@@ -8,7 +8,7 @@ export default function WordDetailModal({ word, onClose, onPlay, onEdit }) {
   if (!word) return null;
 
   return (
-    <div className="fixed inset-0 z-[150] flex items-center justify-center p-4 md:p-8">
+    <div className="fixed inset-0 z-[150] flex items-center justify-center p-4 pt-20 md:pt-8 md:p-8">
       {/* Overlay */}
       <motion.div 
         initial={{ opacity: 0 }}
@@ -23,58 +23,58 @@ export default function WordDetailModal({ word, onClose, onPlay, onEdit }) {
         initial={{ opacity: 0, scale: 0.9, y: 20 }}
         animate={{ opacity: 1, scale: 1, y: 0 }}
         exit={{ opacity: 0, scale: 0.9, y: 20 }}
-        className="relative bg-[#0e0c1d]/90 backdrop-blur-[20px] rounded-[30px] w-full max-w-4xl max-h-[90vh] overflow-hidden shadow-[0_20px_50px_rgba(0,0,0,0.5)] border border-[#00c3ff]/30 flex flex-col md:flex-row"
+        className="relative bg-[#0e0c1d]/90 backdrop-blur-[20px] rounded-[30px] w-full max-w-4xl max-h-[80vh] md:max-h-[90vh] overflow-hidden shadow-[0_20px_50px_rgba(0,0,0,0.5)] border border-[#00c3ff]/30 flex flex-col md:flex-row"
       >
         {/* Close Button */}
         <button 
           onClick={onClose}
-          className="absolute top-6 right-6 z-20 p-2 rounded-full bg-[#071320]/50 text-[#a0a0a0] hover:text-white hover:bg-[#00c3ff]/20 transition-all"
+          className="absolute top-4 right-4 md:top-6 md:right-6 z-20 p-2 rounded-full bg-[#071320]/50 text-[#a0a0a0] hover:text-white hover:bg-[#00c3ff]/20 transition-all"
         >
           <BsXLg size={20} />
         </button>
 
         {/* Left Side: Image & Title */}
-        <div className="w-full md:w-[40%] bg-[#071320]/50 p-8 flex flex-col items-center justify-center border-b md:border-b-0 md:border-r border-[#00c3ff]/10">
-          <div className="w-full aspect-square mb-6 rounded-2xl overflow-hidden border border-[#00c3ff]/20 shadow-2xl">
+        <div className="w-full md:w-[40%] bg-[#071320]/50 p-6 md:p-8 flex flex-col items-center justify-center border-b md:border-b-0 md:border-r border-[#00c3ff]/10 shrink-0">
+          <div className="w-24 h-24 md:w-full md:aspect-square mb-4 md:mb-6 rounded-2xl overflow-hidden border border-[#00c3ff]/20 shadow-2xl shrink-0">
             {word.image ? (
               <img src={word.image} alt={word.name} className="w-full h-full object-cover" />
             ) : (
-              <div className="w-full h-full bg-[#0e0c1d] flex items-center justify-center text-[#a0a0a0]/20 italic text-sm">
-                No Image Available
+              <div className="w-full h-full bg-[#0e0c1d] flex items-center justify-center text-[#a0a0a0]/20 italic text-xs md:text-sm p-2 text-center">
+                No Image
               </div>
             )}
           </div>
           
-          <h2 className="text-4xl font-black text-white text-center mb-2 drop-shadow-[0_0_15px_rgba(0,195,255,0.3)]">
+          <h2 className="text-3xl md:text-4xl font-black text-white text-center mb-2 drop-shadow-[0_0_15px_rgba(0,195,255,0.3)]">
             {word.name}
           </h2>
           
-          <div className="flex flex-wrap gap-2 justify-center mb-6">
+          <div className="flex flex-wrap gap-2 justify-center mb-4 md:mb-6">
             {word.word_types?.map((type, idx) => (
-              <span key={idx} className="px-3 py-1 bg-[#00c3ff]/10 text-[#00c3ff] border border-[#00c3ff]/30 rounded-lg text-xs font-bold uppercase tracking-widest">
+              <span key={idx} className="px-2 py-1 md:px-3 md:py-1 bg-[#00c3ff]/10 text-[#00c3ff] border border-[#00c3ff]/30 rounded-lg text-[10px] md:text-xs font-bold uppercase tracking-widest">
                 {type}
               </span>
             ))}
           </div>
 
-          <div className="flex gap-4">
+          <div className="flex gap-3 md:gap-4">
             <button 
               onClick={() => onPlay(word.name)}
-              className="flex items-center gap-2 px-6 py-3 bg-[#00c3ff] text-black rounded-full font-bold hover:shadow-[0_0_20px_rgba(0,195,255,0.5)] transition-all active:scale-95"
+              className="flex items-center gap-2 px-5 py-2.5 md:px-6 md:py-3 bg-[#00c3ff] text-black rounded-full font-bold text-sm md:text-base hover:shadow-[0_0_20px_rgba(0,195,255,0.5)] transition-all active:scale-95"
             >
-              <CiPlay1 size={20} /> Listen
+              <CiPlay1 size={18} className="md:w-5 md:h-5" /> Listen
             </button>
             <button 
               onClick={() => onEdit(word.id)}
-              className="p-3 bg-[#0e0c1d] border border-[#00c3ff]/30 text-[#00c3ff] rounded-full hover:bg-[#00c3ff]/10 transition-all"
+              className="p-2.5 md:p-3 bg-[#0e0c1d] border border-[#00c3ff]/30 text-[#00c3ff] rounded-full hover:bg-[#00c3ff]/10 transition-all"
             >
-              <MdOutlineModeEdit size={24} />
+              <MdOutlineModeEdit size={20} className="md:w-6 md:h-6" />
             </button>
           </div>
         </div>
 
         {/* Right Side: Details */}
-        <div className="w-full md:w-[60%] p-8 md:p-12 overflow-y-auto custom-scrollbar space-y-8">
+        <div className="w-full md:w-[60%] flex-1 p-6 md:p-12 overflow-y-auto custom-scrollbar space-y-6 md:space-y-8">
           
           {/* Meaning Section */}
           <section>
@@ -137,14 +137,14 @@ export default function WordDetailModal({ word, onClose, onPlay, onEdit }) {
           {/* Synonyms & Antonyms */}
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-8">
             <section>
-              <h4 className="text-[#00ff88] text-xs font-black uppercase tracking-[3px] mb-3">Synonyms</h4>
-              <div className="text-sm text-[#a0a0a0] bg-[#00ff88]/5 p-4 rounded-xl border border-[#00ff88]/10 min-h-[60px]">
+              <h4 className="text-[#00c3ff] text-xs font-black uppercase tracking-[3px] mb-3">Synonyms</h4>
+              <div className="text-sm text-[#a0a0a0] bg-[#00c3ff]/5 p-4 rounded-xl border border-[#00c3ff]/10 min-h-[60px]">
                 {word.synonyms || "None"}
               </div>
             </section>
             <section>
-              <h4 className="text-[#ff4d4d] text-xs font-black uppercase tracking-[3px] mb-3">Antonyms</h4>
-              <div className="text-sm text-[#a0a0a0] bg-[#ff4d4d]/5 p-4 rounded-xl border border-[#ff4d4d]/10 min-h-[60px]">
+              <h4 className="text-blue-500 text-xs font-black uppercase tracking-[3px] mb-3">Antonyms</h4>
+              <div className="text-sm text-[#a0a0a0] bg-blue-500/5 p-4 rounded-xl border border-blue-500/10 min-h-[60px]">
                 {word.antonyms || "None"}
               </div>
             </section>

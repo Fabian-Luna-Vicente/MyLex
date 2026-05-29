@@ -78,18 +78,18 @@ export default function VerifyEmail() {
 
         {status === 'error' && (
           <div className="flex flex-col items-center">
-            <div className="h-20 w-20 bg-red-500/10 border border-red-500/30 text-red-500 rounded-full flex items-center justify-center mb-6 shadow-[0_0_20px_rgba(239,68,68,0.2)]">
+            <div className="h-20 w-20 bg-blue-600/10 border border-blue-500/30 text-blue-500 rounded-full flex items-center justify-center mb-6 shadow-[0_0_20px_rgba(59,130,246,0.2)]">
               <svg className="w-10 h-10" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
               </svg>
             </div>
-            <h2 className="text-[1.8rem] font-bold text-white mb-2 drop-shadow-[0_0_10px_rgba(239,68,68,0.5)]">
+            <h2 className="text-[1.8rem] font-bold text-white mb-2 drop-shadow-[0_0_10px_rgba(59,130,246,0.5)]">
               Verification Failed
             </h2>
             <p className="text-[#a0a0a0] mb-8">{message}</p>
             <button
               onClick={() => navigate('/login')}
-              className="px-8 py-3.5 bg-[#0e0c1d]/60 backdrop-blur-sm border border-red-500/50 hover:bg-red-500/10 text-red-400 rounded-full font-bold uppercase tracking-widest text-sm transition-all duration-300 hover:shadow-[0_0_15px_rgba(239,68,68,0.3)]"
+              className="px-8 py-3.5 bg-[#0e0c1d]/60 backdrop-blur-sm border border-blue-500/50 hover:bg-blue-600/10 text-white rounded-full font-bold uppercase tracking-widest text-sm transition-all duration-300 hover:shadow-[0_0_15px_rgba(59,130,246,0.3)]"
             >
               Back to Login
             </button>

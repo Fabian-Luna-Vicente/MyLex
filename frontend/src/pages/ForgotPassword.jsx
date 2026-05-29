@@ -41,10 +41,10 @@ export default function ForgotPassword() {
 
         {status === 'success' ? (
           <div className="text-center">
-            <div className="w-16 h-16 bg-[#00ff88]/10 text-[#00ff88] rounded-full flex items-center justify-center mx-auto mb-4 text-2xl">
+            <div className="w-16 h-16 bg-[#00c3ff]/10 text-[#00c3ff] rounded-full flex items-center justify-center mx-auto mb-4 text-2xl">
               ✓
             </div>
-            <p className="text-[#00ff88] font-bold mb-6">{message}</p>
+            <p className="text-[#00c3ff] font-bold mb-6">{message}</p>
             <button
               onClick={() => navigate('/login')}
               className="w-full py-4 rounded-2xl font-black text-sm bg-white/5 border border-white/10 text-white hover:bg-white/10 transition-all"
@@ -69,7 +69,7 @@ export default function ForgotPassword() {
             </div>
 
             {status === 'error' && (
-              <p className="text-red-500 text-xs font-bold bg-red-500/10 px-4 py-3 rounded-xl border border-red-500/20">
+              <p className="text-white text-xs font-bold bg-blue-600/10 px-4 py-3 rounded-xl border border-blue-500/20">
                 {message}
               </p>
             )}

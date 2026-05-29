@@ -268,7 +268,7 @@ export default function MyProfile() {
             {profile?.native_language && (
               <div className="mb-4">
                 <span className="text-[10px] font-bold text-[#a0a0a0] uppercase tracking-widest">Native:</span>
-                <span className="ml-2 px-3 py-1 rounded-lg text-sm font-bold bg-[#00ff88]/10 text-[#00ff88] border border-[#00ff88]/20">
+                <span className="ml-2 px-3 py-1 rounded-lg text-sm font-bold bg-[#00c3ff]/10 text-[#00c3ff] border border-[#00c3ff]/20">
                   {profile.native_language}
                 </span>
               </div>

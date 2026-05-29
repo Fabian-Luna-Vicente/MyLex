@@ -107,9 +107,9 @@ export default function SearchUsers() {
                   </div>
 
                   {user.is_friend ? (
-                    <span className="text-[#00ff88] text-sm font-bold flex items-center gap-1"><FaUserCheck /> Friends</span>
+                    <span className="text-[#00c3ff] text-sm font-bold flex items-center gap-1"><FaUserCheck /> Friends</span>
                   ) : user.request_status === 'pending' ? (
-                    <span className="text-yellow-400 text-sm font-bold flex items-center gap-1"><FaClock /> Pending</span>
+                    <span className="text-blue-400 text-sm font-bold flex items-center gap-1"><FaClock /> Pending</span>
                   ) : (
                     <button
                       onClick={() => handleSendRequest(user.user_id)}

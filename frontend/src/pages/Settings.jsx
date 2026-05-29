@@ -148,7 +148,7 @@ export default function Settings() {
 
           <button
             onClick={handleLogout}
-            className="w-full p-4 rounded-3xl bg-red-500/10 border border-red-500/20 text-red-500 flex items-center justify-center gap-3 font-black hover:bg-red-500 hover:text-white transition-all shadow-lg hover:shadow-red-500/20"
+            className="w-full p-4 rounded-3xl bg-white/5 border border-white/20 text-white flex items-center justify-center gap-3 font-black hover:bg-white hover:text-black transition-all shadow-lg hover:shadow-white/20"
           >
             <FaSignOutAlt /> LOG OUT
           </button>
