@@ -1,5 +1,4 @@
 import React from 'react';
-import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import {
@@ -7,58 +6,19 @@ import {
   FaLayerGroup, FaTrophy, FaFlag, FaUserPlus, FaUserCheck,
   FaClock, FaUserMinus, FaArrowLeft
 } from 'react-icons/fa';
-import { profileService } from '../services/profileService';
-import { vocabularyService } from '../services/vocabularyService';
+import { useUserProfile } from '../hooks/useUserProfile';
 
 export default function UserProfile() {
   const { userId } = useParams();
   const navigate = useNavigate();
-  const [profile, setProfile] = useState(null);
-  const [lists, setLists] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [actionLoading, setActionLoading] = useState(false);
-
-  useEffect(() => {
-    loadProfile();
-  }, [userId]);
-
-  const loadProfile = async () => {
-    setLoading(true);
-    try {
-      const data = await profileService.getUserProfile(userId);
-      setProfile(data);
-      const userLists = await vocabularyService.getUserLists(userId);
-      setLists(userLists);
-    } catch (e) {
-      console.error(e);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const handleSendRequest = async () => {
-    setActionLoading(true);
-    try {
-      await profileService.sendFriendRequest(userId);
-      setProfile(prev => ({ ...prev, request_status: 'pending' }));
-    } catch (e) {
-      console.error(e);
-    } finally {
-      setActionLoading(false);
-    }
-  };
-
-  const handleRemoveFriend = async () => {
-    setActionLoading(true);
-    try {
-      await profileService.removeFriend(userId);
-      setProfile(prev => ({ ...prev, is_friend: false, request_status: null, friend_count: prev.friend_count - 1 }));
-    } catch (e) {
-      console.error(e);
-    } finally {
-      setActionLoading(false);
-    }
-  };
+  const {
+    profile,
+    lists,
+    loading,
+    actionLoading,
+    handleSendRequest,
+    handleRemoveFriend
+  } = useUserProfile(userId);
 
   const renderFriendButton = () => {
     if (profile?.is_friend) {

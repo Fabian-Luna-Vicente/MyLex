@@ -1,42 +1,22 @@
 import React from 'react';
-import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import {
   FaUserCircle, FaSearch, FaUserPlus, FaUserCheck,
   FaClock, FaArrowLeft
 } from 'react-icons/fa';
-import { profileService } from '../services/profileService';
+import { useSearchUsers } from '../hooks/useSearchUsers';
 
 export default function SearchUsers() {
   const navigate = useNavigate();
-  const [searchResults, setSearchResults] = useState([]);
-  const [searchQuery, setSearchQuery] = useState('');
-  const [searchLoading, setSearchLoading] = useState(false);
-
-  const handleSearch = async () => {
-    if (!searchQuery.trim()) return;
-    setSearchLoading(true);
-    try {
-      const data = await profileService.searchUsers(searchQuery);
-      setSearchResults(data);
-    } catch (e) {
-      console.error(e);
-    } finally {
-      setSearchLoading(false);
-    }
-  };
-
-  const handleSendRequest = async (userId) => {
-    try {
-      await profileService.sendFriendRequest(userId);
-      setSearchResults(prev => prev.map(u =>
-        u.user_id === userId ? { ...u, request_status: 'pending' } : u
-      ));
-    } catch (e) {
-      console.error(e);
-    }
-  };
+  const {
+    searchResults,
+    searchQuery,
+    setSearchQuery,
+    searchLoading,
+    handleSearch,
+    handleSendRequest
+  } = useSearchUsers();
 
   return (
     <div className="max-w-4xl mx-auto px-4 pb-32">

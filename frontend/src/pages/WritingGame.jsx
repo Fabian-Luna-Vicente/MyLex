@@ -30,25 +30,35 @@ export default function WritingGame() {
       <div className="absolute bottom-[-20%] right-[-10%] w-[50%] h-[50%] bg-[#00c3ff]/5 blur-[120px] rounded-full"></div>
 
       {/* Header */}
-      <header className="relative z-10 flex items-center justify-between px-6 md:px-12 pt-8 pb-4 border-b border-[#00c3ff]/20 backdrop-blur-md sticky top-0 bg-[#071320]/80">
-        <button
-          onClick={() => { quitGame(); navigate('/dashboard'); }}
-          className="group flex items-center text-[#a0a0a0] hover:text-[#00c3ff] transition-colors font-bold uppercase tracking-widest text-xs"
-        >
-          <GrPrevious className="mr-2 group-hover:-translate-x-1 transition-transform" />
-          Dashboard
-        </button>
-        <h1 className="text-2xl font-extrabold drop-shadow-[0_0_10px_rgba(0,195,255,0.5)] flex items-center gap-2">
+      <header className="relative z-10 flex flex-col md:flex-row items-center justify-between px-4 md:px-12 pt-4 md:pt-8 pb-4 border-b border-[#00c3ff]/20 backdrop-blur-md sticky top-0 bg-[#071320]/80 gap-3">
+        <div className="flex w-full md:w-auto justify-between items-center">
+          <button
+            onClick={() => { quitGame(); navigate('/dashboard'); }}
+            className="group flex items-center text-[#a0a0a0] hover:text-[#00c3ff] transition-colors font-bold uppercase tracking-widest text-[10px] md:text-xs"
+          >
+            <GrPrevious className="mr-2 group-hover:-translate-x-1 transition-transform" />
+            Dashboard
+          </button>
+          
+          {/* Progress (Mobile only) */}
+          {showGame && (
+            <div className="md:hidden flex items-center gap-2 text-[10px] font-bold uppercase tracking-widest text-[#a0a0a0]">
+              Batch {Math.floor(index / 3) + 1} / {Math.ceil(shuffledWords.length / 3)}
+            </div>
+          )}
+        </div>
+        
+        <h1 className="text-xl md:text-2xl font-extrabold drop-shadow-[0_0_10px_rgba(0,195,255,0.5)] flex items-center gap-2">
           Writing <span className="text-[#00c3ff]">Skills</span>
         </h1>
         {showGame ? (
-          <div className="flex items-center gap-4 text-xs font-bold uppercase tracking-widest text-[#a0a0a0]">
+          <div className="hidden md:flex items-center gap-4 text-xs font-bold uppercase tracking-widest text-[#a0a0a0]">
             Batch {Math.floor(index / 3) + 1} / {Math.ceil(shuffledWords.length / 3)}
           </div>
-        ) : <div className="w-24 md:block hidden" />}
+        ) : <div className="w-24 hidden md:block" />}
       </header>
 
-      <div className="max-w-4xl mx-auto px-6 md:px-12 py-10 relative z-10">
+      <div className="w-full max-w-4xl mx-auto px-4 md:px-12 py-4 md:py-10 relative z-10">
         {/* --- LIST SELECTION MENU --- */}
         {!showGame && (
           <motion.div
@@ -103,16 +113,16 @@ export default function WritingGame() {
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: -20 }}
-              className="flex flex-col gap-6"
+              className="flex flex-col gap-4 md:gap-6 mt-2 md:mt-0"
             >
-              <div className="bg-[#0e0c1d]/40 backdrop-blur-md border border-[#ffffff05] rounded-[30px] p-8 shadow-2xl">
-                <h2 className="text-[#a0a0a0] uppercase tracking-[2px] font-bold text-sm text-center mb-6">
+              <div className="bg-[#0e0c1d]/40 backdrop-blur-md border border-[#ffffff05] rounded-[20px] md:rounded-[30px] p-4 md:p-8 shadow-2xl">
+                <h2 className="text-[#a0a0a0] uppercase tracking-[2px] font-bold text-xs md:text-sm text-center mb-4 md:mb-6">
                   Write sentences using these words:
                 </h2>
 
-                <div className="flex flex-wrap justify-center gap-4 mb-8">
+                <div className="flex flex-wrap justify-center gap-2 md:gap-4 mb-4 md:mb-8">
                   {currentWords.map((word, i) => (
-                    <span key={i} className="px-6 py-3 bg-[#00c3ff]/10 text-[#00c3ff] border border-[#00c3ff]/30 rounded-xl font-bold text-lg shadow-[0_0_15px_rgba(0,195,255,0.2)]">
+                    <span key={i} className="px-4 md:px-6 py-2 md:py-3 bg-[#00c3ff]/10 text-[#00c3ff] border border-[#00c3ff]/30 rounded-lg md:rounded-xl font-bold text-sm md:text-lg shadow-[0_0_15px_rgba(0,195,255,0.2)]">
                       {word.name}
                     </span>
                   ))}
@@ -122,14 +132,14 @@ export default function WritingGame() {
                   value={text}
                   onChange={(e) => setText(e.target.value)}
                   placeholder="Start typing your sentences here..."
-                  className="w-full bg-[#071320]/80 border border-[#00c3ff]/30 rounded-[20px] p-6 text-white text-lg focus:outline-none focus:border-[#00c3ff] focus:ring-1 focus:ring-[#00c3ff] transition-all min-h-[150px] resize-y"
+                  className="w-full bg-[#071320]/80 border border-[#00c3ff]/30 rounded-[15px] md:rounded-[20px] p-4 md:p-6 text-white text-base md:text-lg focus:outline-none focus:border-[#00c3ff] focus:ring-1 focus:ring-[#00c3ff] transition-all min-h-[100px] md:min-h-[150px] resize-y"
                 />
 
-                <div className="flex flex-col sm:flex-row items-center justify-between gap-4 mt-6">
+                <div className="flex flex-col sm:flex-row items-center justify-between gap-3 md:gap-4 mt-4 md:mt-6">
                   <button
                     onClick={handleCheck}
                     disabled={aiLoading || !text.trim()}
-                    className="w-full sm:w-auto flex items-center justify-center gap-3 px-8 py-4 bg-[#071320] border border-[#00c3ff]/50 text-[#00c3ff] hover:bg-[#00c3ff]/10 rounded-full font-bold uppercase tracking-widest transition-all disabled:opacity-50"
+                    className="w-full sm:w-auto flex items-center justify-center gap-2 md:gap-3 px-6 md:px-8 py-3 md:py-4 bg-[#071320] border border-[#00c3ff]/50 text-[#00c3ff] hover:bg-[#00c3ff]/10 rounded-full font-bold uppercase tracking-widest transition-all disabled:opacity-50 text-xs md:text-base"
                   >
                     {aiLoading ? (
                       <><div className="h-4 w-4 animate-spin rounded-full border-2 border-[#00c3ff] border-t-transparent" /> AI Thinking...</>
@@ -141,7 +151,7 @@ export default function WritingGame() {
                   <button
                     onClick={nextLevel}
                     disabled={!aiFeedback || !aiFeedback.words_used_correctly}
-                    className={`w-full sm:w-auto flex items-center justify-center gap-3 px-8 py-4 font-black rounded-full transition-all uppercase tracking-widest text-sm group ${!aiFeedback || !aiFeedback.words_used_correctly
+                    className={`w-full sm:w-auto flex items-center justify-center gap-2 md:gap-3 px-6 md:px-8 py-3 md:py-4 font-black rounded-full transition-all uppercase tracking-widest text-xs md:text-sm group ${!aiFeedback || !aiFeedback.words_used_correctly
                       ? 'bg-gray-600 text-gray-400 opacity-50 cursor-not-allowed'
                       : 'bg-white text-black hover:shadow-[0_0_30px_rgba(255,255,255,0.5)] active:scale-95'
                       }`}
@@ -161,7 +171,7 @@ export default function WritingGame() {
                 <motion.div
                   initial={{ opacity: 0, y: 15 }}
                   animate={{ opacity: 1, y: 0 }}
-                  className="mt-8 bg-[#0e0c1d]/60 backdrop-blur-xl border border-[#00c3ff]/20 rounded-[24px] p-6 shadow-2xl"
+                  className="mt-4 md:mt-8 bg-[#0e0c1d]/60 backdrop-blur-xl border border-[#00c3ff]/20 rounded-[16px] md:rounded-[24px] p-4 md:p-6 shadow-2xl"
                 >
                   <div className="flex items-center gap-3 mb-5 pb-4">
                     <div className="p-1.5  rounded-xl  flex items-center justify-center w-12 h-12">
@@ -181,7 +191,7 @@ export default function WritingGame() {
                       <h4 className="text-[10px] text-[#a0a0a0] uppercase tracking-widest mb-1.5 font-bold">
                         Correction
                       </h4>
-                      <p className="text-lg text-white font-medium bg-[#071320]/50 p-4 rounded-xl border border-[#ffffff05]">
+                      <p className="text-sm md:text-lg text-white font-medium bg-[#071320]/50 p-3 md:p-4 rounded-xl border border-[#ffffff05]">
                         {aiFeedback.corrected_text}
                       </p>
                     </div>
@@ -190,7 +200,7 @@ export default function WritingGame() {
                       <h4 className="text-[10px] text-[#a0a0a0] uppercase tracking-widest mb-1.5 font-bold">
                         Explanation
                       </h4>
-                      <p className="text-sm text-[#c0c0c0] leading-relaxed">
+                      <p className="text-xs md:text-sm text-[#c0c0c0] leading-relaxed">
                         {aiFeedback.explanation}
                       </p>
                     </div>

@@ -1,12 +1,10 @@
-import React from 'react';
-import { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useHangmanGame } from '../hooks/useHangmanGame';
 import { GrPrevious, GrLinkNext } from 'react-icons/gr';
 import { MdNotStarted } from 'react-icons/md';
 import { FaArrowLeft } from 'react-icons/fa';
 
-// Hangman SVG figure with progressive body parts
 const HangmanFigure = ({ mistakes }) => (
   <svg viewBox="0 0 200 250" className="w-48 h-48 md:w-56 md:h-56" strokeLinecap="round">
     {/* Gallows */}
@@ -57,6 +55,8 @@ export default function HangmanGame() {
     loadLists, startGame, checkLetter, goNext, quitGame
   } = useHangmanGame();
 
+  const [showMeaning, setShowMeaning] = useState(true);
+
   useEffect(() => { loadLists(); }, [loadLists]);
 
   return (
@@ -101,11 +101,10 @@ export default function HangmanGame() {
                       <button
                         key={list.id}
                         onClick={() => setSelectedListId(list.id)}
-                        className={`px-4 py-2 rounded-[10px] text-sm font-bold tracking-wide transition-all border ${
-                          selectedListId === list.id
+                        className={`px-4 py-2 rounded-[10px] text-sm font-bold tracking-wide transition-all border ${selectedListId === list.id
                             ? 'bg-[#00c3ff]/20 border-[#00c3ff] text-[#00c3ff] shadow-[0_0_10px_rgba(0,195,255,0.3)]'
                             : 'bg-[#071320] border-[#00c3ff]/30 text-[#a0a0a0] hover:border-[#00c3ff]/60 hover:text-white'
-                        }`}
+                          }`}
                       >
                         {list.name}
                       </button>
@@ -136,10 +135,10 @@ export default function HangmanGame() {
               {/* LEFT: Figure + Word slots */}
               <div className="bg-[#0e0c1d]/60 backdrop-blur-[10px] border border-[#00c3ff]/20 rounded-[20px] p-6 flex flex-col items-center shadow-[0_5px_15px_rgba(0,0,0,0.3)]">
                 <HangmanFigure mistakes={mistakes} />
-                
+
                 {/* Mistakes bar */}
                 <div className="flex gap-1.5 mt-3 mb-5">
-                  {[1,2,3,4,5,6].map(n => (
+                  {[1, 2, 3, 4, 5, 6].map(n => (
                     <div key={n} className={`h-2 w-6 rounded-full transition-colors ${n <= mistakes ? 'bg-white' : 'bg-[#a0a0a0]/20'}`} />
                   ))}
                 </div>
@@ -152,13 +151,12 @@ export default function HangmanGame() {
                     ) : (
                       <div
                         key={i}
-                        className={`w-9 h-10 flex items-center justify-center border-b-2 text-xl font-extrabold transition-all ${
-                          foundLetters.includes(char)
+                        className={`w-9 h-10 flex items-center justify-center border-b-2 text-xl font-extrabold transition-all ${foundLetters.includes(char)
                             ? 'border-[#00c3ff] text-[#00c3ff] drop-shadow-[0_0_5px_rgba(0,195,255,0.5)]'
                             : isLost
-                            ? 'border-white text-white'
-                            : 'border-[#a0a0a0]/40 text-transparent'
-                        }`}
+                              ? 'border-white text-white'
+                              : 'border-[#a0a0a0]/40 text-transparent'
+                          }`}
                       >
                         {foundLetters.includes(char) || isLost ? char : '_'}
                       </div>
@@ -168,25 +166,38 @@ export default function HangmanGame() {
               </div>
 
               {/* RIGHT: Meaning + Examples */}
-              <div className={`bg-[#0e0c1d]/60 backdrop-blur-[10px] border border-[#00c3ff]/20 rounded-[20px] p-6 shadow-[0_5px_15px_rgba(0,0,0,0.3)] overflow-y-auto max-h-80 ${isLost ? 'opacity-40 pointer-events-none' : ''}`}>
-                <p className="text-xs text-[#00c3ff] uppercase font-bold tracking-widest mb-2">Meaning</p>
-                <p className="text-[#a0a0a0] text-sm leading-relaxed mb-4">{currentWord.meaning}</p>
-                {currentWord.examples?.length > 0 && (
-                  <>
-                    <p className="text-xs text-[#00c3ff] uppercase font-bold tracking-widest mb-2">Examples</p>
-                    <ul className="text-[#a0a0a0] text-sm italic space-y-1">
-                      {currentWord.examples.map((ex, i) => (
-                        <HideWord
-                          key={i}
-                          example={ex}
-                          wordName={currentWord.name}
-                          past={currentWord.past}
-                          gerund={currentWord.gerund}
-                          participle={currentWord.participle}
-                        />
-                      ))}
-                    </ul>
-                  </>
+              <div className={`bg-[#0e0c1d]/60 backdrop-blur-[10px] border border-[#00c3ff]/20 rounded-[20px] p-6 shadow-[0_5px_15px_rgba(0,0,0,0.3)] ${isLost ? 'opacity-40 pointer-events-none' : ''}`}>
+                <div
+                  className="flex justify-between items-center cursor-pointer group"
+                  onClick={() => setShowMeaning(!showMeaning)}
+                >
+                  <p className="text-xs text-[#00c3ff] uppercase font-bold tracking-widest">Meaning & Examples</p>
+                  <button className="text-[#a0a0a0] text-[10px] font-bold uppercase tracking-widest group-hover:text-white transition-colors bg-white/5 border border-white/10 px-2 py-1 rounded-md">
+                    {showMeaning ? 'Hide' : 'Show'}
+                  </button>
+                </div>
+
+                {showMeaning && (
+                  <div className="overflow-y-auto max-h-60 mt-4 pr-2 custom-scrollbar border-t border-[#00c3ff]/10 pt-4">
+                    <p className="text-[#a0a0a0] text-sm leading-relaxed mb-4">{currentWord.meaning}</p>
+                    {currentWord.examples?.length > 0 && (
+                      <>
+                        <p className="text-[10px] text-[#00c3ff]/70 uppercase font-bold tracking-widest mb-2">Examples</p>
+                        <ul className="text-[#a0a0a0] text-sm italic space-y-2">
+                          {currentWord.examples.map((ex, i) => (
+                            <HideWord
+                              key={i}
+                              example={ex}
+                              wordName={currentWord.name}
+                              past={currentWord.past}
+                              gerund={currentWord.gerund}
+                              participle={currentWord.participle}
+                            />
+                          ))}
+                        </ul>
+                      </>
+                    )}
+                  </div>
                 )}
               </div>
             </div>
@@ -210,7 +221,7 @@ export default function HangmanGame() {
             {/* Win panel */}
             {isWon && (
               <div className="bg-[#00c3ff]/10 border border-[#00c3ff]/50 rounded-[20px] p-6 text-center flex flex-col items-center gap-4 w-full max-w-sm">
-                <p className="text-[#00c3ff] text-3xl font-extrabold">🎉 You Found It!</p>
+                <p className="text-[#00c3ff] text-3xl font-extrabold"> You Found It!</p>
                 <p className="text-[#a0a0a0] mb-4">You successfully guessed the word.</p>
                 <button
                   onClick={goNext}
@@ -224,7 +235,7 @@ export default function HangmanGame() {
             {/* Lose panel */}
             {isLost && (
               <div className="bg-white/10 border border-white/50 rounded-[20px] p-6 text-center flex flex-col items-center gap-4 w-full max-w-sm">
-                <p className="text-white text-3xl font-extrabold">💀 You Lost</p>
+                <p className="text-white text-3xl font-extrabold"> You Lost</p>
                 <p className="text-[#a0a0a0] mb-4">The word was: <span className="text-white font-bold">{currentWord.name}</span></p>
                 <button
                   onClick={goNext}

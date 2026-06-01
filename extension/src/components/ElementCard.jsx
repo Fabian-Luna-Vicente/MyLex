@@ -105,7 +105,7 @@ function ElementCard({
                                         transition: 'all 0.2s'
                                     }}
                                 >
-                                    <span style={{ flexGrow: 1, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', fontSize: '0.9rem' }}>
+                                    <span style={{ flexGrow: 1, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', fontSize: '14.4px' }}>
                                         {obj.name}
                                     </span>
                                     <BsXLg
@@ -156,11 +156,11 @@ function ElementCard({
                     {/* --- PANEL IZQUIERDO --- */}
                     <div className="EC-LeftPanel" style={{ position: 'relative', flex: '1 1 350px', minWidth: '300px', height: '100%', minHeight: '100%', background: 'rgba(7, 19, 32, 0.5)', padding: '32px', display: 'flex', flexDirection: 'column', alignItems: 'flex-start', justifyContent: 'flex-start', borderRight: '1px solid rgba(0, 195, 255, 0.1)', overflowY: 'auto' }}>
 
-                        <h2 style={{ fontSize: '2.25rem', fontWeight: 900, color: 'white', textAlign: 'left', textShadow: '0 0 15px rgba(0,195,255,0.3)', margin: '0 0 8px 0' }}>{currentWord.name}</h2>
+                        <h2 style={{ fontSize: '36px', fontWeight: 900, color: 'white', textAlign: 'left', textShadow: '0 0 15px rgba(0,195,255,0.3)', margin: '0 0 8px 0' }}>{currentWord.name}</h2>
 
                         <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px', justifyContent: 'flex-start', marginBottom: '24px' }}>
                             {typeList.map((type, idx) => (
-                                <span key={idx} style={{ padding: '4px 12px', background: 'rgba(0, 195, 255, 0.1)', color: '#00c3ff', border: '1px solid rgba(0, 195, 255, 0.3)', borderRadius: '8px', fontSize: '0.75rem', fontWeight: 'bold', textTransform: 'uppercase', letterSpacing: '0.1em' }}>{type}</span>
+                                <span key={idx} style={{ padding: '4px 12px', background: 'rgba(0, 195, 255, 0.1)', color: '#00c3ff', border: '1px solid rgba(0, 195, 255, 0.3)', borderRadius: '8px', fontSize: '12px', fontWeight: 'bold', textTransform: 'uppercase', letterSpacing: '0.1em' }}>{type}</span>
                             ))}
                         </div>
 
@@ -179,16 +179,16 @@ function ElementCard({
 
                         {currentWord.originalContext && (
                             <section>
-                                <h4 style={{ color: '#00c3ff', fontSize: '0.75rem', fontWeight: 900, textTransform: 'uppercase', letterSpacing: '3px', marginBottom: '12px', margin: 0 }}>Context Found</h4>
-                                <div style={{ fontSize: '1rem', color: 'rgba(255, 255, 255, 0.9)', fontStyle: 'italic', background: 'rgba(255, 255, 255, 0.05)', padding: '20px', borderRadius: '16px', borderLeft: '3px solid #00c3ff' }}>
+                                <h4 style={{ color: '#00c3ff', fontSize: '12px', fontWeight: 900, textTransform: 'uppercase', letterSpacing: '3px', marginBottom: '12px', margin: 0 }}>Context Found</h4>
+                                <div style={{ fontSize: '16px', color: 'rgba(255, 255, 255, 0.9)', fontStyle: 'italic', background: 'rgba(255, 255, 255, 0.05)', padding: '20px', borderRadius: '16px', borderLeft: '3px solid #00c3ff' }}>
                                     "{currentWord.originalContext}"
                                 </div>
                             </section>
                         )}
 
                         <section>
-                            <h4 style={{ color: '#00c3ff', fontSize: '0.75rem', fontWeight: 900, textTransform: 'uppercase', letterSpacing: '3px', marginBottom: '12px', margin: 0 }}>Meaning</h4>
-                            <div style={{ fontSize: '1.125rem', color: 'rgba(255, 255, 255, 0.9)', lineHeight: 1.6, background: 'rgba(255, 255, 255, 0.05)', padding: '20px', borderRadius: '16px', border: '1px solid rgba(255, 255, 255, 0.05)' }}>
+                            <h4 style={{ color: '#00c3ff', fontSize: '12px', fontWeight: 900, textTransform: 'uppercase', letterSpacing: '3px', marginBottom: '12px', margin: 0 }}>Meaning</h4>
+                            <div style={{ fontSize: '18px', color: 'rgba(255, 255, 255, 0.9)', lineHeight: 1.6, background: 'rgba(255, 255, 255, 0.05)', padding: '20px', borderRadius: '16px', border: '1px solid rgba(255, 255, 255, 0.05)' }}>
                                 {meaningList.length > 0 ? (
                                     meaningList.map((line, i) => <p key={i} style={{ margin: '0 0 8px 0' }}>{line}</p>)
                                 ) : (
@@ -198,7 +198,7 @@ function ElementCard({
                         </section>
 
                         <section>
-                            <h4 style={{ color: '#00c3ff', fontSize: '0.75rem', fontWeight: 900, textTransform: 'uppercase', letterSpacing: '3px', margin: 0, marginBottom: '24px' }}>Example Sentences</h4>
+                            <h4 style={{ color: '#00c3ff', fontSize: '12px', fontWeight: 900, textTransform: 'uppercase', letterSpacing: '3px', margin: 0, marginBottom: '24px' }}>Example Sentences</h4>
                             <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
                                 {exampleList.length > 0 ? (
                                     exampleList.map((ex, i) => (
@@ -206,13 +206,13 @@ function ElementCard({
                                             <div style={{ position: 'absolute', top: '-10px', left: '16px', background: '#071320', padding: '0 8px', color: 'rgba(0, 195, 255, 0.3)' }}>
                                                 <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M14.017 21L14.017 18C14.017 16.8954 14.9124 16 16.017 16H19.017C19.5693 16 20.017 15.5523 20.017 15V9C20.017 8.44772 19.5693 8 19.017 8H16.017C14.9124 8 14.017 7.10457 14.017 6V3L14.017 3C15.1216 3 16.017 3.89543 16.017 5V5.5C16.017 6.05228 16.4647 6.5 17.017 6.5H20.017C21.1216 6.5 22.017 7.39543 22.017 8.5V15.5C22.017 16.6046 21.1216 17.5 20.017 17.5H17.017C16.4647 17.5 16.017 17.9477 16.017 18.5V21H14.017ZM2.0166 21L2.0166 18C2.0166 16.8954 2.91203 16 4.0166 16H7.0166C7.56889 16 8.0166 15.5523 8.0166 15V9C8.0166 8.44772 7.56889 8 7.0166 8H4.0166C2.91203 8 2.0166 7.10457 2.0166 6V3L2.0166 3C3.12117 3 4.0166 3.89543 4.0166 5V5.5C4.0166 6.05228 4.46432 6.5 5.0166 6.5H8.0166C9.12117 6.5 10.0166 7.39543 10.0166 8.5V15.5C10.0166 16.6046 9.12117 17.5 8.0166 17.5H5.0166C4.46432 17.5 4.0166 17.9477 4.0166 18.5V21H2.0166Z"/></svg>
                                             </div>
-                                            <p style={{ color: '#e0e0e0', fontStyle: 'italic', lineHeight: 1.6, margin: 0 }}>
+                                            <p style={{ color: '#e0e0e0', fontSize: '16px', fontStyle: 'italic', lineHeight: 1.6, margin: 0 }}>
                                                 {typeof ex === 'string' ? ex : JSON.stringify(ex)}
                                             </p>
                                         </div>
                                     ))
                                 ) : (
-                                    <div style={{ background: '#0e0c1d', padding: '24px', borderRadius: '16px', border: '1px solid rgba(255, 255, 255, 0.05)', color: '#a0a0a0', fontStyle: 'italic', fontSize: '0.875rem', textAlign: 'center' }}>
+                                    <div style={{ background: '#0e0c1d', padding: '24px', borderRadius: '16px', border: '1px solid rgba(255, 255, 255, 0.05)', color: '#a0a0a0', fontStyle: 'italic', fontSize: '14px', textAlign: 'center' }}>
                                         No examples provided yet.
                                     </div>
                                 )}
@@ -221,23 +221,23 @@ function ElementCard({
 
                         {(currentWord.past || currentWord.gerund || currentWord.participle) && (
                             <section>
-                                <h4 style={{ color: '#00c3ff', fontSize: '0.75rem', fontWeight: 900, textTransform: 'uppercase', letterSpacing: '3px', margin: '0 0 16px 0' }}>Word Forms</h4>
+                                <h4 style={{ color: '#00c3ff', fontSize: '12px', fontWeight: 900, textTransform: 'uppercase', letterSpacing: '3px', margin: '0 0 16px 0' }}>Word Forms</h4>
                                 <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(100px, 1fr))', gap: '16px' }}>
                                     {currentWord.past && (
                                         <div style={{ background: '#071320', padding: '16px', borderRadius: '12px', border: '1px solid rgba(255, 255, 255, 0.05)' }}>
-                                            <span style={{ fontSize: '0.625rem', color: '#a0a0a0', textTransform: 'uppercase', display: 'block', marginBottom: '4px' }}>Past</span>
+                                            <span style={{ fontSize: '10px', color: '#a0a0a0', textTransform: 'uppercase', display: 'block', marginBottom: '4px' }}>Past</span>
                                             <span style={{ color: 'white', fontWeight: 'bold' }}>{currentWord.past}</span>
                                         </div>
                                     )}
                                     {currentWord.gerund && (
                                         <div style={{ background: '#071320', padding: '16px', borderRadius: '12px', border: '1px solid rgba(255, 255, 255, 0.05)' }}>
-                                            <span style={{ fontSize: '0.625rem', color: '#a0a0a0', textTransform: 'uppercase', display: 'block', marginBottom: '4px' }}>Gerund</span>
+                                            <span style={{ fontSize: '10px', color: '#a0a0a0', textTransform: 'uppercase', display: 'block', marginBottom: '4px' }}>Gerund</span>
                                             <span style={{ color: 'white', fontWeight: 'bold' }}>{currentWord.gerund}</span>
                                         </div>
                                     )}
                                     {currentWord.participle && (
                                         <div style={{ background: '#071320', padding: '16px', borderRadius: '12px', border: '1px solid rgba(255, 255, 255, 0.05)' }}>
-                                            <span style={{ fontSize: '0.625rem', color: '#a0a0a0', textTransform: 'uppercase', display: 'block', marginBottom: '4px' }}>Participle</span>
+                                            <span style={{ fontSize: '10px', color: '#a0a0a0', textTransform: 'uppercase', display: 'block', marginBottom: '4px' }}>Participle</span>
                                             <span style={{ color: 'white', fontWeight: 'bold' }}>{currentWord.participle}</span>
                                         </div>
                                     )}
@@ -247,21 +247,21 @@ function ElementCard({
 
                         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '32px' }}>
                             <section>
-                                <h4 style={{ color: '#00ff88', fontSize: '0.75rem', fontWeight: 900, textTransform: 'uppercase', letterSpacing: '3px', margin: '0 0 12px 0' }}>Synonyms</h4>
-                                <div style={{ fontSize: '0.875rem', color: '#a0a0a0', background: 'rgba(0, 255, 136, 0.05)', padding: '16px', borderRadius: '12px', border: '1px solid rgba(0, 255, 136, 0.1)', minHeight: '60px' }}>
+                                <h4 style={{ color: '#00ff88', fontSize: '12px', fontWeight: 900, textTransform: 'uppercase', letterSpacing: '3px', margin: '0 0 12px 0' }}>Synonyms</h4>
+                                <div style={{ fontSize: '14px', color: '#a0a0a0', background: 'rgba(0, 255, 136, 0.05)', padding: '16px', borderRadius: '12px', border: '1px solid rgba(0, 255, 136, 0.1)', minHeight: '60px' }}>
                                     {safeString(currentWord.synonyms) || "None"}
                                 </div>
                             </section>
                             <section>
-                                <h4 style={{ color: '#ff4d4d', fontSize: '0.75rem', fontWeight: 900, textTransform: 'uppercase', letterSpacing: '3px', margin: '0 0 12px 0' }}>Antonyms</h4>
-                                <div style={{ fontSize: '0.875rem', color: '#a0a0a0', background: 'rgba(255, 77, 77, 0.05)', padding: '16px', borderRadius: '12px', border: '1px solid rgba(255, 77, 77, 0.1)', minHeight: '60px' }}>
+                                <h4 style={{ color: '#ff4d4d', fontSize: '12px', fontWeight: 900, textTransform: 'uppercase', letterSpacing: '3px', margin: '0 0 12px 0' }}>Antonyms</h4>
+                                <div style={{ fontSize: '14px', color: '#a0a0a0', background: 'rgba(255, 77, 77, 0.05)', padding: '16px', borderRadius: '12px', border: '1px solid rgba(255, 77, 77, 0.1)', minHeight: '60px' }}>
                                     {safeString(currentWord.antonyms) || "None"}
                                 </div>
                             </section>
                         </div>
 
                         <section style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
-                            <h4 style={{ color: '#00c3ff', fontSize: '0.75rem', fontWeight: 900, textTransform: 'uppercase', letterSpacing: '3px', margin: '0 0 12px 0', width: '100%', textAlign: 'left' }}>Image</h4>
+                            <h4 style={{ color: '#00c3ff', fontSize: '12px', fontWeight: 900, textTransform: 'uppercase', letterSpacing: '3px', margin: '0 0 12px 0', width: '100%', textAlign: 'left' }}>Image</h4>
                             <div className="EC-ImageContainer" style={{ width: '100%', maxWidth: '400px', aspectRatio: '1 / 1', borderRadius: '16px', overflow: 'hidden', border: '1px solid rgba(0, 195, 255, 0.2)', boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.25)', position: 'relative' }}>
                                 {currentWord.image ? (
                                     <div className="EC-ImageWrapper" style={{ width: '100%', height: '100%' }}>
@@ -275,7 +275,7 @@ function ElementCard({
                                 ) : showSearch ? (
                                     <div className="EC-ImageSearchContainer" style={{ padding: '16px', height: '100%', display: 'flex', flexDirection: 'column', background: '#0e0c1d' }}>
                                         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
-                                            <h4 style={{ color: '#00c3ff', fontSize: '0.8rem', margin: 0, display: 'flex', alignItems: 'center', gap: '4px' }}>
+                                            <h4 style={{ color: '#00c3ff', fontSize: '12.8px', margin: 0, display: 'flex', alignItems: 'center', gap: '4px' }}>
                                                 <FaSearch size={12} /> Find Image
                                             </h4>
                                             <button onClick={() => setShowSearch(false)} style={{ background: 'transparent', border: 'none', color: '#a0a0a0', cursor: 'pointer' }} title="Cancel">
@@ -288,7 +288,7 @@ function ElementCard({
                                                 value={imageQuery}
                                                 onChange={(e) => setImageQuery(e.target.value)}
                                                 placeholder="Search..."
-                                                style={{ flexGrow: 1, padding: '6px', fontSize: '0.8rem', borderRadius: '8px', border: '1px solid rgba(0,195,255,0.3)', background: 'rgba(0,0,0,0.5)', color: 'white', minWidth: 0 }}
+                                                style={{ flexGrow: 1, padding: '6px', fontSize: '12.8px', borderRadius: '8px', border: '1px solid rgba(0,195,255,0.3)', background: 'rgba(0,0,0,0.5)', color: 'white', minWidth: 0 }}
                                             />
                                             <button type="submit" disabled={isSearchingImages} style={{ background: '#00c3ff', color: 'black', border: 'none', padding: '6px 10px', borderRadius: '8px', cursor: 'pointer' }}>
                                                 <FaSearch size={10} />
@@ -307,7 +307,7 @@ function ElementCard({
                                                     />
                                                 ))
                                             ) : (
-                                                <div style={{ gridColumn: 'span 2', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'rgba(160, 160, 160, 0.4)', fontStyle: 'italic', fontSize: '0.75rem', textAlign: 'center', padding: '10px' }}>
+                                                <div style={{ gridColumn: 'span 2', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'rgba(160, 160, 160, 0.4)', fontStyle: 'italic', fontSize: '12px', textAlign: 'center', padding: '10px' }}>
                                                     Search for an image to represent this word.
                                                 </div>
                                             )}
@@ -315,8 +315,8 @@ function ElementCard({
                                     </div>
                                 ) : (
                                     <div style={{ width: '100%', height: '100%', background: '#0e0c1d', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', color: 'rgba(160,160,160,0.2)' }}>
-                                        <span style={{ fontStyle: 'italic', fontSize: '0.875rem' }}>No Image Available</span>
-                                        <button onClick={() => setShowSearch(true)} style={{ marginTop: '16px', background: 'transparent', color: '#00c3ff', border: '1px solid #00c3ff', padding: '6px 12px', borderRadius: '8px', cursor: 'pointer', fontSize: '0.75rem', display: 'flex', alignItems: 'center', gap: '4px' }}>
+                                        <span style={{ fontStyle: 'italic', fontSize: '14px' }}>No Image Available</span>
+                                        <button onClick={() => setShowSearch(true)} style={{ marginTop: '16px', background: 'transparent', color: '#00c3ff', border: '1px solid #00c3ff', padding: '6px 12px', borderRadius: '8px', cursor: 'pointer', fontSize: '12px', display: 'flex', alignItems: 'center', gap: '4px' }}>
                                             <FaImage size={12} /> Add Image
                                         </button>
                                     </div>

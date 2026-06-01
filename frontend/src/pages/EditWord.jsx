@@ -198,25 +198,67 @@ export default function EditWord() {
               <label className="block text-xs font-bold text-[#00c3ff] uppercase tracking-widest mb-3 flex items-center gap-2">
                 <FaImage /> Update Image
               </label>
-              <div className="flex gap-4 mb-4">
+              <div className="flex flex-col md:flex-row gap-4 mb-4">
                 <input
                   type="text"
                   value={imageQuery}
                   onChange={(e) => setImageQuery(e.target.value)}
-                  className="flex-grow bg-[#071320] border border-[#00c3ff]/30 rounded-[15px] px-4 py-3 text-white"
+                  onKeyDown={(e) => { if (e.key === 'Enter') { e.preventDefault(); handleImageSearchSubmit(); } }}
+                  placeholder="Search image..."
+                  className="flex-grow bg-[#071320] border border-[#00c3ff]/30 rounded-[15px] px-4 py-3 text-white focus:outline-none focus:border-[#00c3ff] focus:ring-1 focus:ring-[#00c3ff] transition-all duration-300"
                 />
-                <button type="button" onClick={handleImageSearchSubmit} className="px-6 bg-[#00c3ff]/20 text-[#00c3ff] rounded-[15px] font-bold border border-[#00c3ff]/50">Search</button>
+                <button
+                  type="button"
+                  onClick={handleImageSearchSubmit}
+                  disabled={isSearchingImages}
+                  className="px-6 py-3 bg-[#00c3ff]/20 text-[#00c3ff] hover:bg-[#00c3ff]/30 font-bold uppercase tracking-wider rounded-[15px] transition-all flex items-center justify-center min-w-[140px] border border-[#00c3ff]/50 disabled:opacity-50"
+                >
+                  {isSearchingImages && imagePage === 1 ? (
+                    <div className="h-5 w-5 animate-spin rounded-full border-2 border-[#00c3ff] border-t-transparent"></div>
+                  ) : "Search"}
+                </button>
               </div>
 
               {imageResults.length > 0 && (
-                <div className="grid grid-cols-4 gap-3 max-h-[200px] overflow-y-auto mb-4">
-                  {imageResults.map((res, i) => (
-                    <img key={i} src={res.link} onClick={() => setFormData({ ...formData, image: res.link })} className={`cursor-pointer rounded-lg border-2 ${formData.image === res.link ? 'border-[#00c3ff]' : 'border-transparent'}`} />
-                  ))}
+                <div className="mb-4">
+                  <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 gap-3 max-h-[300px] overflow-y-auto pr-2 custom-scrollbar">
+                    {imageResults.map((result, i) => (
+                      <div
+                        key={i}
+                        className={`cursor-pointer rounded-[10px] overflow-hidden border-2 transition-all duration-200 aspect-square ${formData.image === result.link ? 'border-[#00c3ff] shadow-[0_0_15px_rgba(0,195,255,0.6)] scale-105 z-10' : 'border-transparent hover:border-[#00c3ff]/50'}`}
+                        onClick={() => setFormData({ ...formData, image: result.link })}
+                      >
+                        <img
+                          src={result.link}
+                          alt={result.title}
+                          className="w-full h-full object-cover"
+                          loading="lazy"
+                        />
+                      </div>
+                    ))}
+                  </div>
+
+                  {/* Paginación de Imágenes */}
+                  <div className="mt-4 flex justify-center">
+                    <button
+                      type="button"
+                      onClick={handleLoadMoreImages}
+                      disabled={isSearchingImages}
+                      className="flex items-center gap-2 text-xs font-bold text-[#00c3ff] uppercase tracking-widest hover:text-white transition-colors"
+                    >
+                      {isSearchingImages && imagePage > 1 ? (
+                        <div className="h-3 w-3 animate-spin rounded-full border-2 border-[#00c3ff] border-t-transparent"></div>
+                      ) : <FaChevronDown />}
+                      Load More Images
+                    </button>
+                  </div>
                 </div>
               )}
               
-              <input type="url" value={formData.image} onChange={(e) => setFormData({ ...formData, image: e.target.value })} placeholder="Image URL" className="w-full bg-[#071320] border border-[#00c3ff]/20 rounded-[15px] px-4 py-2 text-sm" />
+              <div className="mt-4">
+                <label className="block text-[10px] font-bold text-[#a0a0a0] uppercase tracking-widest mb-2">Or paste image URL directly:</label>
+                <input type="url" value={formData.image} onChange={(e) => setFormData({ ...formData, image: e.target.value })} placeholder="https://example.com/image.jpg" className="w-full bg-[#071320] border border-[#00c3ff]/20 rounded-[15px] px-4 py-2.5 text-[#a0a0a0] text-sm focus:outline-none focus:border-[#00c3ff]/50 transition-all duration-300" />
+              </div>
             </div>
 
             <div className="pt-6 border-t border-[#00c3ff]/20 flex justify-end">

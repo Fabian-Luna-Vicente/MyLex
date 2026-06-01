@@ -1,97 +1,42 @@
 import React from 'react';
-import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { FaTimes, FaRobot, FaUserCircle, FaPlus, FaCheck, FaGlobe, FaInfoCircle, FaTheaterMasks, FaUsers, FaUserPlus } from 'react-icons/fa';
 import { LANGUAGES } from '../../config/constants';
-import { chatService } from '../../services/chatService';
-import { profileService } from '../../services/profileService';
+import { useCreateChat } from '../../hooks/useCreateChat';
 
 export default function CreateChatModal({ onClose, onSuccess }) {
-  const [step, setStep] = useState(1);
-  const [loading, setLoading] = useState(false);
-  const [friends, setFriends] = useState([]);
-  const [aiPersonas, setAiPersonas] = useState([]);
-
-  // Room details
-  const [roomName, setRoomName] = useState('New Adventure');
-  const [description, setDescription] = useState('');
-  const [context, setContext] = useState('');
-  const [language, setLanguage] = useState('English');
-
-  // Participants
-  const [participants, setParticipants] = useState([]);
-
-  // Sub-forms
-  const [showAddAI, setShowAddAI] = useState(false);
-  const [showAddHuman, setShowAddHuman] = useState(false);
-
-  // AI Form State
-  const [aiName, setAiName] = useState('Assistant');
-  const [aiGender, setAiGender] = useState('female');
-  const [aiPersonality, setAiPersonality] = useState('Friendly and helpful');
-  const [aiRole, setAiRole] = useState('Guide');
-
-  useEffect(() => {
-    profileService.getFriends().then(setFriends).catch(console.error);
-    chatService.getAIPersonas().then(setAiPersonas).catch(console.error);
-  }, []);
-
-  const handleAddAI = (persona, role) => {
-    if (participants.find(p => p.is_ai && p.ai_name === persona.name)) return;
-    setParticipants([...participants, {
-      is_ai: true,
-      ai_name: persona.name,
-      ai_gender: persona.gender,
-      ai_personality: persona.personality,
-      ai_avatar_url: persona.avatar_url,
-      role: role || 'AI Companion'
-    }]);
-    setShowAddAI(false);
-  };
-
-  const handleAddHuman = (friend, role) => {
-    if (participants.find(p => p.user_id === friend.user_id)) return;
-    setParticipants([...participants, {
-      is_ai: false,
-      user_id: friend.user_id,
-      name_display: friend.username, // Just for UI
-      avatar_display: friend.avatar_url,
-      role: role || 'Participant'
-    }]);
-    setShowAddHuman(false);
-  };
-
-  const removeParticipant = (index) => {
-    setParticipants(participants.filter((_, i) => i !== index));
-  };
-
-  const handleCreate = async () => {
-    setLoading(true);
-    try {
-      const data = {
-        name: roomName,
-        description,
-        context,
-        language,
-        initial_participants: participants.map(p => ({
-          user_id: p.user_id,
-          is_ai: p.is_ai,
-          ai_name: p.ai_name,
-          ai_gender: p.ai_gender,
-          ai_personality: p.ai_personality,
-          ai_avatar_url: p.ai_avatar_url,
-          role: p.role
-        }))
-      };
-      // We need to implement createRoom in chatService
-      const room = await chatService.createRoom(data);
-      onSuccess(room);
-    } catch (e) {
-      console.error(e);
-    } finally {
-      setLoading(false);
-    }
-  };
+  const {
+    step,
+    setStep,
+    loading,
+    friends,
+    aiPersonas,
+    roomName,
+    setRoomName,
+    description,
+    setDescription,
+    context,
+    setContext,
+    language,
+    setLanguage,
+    participants,
+    showAddAI,
+    setShowAddAI,
+    showAddHuman,
+    setShowAddHuman,
+    aiName,
+    setAiName,
+    aiGender,
+    setAiGender,
+    aiPersonality,
+    setAiPersonality,
+    aiRole,
+    setAiRole,
+    handleAddAI,
+    handleAddHuman,
+    removeParticipant,
+    handleCreate
+  } = useCreateChat(onSuccess);
 
   return (
     <div className="fixed top-[80px] left-0 right-0 bottom-0 bg-black/60 backdrop-blur-sm z-[90] flex items-center justify-center p-4">
@@ -225,16 +170,16 @@ export default function CreateChatModal({ onClose, onSuccess }) {
                                 </div>
                               </div>
                               <div className="flex items-center gap-2">
-                                <input 
-                                  type="text" 
-                                  placeholder="Role..." 
+                                <input
+                                  type="text"
+                                  placeholder="Role..."
                                   className="w-20 bg-black/50 border border-white/10 rounded-lg p-1.5 text-white text-xs focus:border-[#00c3ff] outline-none"
                                   id={`role-${persona.id}`}
                                   disabled={isAdded}
                                 />
                                 {!isAdded && (
-                                  <button 
-                                    onClick={() => handleAddAI(persona, document.getElementById(`role-${persona.id}`).value)} 
+                                  <button
+                                    onClick={() => handleAddAI(persona, document.getElementById(`role-${persona.id}`).value)}
                                     className="text-xs bg-[#00c3ff]/10 text-[#00c3ff] px-3 py-1.5 rounded-lg font-bold hover:bg-[#00c3ff] hover:text-black transition-all"
                                   >
                                     Add

@@ -93,7 +93,7 @@
 }
 
 .EC-Title {
-    font-size: 2.2rem;
+    font-size: 35.2px;
     font-weight: 900;
     color: #fff;
     text-align: center;
@@ -115,7 +115,7 @@
     color: #00c3ff;
     border: 1px solid rgba(0, 195, 255, 0.3);
     border-radius: 8px;
-    font-size: 0.75rem;
+    font-size: 12px;
     font-weight: bold;
     text-transform: uppercase;
     letter-spacing: 1px;
@@ -185,7 +185,7 @@
 
 .EC-SectionTitle {
     color: #00c3ff;
-    font-size: 0.75rem;
+    font-size: 12px;
     font-weight: 900;
     text-transform: uppercase;
     letter-spacing: 3px;
@@ -198,7 +198,7 @@
     border-radius: 16px;
     border: 1px solid rgba(255, 255, 255, 0.05);
     color: rgba(255, 255, 255, 0.9);
-    font-size: 1rem;
+    font-size: 16px;
     line-height: 1.6;
     margin: 0;
 }
@@ -277,7 +277,7 @@
 }
 
 .EC-SmallBoxLabel {
-    font-size: 0.625rem;
+    font-size: 10px;
     color: #a0a0a0;
     text-transform: uppercase;
     margin-bottom: 4px;
@@ -287,7 +287,7 @@
 .EC-SmallBoxValue {
     color: #fff;
     font-weight: bold;
-    font-size: 0.9rem;
+    font-size: 14.4px;
 }
 
 .EC-Pagination {
@@ -434,7 +434,7 @@
 }
 
 .EC-Title {
-    font-size: 2.2rem;
+    font-size: 35.2px;
     font-weight: 900;
     color: #fff;
     text-align: center;
@@ -456,7 +456,7 @@
     color: #00c3ff;
     border: 1px solid rgba(0, 195, 255, 0.3);
     border-radius: 8px;
-    font-size: 0.75rem;
+    font-size: 12px;
     font-weight: bold;
     text-transform: uppercase;
     letter-spacing: 1px;
@@ -526,7 +526,7 @@
 
 .EC-SectionTitle {
     color: #00c3ff;
-    font-size: 0.75rem;
+    font-size: 12px;
     font-weight: 900;
     text-transform: uppercase;
     letter-spacing: 3px;
@@ -539,7 +539,7 @@
     border-radius: 16px;
     border: 1px solid rgba(255, 255, 255, 0.05);
     color: rgba(255, 255, 255, 0.9);
-    font-size: 1rem;
+    font-size: 16px;
     line-height: 1.6;
     margin: 0;
 }
@@ -618,7 +618,7 @@
 }
 
 .EC-SmallBoxLabel {
-    font-size: 0.625rem;
+    font-size: 10px;
     color: #a0a0a0;
     text-transform: uppercase;
     margin-bottom: 4px;
@@ -628,7 +628,7 @@
 .EC-SmallBoxValue {
     color: #fff;
     font-weight: bold;
-    font-size: 0.9rem;
+    font-size: 14.4px;
 }
 
 .EC-Pagination {
@@ -733,7 +733,7 @@
     padding: 8px 16px;
     border-radius: 20px;
     font-weight: bold;
-    font-size: 0.7rem;
+    font-size: 11.2px;
     text-transform: uppercase;
     letter-spacing: 1px;
     cursor: pointer;
@@ -769,7 +769,7 @@
 }
 
 .AW-Title {
-    font-size: 1.5rem;
+    font-size: 24px;
     font-weight: 900;
     color: #fff;
     margin: 0 0 20px 0;
@@ -859,7 +859,7 @@
 .AW-ListOption span {
     color: #fff;
     font-weight: bold;
-    font-size: 1rem;
+    font-size: 16px;
 }
 
 .AW-BtnSubmit {
@@ -873,7 +873,7 @@
     padding: 16px;
     border-radius: 9999px;
     font-weight: 900;
-    font-size: 1rem;
+    font-size: 16px;
     text-transform: uppercase;
     letter-spacing: 1px;
     cursor: pointer;
@@ -912,7 +912,7 @@
     border: 1px solid rgba(0, 195, 255, 0.3);
     padding: 8px 16px;
     border-radius: 20px;
-    font-size: 0.75rem;
+    font-size: 12px;
     font-weight: bold;
     cursor: pointer;
     transition: all 0.3s;
@@ -941,7 +941,7 @@
 
 .EC-ImageSearchHeader {
     color: #00c3ff;
-    font-size: 0.7rem;
+    font-size: 11.2px;
     font-weight: bold;
     text-transform: uppercase;
     letter-spacing: 1px;
@@ -965,7 +965,7 @@
     border-radius: 8px 0 0 8px;
     padding: 0 10px;
     color: #fff;
-    font-size: 0.75rem;
+    font-size: 12px;
     outline: none;
     transition: border-color 0.3s;
 }

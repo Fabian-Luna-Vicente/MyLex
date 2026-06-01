@@ -20,37 +20,49 @@ export default function SynAntGame() {
 
   return (
     <div className="min-h-screen bg-[#071320] text-white font-sans relative overflow-hidden">
-      
+
       {/* Background Decor */}
       <div className="absolute top-[-10%] right-[-10%] w-[45%] h-[45%] bg-[#00c3ff]/5 blur-[100px] rounded-full"></div>
       <div className="absolute bottom-[-10%] left-[-10%] w-[45%] h-[45%] bg-[#00c3ff]/5 blur-[100px] rounded-full"></div>
 
       {/* Header */}
-      <header className="relative z-10 flex items-center justify-between px-6 md:px-12 pt-8 pb-4 border-b border-[#00c3ff]/20 backdrop-blur-md sticky top-0 bg-[#071320]/80">
-        <button
-          onClick={() => { quitGame(); navigate('/dashboard'); }}
-          className="group flex items-center text-[#a0a0a0] hover:text-[#00c3ff] transition-colors font-bold uppercase tracking-widest text-xs"
-        >
-          <GrPrevious className="mr-2 group-hover:-translate-x-1 transition-transform" />
-          Dashboard
-        </button>
-        <h1 className="text-2xl font-extrabold drop-shadow-[0_0_10px_rgba(0,195,255,0.5)]">
+      <header className="relative z-10 flex flex-col md:flex-row items-center justify-between px-4 md:px-12 pt-4 md:pt-8 pb-4 border-b border-[#00c3ff]/20 backdrop-blur-md sticky top-0 bg-[#071320]/80 gap-3">
+        <div className="flex w-full md:w-auto justify-between items-center">
+          <button
+            onClick={() => { quitGame(); navigate('/dashboard'); }}
+            className="group flex items-center text-[#a0a0a0] hover:text-[#00c3ff] transition-colors font-bold uppercase tracking-widest text-[10px] md:text-xs"
+          >
+            <GrPrevious className="mr-2 group-hover:-translate-x-1 transition-transform" />
+            Dashboard
+          </button>
+
+          {/* Progress (Mobile only) */}
+          {showGame && (
+            <div className="md:hidden flex items-center gap-2 text-[10px] font-bold uppercase tracking-widest">
+              <span className="text-[#00c3ff]">✓ {score.correct}</span>
+              <span className="text-white">✗ {score.wrong}</span>
+              <span className="text-[#a0a0a0] ml-1">{index + 1}/{shuffledWords.length}</span>
+            </div>
+          )}
+        </div>
+
+        <h1 className="text-xl md:text-2xl font-extrabold drop-shadow-[0_0_10px_rgba(0,195,255,0.5)]">
           Synonyms & <span className="text-[#00c3ff]">Antonyms</span>
         </h1>
         {showGame ? (
-          <div className="flex items-center gap-4 text-xs font-bold uppercase tracking-widest">
+          <div className="hidden md:flex items-center gap-4 text-xs font-bold uppercase tracking-widest">
             <span className="text-[#00c3ff]">✓ {score.correct}</span>
             <span className="text-white">✗ {score.wrong}</span>
             <span className="text-[#a0a0a0] ml-2">{index + 1}/{shuffledWords.length}</span>
           </div>
-        ) : <div className="w-24 md:block hidden" />}
+        ) : <div className="w-24 hidden md:block" />}
       </header>
 
-      <div className="max-w-4xl mx-auto px-6 md:px-12 py-10 relative z-10">
+      <div className="w-full max-w-4xl mx-auto px-4 md:px-12 py-4 md:py-10 relative z-10">
 
         {/* --- LIST SELECTION MENU --- */}
         {!showGame && (
-          <motion.div 
+          <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             className="flex flex-col items-center justify-center gap-6 mt-12"
@@ -66,11 +78,10 @@ export default function SynAntGame() {
                       <button
                         key={list.id}
                         onClick={() => setSelectedListId(list.id)}
-                        className={`px-4 py-2.5 rounded-xl text-sm font-bold tracking-wide transition-all border ${
-                          selectedListId === list.id
-                            ? 'bg-[#00c3ff]/20 border-[#00c3ff] text-[#00c3ff] shadow-[0_0_15px_rgba(0,195,255,0.3)]'
-                            : 'bg-[#071320] border-[#00c3ff]/20 text-[#a0a0a0] hover:border-[#00c3ff]/50 hover:text-white'
-                        }`}
+                        className={`px-4 py-2.5 rounded-xl text-sm font-bold tracking-wide transition-all border ${selectedListId === list.id
+                          ? 'bg-[#00c3ff]/20 border-[#00c3ff] text-[#00c3ff] shadow-[0_0_15px_rgba(0,195,255,0.3)]'
+                          : 'bg-[#071320] border-[#00c3ff]/20 text-[#a0a0a0] hover:border-[#00c3ff]/50 hover:text-white'
+                          }`}
                       >
                         {list.name}
                       </button>
@@ -96,28 +107,28 @@ export default function SynAntGame() {
         {/* --- GAME AREA --- */}
         <AnimatePresence mode="wait">
           {showGame && currentWord && (
-            <motion.div 
+            <motion.div
               key={index}
               initial={{ opacity: 0, scale: 0.95 }}
               animate={{ opacity: 1, scale: 1 }}
               exit={{ opacity: 0, scale: 1.05 }}
-              className="flex flex-col items-center gap-8 mt-4"
+              className="flex flex-col items-center gap-4 md:gap-8 mt-2 md:mt-4"
             >
               <div className="text-center space-y-2">
-                <h2 className="text-[#a0a0a0] uppercase tracking-[4px] font-bold text-sm">
+                <h2 className="text-[#a0a0a0] uppercase tracking-[2px] md:tracking-[4px] font-bold text-xs md:text-sm">
                   Find the <span className={synOrAnt === 'Syn' ? 'text-[#00c3ff]' : 'text-blue-500'}>{synOrAnt === 'Syn' ? 'Synonym' : 'Antonym'}</span> of:
                 </h2>
-                <h3 className="text-5xl font-black text-white drop-shadow-[0_0_20px_rgba(255,255,255,0.2)]">
+                <h3 className="text-3xl md:text-5xl font-black text-white drop-shadow-[0_0_20px_rgba(255,255,255,0.2)]">
                   "{targetRelation}"
                 </h3>
               </div>
 
               {/* Choices Container */}
-              <div className="bg-[#0e0c1d]/40 backdrop-blur-md border border-[#ffffff05] rounded-[40px] p-10 w-full max-w-2xl shadow-2xl">
-                <div className={`grid grid-cols-1 md:grid-cols-2 gap-5 ${gameStatus !== 'playing' ? 'pointer-events-none' : ''}`}>
+              <div className="bg-[#0e0c1d]/40 backdrop-blur-md border border-[#ffffff05] rounded-[20px] md:rounded-[40px] p-4 md:p-10 w-full max-w-2xl shadow-2xl">
+                <div className={`grid grid-cols-1 md:grid-cols-2 gap-3 md:gap-5 ${gameStatus !== 'playing' ? 'pointer-events-none' : ''}`}>
                   {choices.map((choice, i) => {
                     let statusColor = "bg-[#071320] border-[#ffffff10] text-[#a0a0a0] hover:border-[#00c3ff] hover:text-[#00c3ff] hover:bg-[#00c3ff]/5";
-                    
+
                     if (gameStatus !== 'playing') {
                       if (choice.id === currentWord.id) statusColor = "bg-[#00c3ff]/10 border-[#00c3ff] text-[#00c3ff] shadow-[0_0_20px_rgba(0,195,255,0.2)]";
                       else statusColor = "bg-white/5 border-white/20 text-white/40";
@@ -130,7 +141,7 @@ export default function SynAntGame() {
                         animate={{ opacity: 1, y: 0 }}
                         transition={{ delay: i * 0.1 }}
                         onClick={() => handleAnswer(choice)}
-                        className={`px-8 py-6 rounded-3xl border font-bold text-xl transition-all shadow-lg active:scale-95 ${statusColor}`}
+                        className={`px-4 py-4 md:px-8 md:py-6 rounded-2xl md:rounded-3xl border font-bold text-base md:text-xl transition-all shadow-lg active:scale-95 ${statusColor}`}
                       >
                         {choice.name}
                       </motion.button>
@@ -141,20 +152,20 @@ export default function SynAntGame() {
 
               {/* Feedback Overlay */}
               {gameStatus !== 'playing' && (
-                <motion.div 
+                <motion.div
                   initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
-                  className="flex flex-col items-center gap-5 text-center"
+                  className="flex flex-col items-center gap-3 md:gap-5 text-center mt-2"
                 >
-                  <div className={`px-8 py-3 rounded-full text-sm font-black uppercase tracking-[4px] ${gameStatus === 'won' ? 'bg-[#00c3ff]/20 text-[#00c3ff]' : 'bg-white/20 text-white'}`}>
+                  <div className={`px-6 py-2 md:px-8 md:py-3 rounded-full text-xs md:text-sm font-black uppercase tracking-[2px] md:tracking-[4px] ${gameStatus === 'won' ? 'bg-[#00c3ff]/20 text-[#00c3ff]' : 'bg-white/20 text-white'}`}>
                     {gameStatus === 'won' ? 'Correct!' : 'Incorrect'}
                   </div>
-                  <p className="text-xl">
+                  <p className="text-sm md:text-xl">
                     The {synOrAnt === 'Syn' ? 'synonym' : 'antonym'} of <span className="text-white font-bold">"{targetRelation}"</span> is <span className="text-[#00c3ff] font-bold">"{currentWord.name}"</span>
                   </p>
-                  <button 
+                  <button
                     onClick={nextLevel}
-                    className="flex items-center gap-4 px-12 py-5 bg-white text-black font-black rounded-full hover:shadow-[0_0_30px_rgba(255,255,255,0.5)] transition-all uppercase tracking-widest text-sm group"
+                    className="flex items-center gap-2 md:gap-4 px-8 py-3 md:px-12 md:py-5 bg-white text-black font-black rounded-full hover:shadow-[0_0_30px_rgba(255,255,255,0.5)] transition-all uppercase tracking-widest text-xs md:text-sm group"
                   >
                     Continue <GrLinkNext className="group-hover:translate-x-2 transition-transform" />
                   </button>
@@ -162,7 +173,7 @@ export default function SynAntGame() {
               )}
 
               {/* Progress */}
-              <div className="mt-8 flex items-center gap-4">
+              <div className="mt-4 md:mt-8 flex items-center justify-center gap-2 md:gap-4 w-full">
                 <span className="text-[10px] text-[#a0a0a0] font-bold uppercase tracking-widest">Progress</span>
                 <div className="flex gap-1.5">
                   {shuffledWords.map((_, i) => (

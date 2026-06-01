@@ -1,28 +1,20 @@
 import React from 'react';
-import { useEffect, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { useVocabulary } from '../hooks/useVocabulary';
-import { usePaginate } from '../hooks/usePaginate';
 import CreateListModal from '../components/CreateListModal';
+import { useAllLists } from '../hooks/useAllLists';
 
 export default function AllLists() {
-  const navigate = useNavigate();
-  const { lists, fetchLists, addList, loading } = useVocabulary();
-  const [isModalOpen, setIsModalOpen] = useState(false);
-
-  // Paginación
-  const [currentPage, setCurrentPage] = useState(1);
-  const itemsPerPage = 8;
-
-  useEffect(() => {
-    fetchLists();
-  }, [fetchLists]);
-
-  const { currentItems, totalPages } = usePaginate(currentPage, itemsPerPage, lists)
-
-  const handleCreateList = async (listData) => {
-    await addList(listData);
-  };
+  const {
+    navigate,
+    lists,
+    loading,
+    isModalOpen,
+    setIsModalOpen,
+    currentPage,
+    setCurrentPage,
+    currentItems,
+    totalPages,
+    handleCreateList
+  } = useAllLists();
 
   return (
     <div className="min-h-screen bg-[#071320] text-white p-6 md:p-12 relative z-[1] overflow-hidden font-sans">

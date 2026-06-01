@@ -1,15 +1,11 @@
-import React from 'react';
-import { useAuth } from '../hooks/useAuth';
-import { useVocabulary } from '../hooks/useVocabulary';
-import { useEffect, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import React, { useState, useEffect } from 'react';
 import { categories } from "../components/categoriesData";
-import { progressService } from '../services/progressService';
 import {
   AreaChart, Area, ResponsiveContainer, XAxis, YAxis, Tooltip
 } from 'recharts';
 import { motion, AnimatePresence } from 'framer-motion';
 import { FaFire, FaCog, FaSignOutAlt } from 'react-icons/fa';
+import { useDashboard } from '../hooks/useDashboard';
 
 const AccuracyCarousel = ({ accuracies }) => {
   const [index, setIndex] = useState(0);
@@ -69,31 +65,16 @@ const AccuracyCarousel = ({ accuracies }) => {
 };
 
 export default function Dashboard() {
-  const { user, logout } = useAuth();
-  const { words, lists, fetchWords, fetchLists, loading } = useVocabulary();
-  const navigate = useNavigate();
-  const [stats, setStats] = useState(null);
-
-  useEffect(() => {
-    fetchWords();
-    fetchLists();
-    loadStats();
-  }, [fetchWords, fetchLists]);
-
-  const loadStats = async () => {
-    try {
-      const data = await progressService.getOverallStats();
-      console.log(data);
-      setStats(data);
-    } catch (e) {
-      console.error("Dashboard stats error:", e);
-    }
-  };
-
-  const activityData = stats?.recent_activity?.map(a => ({
-    date: new Date(a.date).toLocaleDateString(undefined, { weekday: 'short' }),
-    count: a.count
-  })) || [];
+  const {
+    user,
+    logout,
+    words,
+    lists,
+    loading,
+    navigate,
+    stats,
+    activityData
+  } = useDashboard();
 
   return (
     <div className="min-h-screen bg-[#071320] pt-28 relative z-[1] overflow-x-hidden font-sans">

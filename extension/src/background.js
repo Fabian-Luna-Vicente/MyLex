@@ -59,7 +59,7 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
 
     // Obtener las listas del usuario
     if (request.action === "GET_LISTS") {
-        api.get('/api/lists')
+        api.get('/api/vocabulary/lists')
             .then(response => sendResponse({ success: true, data: response.data }))
             .catch(error => sendResponse({ success: false, error: error.message }));
         return true;
@@ -67,7 +67,7 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
 
     // Añadir una nueva palabra
     if (request.action === "ADD_WORD") {
-        api.post('/api/words', request.payload)
+        api.post('/api/vocabulary/words', request.payload)
             .then(response => sendResponse({ success: true, data: response.data }))
             .catch(error => sendResponse({ success: false, error: error.message }));
         return true;

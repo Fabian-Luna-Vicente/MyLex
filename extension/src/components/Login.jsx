@@ -15,8 +15,8 @@ export default function Login({ onLoginSuccess }) {
 
   return (
     <div style={{ padding: '15px', color: 'white' }}>
-      <h3 style={{ marginTop: 0, color: '#00c3ff', fontSize: '1.2rem' }}>MyLex Assistant</h3>
-      <p style={{ fontSize: '0.8rem', color: '#aaa', marginBottom: '15px' }}>Inicia sesión para usar la extensión.</p>
+      <h3 style={{ marginTop: 0, color: '#00c3ff', fontSize: '19.2px' }}>MyLex Assistant</h3>
+      <p style={{ fontSize: '12.8px', color: '#aaa', marginBottom: '15px' }}>Inicia sesión para usar la extensión.</p>
       
       <form onSubmit={handleLogin} style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
         <input 
@@ -49,7 +49,7 @@ export default function Login({ onLoginSuccess }) {
           }}
           required
         />
-        {error && <p style={{ color: '#ff4d4d', fontSize: '0.75rem', margin: 0 }}>{error}</p>}
+        {error && <p style={{ color: '#ff4d4d', fontSize: '12px', margin: 0 }}>{error}</p>}
         
         <button 
           type="submit" 
@@ -75,7 +75,7 @@ export default function Login({ onLoginSuccess }) {
           href={CONFIG.DASHBOARD_URL} 
           target="_blank" 
           rel="noreferrer"
-          style={{ color: '#00c3ff', fontSize: '0.75rem', textDecoration: 'none' }}
+          style={{ color: '#00c3ff', fontSize: '12px', textDecoration: 'none' }}
         >
           Ir a la web principal
         </a>

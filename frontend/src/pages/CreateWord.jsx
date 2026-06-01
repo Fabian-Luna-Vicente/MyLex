@@ -113,6 +113,13 @@ export default function CreateWord() {
                     </span>
                   </div>
                   <p className="text-[#a0a0a0] mt-2 text-[0.95rem] leading-[1.4] whitespace-pre-wrap">{res.meaning}</p>
+                  {(res.past || res.gerund || res.participle) && (
+                    <div className="mt-3 flex flex-wrap gap-3 text-xs text-[#00c3ff]/80 font-medium bg-[#00c3ff]/5 p-2 rounded-lg border border-[#00c3ff]/10 inline-flex">
+                      {res.past && <span><span className="text-[#a0a0a0] uppercase tracking-wider text-[9px] mr-1">Past:</span> {res.past}</span>}
+                      {res.gerund && <span><span className="text-[#a0a0a0] uppercase tracking-wider text-[9px] mr-1">Gerund:</span> {res.gerund}</span>}
+                      {res.participle && <span><span className="text-[#a0a0a0] uppercase tracking-wider text-[9px] mr-1">Participle:</span> {res.participle}</span>}
+                    </div>
+                  )}
                 </div>
               ))}
             </div>

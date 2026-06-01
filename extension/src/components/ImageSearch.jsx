@@ -56,7 +56,7 @@ function ElementCard({
                         </button>
                         <h3 className="EC-Title">{currentWord.name}</h3>
                     </div>
-                    <span style={{ fontSize: '0.8rem', color: '#aaa' }}>
+                    <span style={{ fontSize: '12.8px', color: '#aaa' }}>
                         {Index + 1} / {SelectedObjects.length}
                     </span>
                 </div>
@@ -147,7 +147,7 @@ function ElementCard({
                     )}
 
                     {AddWordB && (
-                        <div style={{ marginTop: '1rem', borderTop: '1px solid #333', paddingTop: '1rem', display: "flex", justifyContent: "center" }}>
+                        <div style={{ marginTop: '16px', borderTop: '1px solid #333', paddingTop: '16px', display: "flex", justifyContent: "center" }}>
                             <AddWordToList
                                 ExtraFunction={() => setAddWordB(false)}
                                 data={PostData()}

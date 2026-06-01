@@ -20,10 +20,10 @@ export default function RandomGame() {
   const word = shuffledWords[index];
 
   const diffLabels = [
-    { key: 'easy',      icon: <FaGrinSquint />, color: 'bg-blue-300 text-black',  label: 'Easy' },
-    { key: 'normal',    icon: <FaLaugh />,      color: 'bg-blue-500 text-white',  label: 'Normal' },
-    { key: 'hard',      icon: <FaMeh />,        color: 'bg-white text-black',     label: 'Hard' },
-    { key: 'ultrahard', icon: <FaDizzy />,      color: 'bg-transparent border-2 border-white text-white',     label: 'Ultra' },
+    { key: 'easy', icon: <FaGrinSquint />, color: 'bg-blue-300 text-black', label: 'Easy' },
+    { key: 'normal', icon: <FaLaugh />, color: 'bg-blue-500 text-white', label: 'Normal' },
+    { key: 'hard', icon: <FaMeh />, color: 'bg-white text-black', label: 'Hard' },
+    { key: 'ultrahard', icon: <FaDizzy />, color: 'bg-transparent border-2 border-white text-white', label: 'Ultra' },
   ];
 
   const totalByDiff = (key) => difficulty[key]?.length || 0;
@@ -32,7 +32,7 @@ export default function RandomGame() {
     <div className="min-h-screen bg-[#071320] text-white font-sans relative overflow-hidden">
 
       {/* Header */}
-      <header className="flex items-center justify-between px-6 md:px-12 pt-8 pb-4 border-b border-[#00c3ff]/20">
+      <header className="flex flex-col md:flex-row items-start md:items-center justify-between px-6 md:px-12 pt-8 pb-4 border-b border-[#00c3ff]/20 gap-4">
         <button
           onClick={() => { quitGame(); navigate('/dashboard'); }}
           className="group flex items-center text-[#a0a0a0] hover:text-[#00c3ff] transition-colors duration-300 font-bold uppercase tracking-widest text-xs"
@@ -40,15 +40,19 @@ export default function RandomGame() {
           <GrPrevious className="mr-2 group-hover:-translate-x-1 transition-transform" />
           Dashboard
         </button>
-        <h1 className="text-2xl font-extrabold drop-shadow-[0_0_10px_rgba(0,195,255,0.5)]">
+        <h1 className="text-2xl md:text-3xl font-extrabold drop-shadow-[0_0_10px_rgba(0,195,255,0.5)] text-center md:text-left self-center md:self-auto">
           Random <span className="text-[#00c3ff]">Repetition</span>
         </h1>
-        {showGame && (
-          <span className="text-xs text-[#a0a0a0] uppercase tracking-widest font-bold">
-            Lap <span className="text-[#00c3ff]">{lap}</span>/5 · Card <span className="text-[#00c3ff]">{index + 1}</span>/{shuffledWords.length}
-          </span>
+        {showGame ? (
+          <div className="text-xs text-[#a0a0a0] uppercase tracking-widest font-bold text-center md:text-right self-center md:self-auto">
+            Lap <span className="text-[#00c3ff]">{lap}</span>/5 <span className="hidden md:inline">·</span>
+            <br className="md:hidden" />
+            <span className="md:hidden"> </span>
+            Card <span className="text-[#00c3ff]">{index + 1}</span>/{shuffledWords.length}
+          </div>
+        ) : (
+          <div className="w-28 hidden md:block" />
         )}
-        {!showGame && <div className="w-28" />}
       </header>
 
       <div className="max-w-4xl mx-auto px-6 md:px-12 py-10">
@@ -68,11 +72,10 @@ export default function RandomGame() {
                       <button
                         key={list.id}
                         onClick={() => setSelectedListId(list.id)}
-                        className={`px-4 py-2 rounded-[10px] text-sm font-bold tracking-wide transition-all border ${
-                          selectedListId === list.id
+                        className={`px-4 py-2 rounded-[10px] text-sm font-bold tracking-wide transition-all border ${selectedListId === list.id
                             ? 'bg-[#00c3ff]/20 border-[#00c3ff] text-[#00c3ff] shadow-[0_0_10px_rgba(0,195,255,0.3)]'
                             : 'bg-[#071320] border-[#00c3ff]/30 text-[#a0a0a0] hover:border-[#00c3ff]/60 hover:text-white'
-                        }`}
+                          }`}
                       >
                         {list.name}
                       </button>

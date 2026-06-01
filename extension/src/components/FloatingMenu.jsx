@@ -83,14 +83,14 @@ const FloatingMenu = ({
           {showSettings && (
             <div className="fab-settings-panel">
               <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "10px" }}>
-                <span style={{ fontSize: "0.9rem", fontWeight: "bold", color: "#ccc" }}>AI Mode:</span>
+                <span style={{ fontSize: "14.4px", fontWeight: "bold", color: "#ccc" }}>AI Mode:</span>
                 <button
                   onClick={() => setUseAI(!useAI)}
                   style={{
                     background: useAI ? "#00c3ff" : "#444",
                     color: "#fff",
                     border: "none", borderRadius: "20px", padding: "5px 15px",
-                    cursor: "pointer", fontWeight: "bold", fontSize: "0.8rem",
+                    cursor: "pointer", fontWeight: "bold", fontSize: "12.8px",
                     transition: "0.3s", display: "flex", alignItems: "center", gap: "5px",
                   }}
                 >

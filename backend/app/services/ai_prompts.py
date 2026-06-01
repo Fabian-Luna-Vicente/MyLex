@@ -18,12 +18,13 @@ def get_ai_prompt(context_type: str, language: str, target_lang: str, ai_languag
 
             CRITICAL LANGUAGE SEPARATION INSTRUCTIONS:
             1. 'meaning' field: MUST be written EXCLUSIVELY in the TARGET language ({target_lang}).
-            2. 'example', 'synonyms', 'antonyms' fields: MUST be kept STRICTLY in the SOURCE language ({source_lang_instruction}).
+            2. 'example', 'synonyms', 'antonyms' fields: MUST be kept STRICTLY in the ORIGINAL SOURCE LANGUAGE of the word ({source_lang_instruction}). For example, if the word is in English, the examples MUST be in English. Do NOT translate them to {target_lang}.
             3. 'type' field: Must be in the TARGET language ({target_lang}) (e.g., 'Noun', 'Verb').
 
             CONTEXT RULES:
             1. The first definition (1.) and the first example MUST match the usage of the word in the provided 'CONTEXT'.
             2. Generate 3 examples in total.
+            3. You MUST always try to provide at least 2 'synonyms' and 2 'antonyms' if they exist for the word.
 
             OUTPUT FORMAT (JSON ARRAY with a single object):
             [
@@ -35,6 +36,9 @@ def get_ai_prompt(context_type: str, language: str, target_lang: str, ai_languag
                     "examples": ["Example 1", "Example 2", "Example 3"],
                     "synonyms": ["synonym1", "synonym2"],
                     "antonyms": [],
+                    "past": "past tense (if applicable, only for verbs)",
+                    "gerund": "gerund/ing form (if applicable, only for verbs)",
+                    "participle": "past participle (if applicable, only for verbs)",
                     "image": ""
                 }}
             ]
@@ -51,12 +55,13 @@ def get_ai_prompt(context_type: str, language: str, target_lang: str, ai_languag
 
             INSTRUCCIONES CRÍTICAS DE SEPARACIÓN DE IDIOMAS:
             1. Campo 'meaning': DEBE estar escrito EXCLUSIVAMENTE en el idioma DESTINO ({target_lang}).
-            2. Campos 'example', 'synonyms', 'antonyms': DEBEN mantenerse OBLIGATORIAMENTE en el idioma ORIGEN ({source_lang_instruction}).
+            2. Campos 'example', 'synonyms', 'antonyms': DEBEN mantenerse OBLIGATORIAMENTE en el IDIOMA ORIGINAL de la palabra ({source_lang_instruction}). Por ejemplo, si la palabra es en inglés, los ejemplos DEBEN ser en inglés. NO los traduzcas a {target_lang}.
             3. Campo 'type': Debe estar en el idioma DESTINO ({target_lang}) (ej: 'Noun', 'Verb').
 
             REGLAS DE CONTEXTO:
             1. La primera definición (1.) y el primer ejemplo DEBEN coincidir con el uso de la palabra en el 'CONTEXTO' provisto.
             2. Genera 3 ejemplos en total.
+            3. DEBES siempre intentar proporcionar al menos 2 'synonyms' y 2 'antonyms' si existen para esta palabra.
 
             FORMATO DE SALIDA (JSON ARRAY con un solo objeto):
             [
@@ -68,6 +73,9 @@ def get_ai_prompt(context_type: str, language: str, target_lang: str, ai_languag
                     "examples": ["Ejemplo 1", "Ejemplo 2", "Ejemplo 3"],
                     "synonyms": ["sinónimo1", "sinónimo2"],
                     "antonyms": [],
+                    "past": "pasado (si aplica, solo para verbos o phrasal verbs)",
+                    "gerund": "gerundio (si aplica, solo para verbos o phrasal verbs)",
+                    "participle": "participio (si aplica, solo para verbos o phrasal verbs)",
                     "image": ""
                 }}
             ]

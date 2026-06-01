@@ -100,9 +100,9 @@ export const useCreateWord = (lists, addWord, fetchLists, searchDictionary, aiLo
             examples: result.examples ? result.examples.join('\n') : '',
             synonyms: result.synonyms ? result.synonyms.join(', ') : '',
             antonyms: result.antonyms ? result.antonyms.join(', ') : '',
-            past: '',
-            gerund: '',
-            participle: '',
+            past: result.past || '',
+            gerund: result.gerund || '',
+            participle: result.participle || '',
             image: ''
         });
         setImageQuery(result.name || '');

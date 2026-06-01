@@ -29,8 +29,8 @@ function IndexPopup() {
         <Login onLoginSuccess={() => setIsLoggedIn(true)} />
       ) : (
         <div style={{ padding: '20px' }}>
-          <h2 style={{ color: '#00c3ff', margin: '0 0 10px 0', fontSize: '1.4rem' }}>MyLex</h2>
-          <p style={{ fontSize: '0.85rem', color: '#aaa', lineHeight: '1.4' }}>
+          <h2 style={{ color: '#00c3ff', margin: '0 0 10px 0', fontSize: '22.4px' }}>MyLex</h2>
+          <p style={{ fontSize: '13.6px', color: '#aaa', lineHeight: '1.4' }}>
             La extensión está activa y conectada. Selecciona texto en cualquier web para añadirlo a tu vocabulario.
           </p>
           
@@ -51,7 +51,7 @@ function IndexPopup() {
               style={{
                   background: "transparent", border: "none", padding: "10px", 
                   width: "100%", cursor: "pointer", color: '#ff4d4d',
-                  fontSize: '0.8rem', marginTop: '10px'
+                  fontSize: '12.8px', marginTop: '10px'
               }}>
               Cerrar Sesión
             </button>

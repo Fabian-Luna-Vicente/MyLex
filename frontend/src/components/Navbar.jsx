@@ -1,36 +1,33 @@
 import React from 'react';
-import { useState } from 'react';
-import { Link, useNavigate, useLocation } from 'react-router-dom';
+import { Link } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
   FaHome, FaListUl, FaChartLine, FaGamepad,
   FaUserCircle, FaCog, FaSignOutAlt, FaChevronDown,
   FaPlusCircle, FaComments, FaGlobe, FaUsers, FaSearch, FaBars, FaTimes
 } from 'react-icons/fa';
-import { useAuth } from '../hooks/useAuth';
+import { useNavbar } from '../hooks/useNavbar';
 
 export default function Navbar() {
-  const { user, logout } = useAuth();
-  const navigate = useNavigate();
-  const location = useLocation();
-  const [isProfileOpen, setIsProfileOpen] = useState(false);
-  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const {
+    user,
+    navigate,
+    isProfileOpen,
+    setIsProfileOpen,
+    isMobileMenuOpen,
+    setIsMobileMenuOpen,
+    isCommunityOpen,
+    setIsCommunityOpen,
+    isCommunityActive,
+    handleLogout,
+    isActive
+  } = useNavbar();
 
   const navLinks = [
     { name: 'Dashboard', path: '/dashboard', icon: <FaHome /> },
     { name: 'My Lists', path: '/lists', icon: <FaListUl /> },
     { name: 'Statistics', path: '/statistics', icon: <FaChartLine /> },
   ];
-
-  const [isCommunityOpen, setIsCommunityOpen] = useState(false);
-  const isCommunityActive = ['/friends', '/search', '/chat'].includes(location.pathname);
-
-  const handleLogout = () => {
-    logout();
-    navigate('/login');
-  };
-
-  const isActive = (path) => location.pathname === path;
 
   return (
     <nav className="fixed top-0 left-0 w-full z-[100] px-4 py-3">

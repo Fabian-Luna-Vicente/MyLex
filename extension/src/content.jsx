@@ -13,7 +13,6 @@ import { listService } from './services/listService';
 function ContentApp() {
   const [selectedText, setSelectedText] = useState('');
   const [menuPosition, setMenuPosition] = useState({ top: 0, left: 0 });
-  const [showMenu, setShowMenu] = useState(false);
   const [activeModal, setActiveModal] = useState(null);
   const [selectedObjects, setSelectedObjects] = useState([]);
   const [userLists, setUserLists] = useState([]);
@@ -35,7 +34,7 @@ function ContentApp() {
       const isInsideFloatingMenu = path.some(el => el.classList && el.classList.contains('floating-fab-container'));
       if (isInsideFloatingMenu) return;
 
-      const shadowRoot = document.getElementById('mylex-extension-root')?.shadowRoot;
+      const shadowRoot = document.getElementById('drillexa-extension-root')?.shadowRoot;
       let text = shadowRoot?.getSelection()?.toString().trim();
 
       if (!text) {
@@ -44,9 +43,6 @@ function ContentApp() {
 
       if (text) {
         setSelectedText(text);
-        setShowMenu(true);
-      } else {
-        setShowMenu(false);
       }
     };
 
@@ -54,12 +50,10 @@ function ContentApp() {
       if (request.action === "OPEN_ADD_WORD_MODAL") {
         setSelectedText(request.text);
         setActiveModal('addWord');
-        setShowMenu(false);
       }
       if (request.action === "OPEN_GRAMMAR_CARD") {
         setSelectedText(request.text);
         setActiveModal('grammar');
-        setShowMenu(false);
       }
     };
 
@@ -73,9 +67,9 @@ function ContentApp() {
   }, [selectedObjects.length, grammarData, activeModal]);
 
   return (
-    <div className="drillexa-wrapper text-base font-sans">
+    <div className="drillexa-wrapper text-base font-sans" style={{ pointerEvents: 'auto' }}>
       {/* Menú Flotante (Selector de texto) */}
-      {showMenu && !activeModal && !grammarData && (
+      {!activeModal && !grammarData && (
         <FloatingMenu
           position={menuPosition}
           inputValue={selectedText}
@@ -85,7 +79,6 @@ function ContentApp() {
           userLists={userLists}
           setUserLists={setUserLists}
           setGrammarData={setGrammarData}
-          onClose={() => setShowMenu(false)}
         />
       )}
 
@@ -131,10 +124,15 @@ function init() {
 
   const appContainer = document.createElement('div');
   appContainer.id = 'drillexa-extension-root';
-  appContainer.style.position = 'absolute';
+  // Use fixed positioning so it doesn't get scrolled away or affected by absolute document sizing
+  appContainer.style.position = 'fixed';
   appContainer.style.top = '0';
   appContainer.style.left = '0';
+  appContainer.style.width = '0';
+  appContainer.style.height = '0';
+  appContainer.style.overflow = 'visible';
   appContainer.style.zIndex = '2147483647';
+  appContainer.style.pointerEvents = 'none'; // Prevent container from blocking clicks
 
   document.body.appendChild(appContainer);
 

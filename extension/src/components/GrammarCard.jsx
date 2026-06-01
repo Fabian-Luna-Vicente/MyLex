@@ -18,8 +18,8 @@ function GrammarCard({ text, onClose, grammarData: propGrammarData }) {
                         <FaPuzzlePiece size={24} />
                     </div>
                     <div>
-                        <h2 className="EC-Title" style={{ textAlign: 'left', fontSize: '1.8rem', margin: 0 }}>Grammar Analysis</h2>
-                        <p style={{ color: '#a0a0a0', fontSize: '0.8rem', margin: 0, fontWeight: 'bold', textTransform: 'uppercase', letterSpacing: '1px' }}>
+                        <h2 className="EC-Title" style={{ textAlign: 'left', fontSize: '28.8px', margin: 0 }}>Grammar Analysis</h2>
+                        <p style={{ color: '#a0a0a0', fontSize: '12.8px', margin: 0, fontWeight: 'bold', textTransform: 'uppercase', letterSpacing: '1px' }}>
                             Structural Breakdown
                         </p>
                     </div>
@@ -30,7 +30,7 @@ function GrammarCard({ text, onClose, grammarData: propGrammarData }) {
                     {loading && (
                         <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', height: '200px' }}>
                             <div className="EC-Spinner" style={{ width: '40px', height: '40px', borderWidth: '3px', marginBottom: '16px' }}></div>
-                            <p style={{ color: '#a0a0a0', fontSize: '0.95rem', fontStyle: 'italic' }}>Analyzing sentence structure...</p>
+                            <p style={{ color: '#a0a0a0', fontSize: '15.2px', fontStyle: 'italic' }}>Analyzing sentence structure...</p>
                         </div>
                     )}
 
@@ -46,7 +46,7 @@ function GrammarCard({ text, onClose, grammarData: propGrammarData }) {
                             <section>
                                 <h4 className="EC-SectionTitle">Original Sentence</h4>
                                 <div className="EC-MeaningBox" style={{ borderLeft: '4px solid #00c3ff', paddingLeft: '16px' }}>
-                                    <span style={{ fontStyle: 'italic', fontSize: '1.1rem', color: '#fff', fontWeight: '500' }}>
+                                    <span style={{ fontStyle: 'italic', fontSize: '17.6px', color: '#fff', fontWeight: '500' }}>
                                         "{grammarData.original || text}"
                                     </span>
                                 </div>
@@ -68,14 +68,14 @@ function GrammarCard({ text, onClose, grammarData: propGrammarData }) {
                                         {(grammarData.breakdown || []).map((item, i) => (
                                             <div key={i} className="EC-ExampleItem" style={{ display: 'flex', flexDirection: 'column', gap: '10px', padding: '20px' }}>
                                                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                                                    <span style={{ fontWeight: '900', color: '#fff', fontSize: '1.1rem' }}>
+                                                    <span style={{ fontWeight: '900', color: '#fff', fontSize: '17.6px' }}>
                                                         "{item.segment}"
                                                     </span>
-                                                    <span className="EC-Tag" style={{ fontSize: '0.65rem' }}>
+                                                    <span className="EC-Tag" style={{ fontSize: '10.4px' }}>
                                                         {item.role}
                                                     </span>
                                                 </div>
-                                                <p style={{ margin: 0, fontSize: '0.95rem', color: '#a0a0a0', fontStyle: 'normal', lineHeight: '1.5' }}>
+                                                <p style={{ margin: 0, fontSize: '15.2px', color: '#a0a0a0', fontStyle: 'normal', lineHeight: '1.5' }}>
                                                     {item.explanation}
                                                 </p>
                                             </div>

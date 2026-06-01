@@ -1,54 +1,22 @@
 import React from 'react';
-import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
   FaUserCircle, FaSearch, FaUserPlus, FaUserCheck,
   FaClock, FaCheck, FaTimes, FaUsers, FaInbox, FaArrowLeft
 } from 'react-icons/fa';
-import { profileService } from '../services/profileService';
+import { useFriends } from '../hooks/useFriends';
 
 export default function Friends() {
   const navigate = useNavigate();
-  const [tab, setTab] = useState('friends'); // friends, requests, search
-  const [friends, setFriends] = useState([]);
-  const [requests, setRequests] = useState([]);
-  const [loading, setLoading] = useState(true);
-
-  useEffect(() => {
-    loadFriends();
-    loadRequests();
-  }, []);
-
-  const loadFriends = async () => {
-    try {
-      const data = await profileService.getFriends();
-      setFriends(data);
-    } catch (e) {
-      console.error(e);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const loadRequests = async () => {
-    try {
-      const data = await profileService.getPendingRequests();
-      setRequests(data);
-    } catch (e) {
-      console.error(e);
-    }
-  };
-
-  const handleRespondRequest = async (requestId, action) => {
-    try {
-      await profileService.respondToRequest(requestId, action);
-      setRequests(prev => prev.filter(r => r.id !== requestId));
-      if (action === 'accept') loadFriends();
-    } catch (e) {
-      console.error(e);
-    }
-  };
+  const {
+    tab,
+    setTab,
+    friends,
+    requests,
+    loading,
+    handleRespondRequest
+  } = useFriends();
 
   const tabs = [
     { id: 'friends', label: 'Friends', icon: <FaUsers />, count: friends.length },

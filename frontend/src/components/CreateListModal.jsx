@@ -1,33 +1,21 @@
 import React from 'react';
-import { useState } from 'react';
 import { FaTimes, FaLayerGroup } from 'react-icons/fa';
 import { LANGUAGES } from '../config/constants';
+import { useCreateList } from '../hooks/useCreateList';
 
 export default function CreateListModal({ isOpen, onClose, onCreate }) {
-  const [listName, setListName] = useState('');
-  const [privacy, setPrivacy] = useState('public');
-  const [language, setLanguage] = useState('English');
-  const [loading, setLoading] = useState(false);
+  const {
+    listName,
+    setListName,
+    privacy,
+    setPrivacy,
+    language,
+    setLanguage,
+    loading,
+    handleSubmit
+  } = useCreateList(onCreate, onClose);
 
   if (!isOpen) return null;
-
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    if (!listName.trim()) return;
-
-    setLoading(true);
-    try {
-      await onCreate({ name: listName, privacy, language });
-      setListName('');
-      setPrivacy('public');
-      setLanguage('English');
-      onClose();
-    } catch (error) {
-      console.error(error);
-    } finally {
-      setLoading(false);
-    }
-  };
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 font-sans">

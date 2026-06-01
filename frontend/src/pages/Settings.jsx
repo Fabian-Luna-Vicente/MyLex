@@ -1,58 +1,20 @@
 import React from 'react';
-import { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import {
   FaCog, FaUser, FaBell, FaGlobe, FaPalette,
   FaShieldAlt, FaQuestionCircle, FaSignOutAlt, FaChevronRight
 } from 'react-icons/fa';
-import { useAuth } from '../hooks/useAuth';
-import { profileService } from '../services/profileService';
+import { useSettings } from '../hooks/useSettings';
 
 export default function Settings() {
-  const { user, logout } = useAuth();
-  const navigate = useNavigate();
-  const [settings, setSettings] = useState({
-    notifications: true,
-    darkMode: true,
-    language: 'en',
-    privacy: 'Friends Only'
-  });
-
-  useEffect(() => {
-    const fetchProfile = async () => {
-      try {
-        const profile = await profileService.getMyProfile();
-        if (profile) {
-          setSettings(prev => ({ ...prev, language: profile.ai_language || 'en' }));
-        }
-      } catch (err) {
-        console.error("Error fetching profile", err);
-      }
-    };
-    fetchProfile();
-  }, []);
-
-  const handleLanguageChange = async (val) => {
-    console.log("handleLanguageChange called with:", val);
-    setSettings(prev => ({ ...prev, language: val }));
-    try {
-      console.log("Calling profileService.updateProfile with", { ai_language: val });
-      const res = await profileService.updateProfile({ ai_language: val });
-      console.log("API response:", res);
-    } catch (err) {
-      console.error("Error updating AI language", err);
-    }
-  };
-
-  const handleLogout = () => {
-    logout();
-    navigate('/login');
-  };
-
-  const toggleSetting = (key) => {
-    setSettings(prev => ({ ...prev, [key]: !prev[key] }));
-  };
+  const {
+    user,
+    navigate,
+    settings,
+    handleLanguageChange,
+    handleLogout,
+    toggleSetting
+  } = useSettings();
 
   const sections = [
     {

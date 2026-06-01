@@ -97,7 +97,7 @@
 
 .fab-title {
     font-weight: 900;
-    font-size: 1.1rem;
+    font-size: 17.6px;
     color: var(--mylex-text);
     text-shadow: 0 0 10px rgba(0, 195, 255, 0.5);
 }
@@ -110,7 +110,7 @@
     background: rgba(255, 255, 255, 0.05);
     border: 1px solid rgba(255, 255, 255, 0.1);
     color: var(--mylex-text-muted);
-    font-size: 1.1rem;
+    font-size: 17.6px;
     cursor: pointer;
     border-radius: 10px;
     width: 36px;
@@ -137,7 +137,7 @@
     border: 1px solid var(--mylex-cyan-dim);
     background: var(--mylex-bg-main);
     color: var(--mylex-text);
-    font-size: 0.95rem;
+    font-size: 15.2px;
     outline: none;
     transition: all 0.3s;
 }
@@ -158,7 +158,7 @@
     height: 45px;
     flex: 1;
     border: 1px solid rgba(255, 255, 255, 0.05);
-    font-size: 1.2rem;
+    font-size: 19.2px;
     color: var(--mylex-text-muted);
     background: rgba(255, 255, 255, 0.03);
     border-radius: 12px;
@@ -181,7 +181,7 @@
     background: rgba(255, 255, 255, 0.03);
     border-radius: 14px;
     color: var(--mylex-text);
-    font-size: 0.95rem;
+    font-size: 15.2px;
     border: 1px solid rgba(255, 255, 255, 0.05);
     border-left: 4px solid var(--mylex-cyan);
     max-height: 180px;
@@ -222,7 +222,7 @@
 }
 
 .fab-lang-label {
-    font-size: 0.75rem;
+    font-size: 12px;
     color: var(--mylex-text-muted);
     margin-bottom: 4px;
     font-weight: bold;

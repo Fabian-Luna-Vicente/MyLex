@@ -17,7 +17,7 @@ function AddWordToList({ data, ExtraFunction, CurrentListId = "" }) {
 
       <div className="AW-ListScrollArea">
         {loading ? (
-          <p style={{ color: '#aaa', textAlign: 'center', fontSize: '0.8rem', padding: '10px' }}>Loading lists...</p>
+          <p style={{ color: '#aaa', textAlign: 'center', fontSize: '12.8px', padding: '10px' }}>Loading lists...</p>
         ) : availableLists.length > 0 ? (
           availableLists.map((list) => {
             const isSelected = ListsToPost.includes(list.id);
@@ -33,7 +33,7 @@ function AddWordToList({ data, ExtraFunction, CurrentListId = "" }) {
             );
           })
         ) : (
-          <p style={{ color: '#aaa', textAlign: 'center', fontSize: '0.8rem', padding: '10px', fontStyle: 'italic' }}>
+          <p style={{ color: '#aaa', textAlign: 'center', fontSize: '12.8px', padding: '10px', fontStyle: 'italic' }}>
             No other lists found. Create one in the dashboard!
           </p>
         )}
