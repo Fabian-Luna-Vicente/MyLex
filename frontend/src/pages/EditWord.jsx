@@ -3,7 +3,7 @@ import { useNavigate, useParams } from 'react-router-dom';
 import { useVocabulary } from '../hooks/useVocabulary';
 import { useAi } from '../hooks/useAi';
 import { GrPrevious } from "react-icons/gr";
-import { FaSearch, FaRobot, FaSave, FaImage, FaChevronDown } from "react-icons/fa";
+import { FaSearch, FaSave, FaImage, FaChevronDown } from "react-icons/fa";
 import { useEditWord } from '../hooks/useEditWord';
 
 export default function EditWord() {
@@ -13,12 +13,12 @@ export default function EditWord() {
   const { lists, updateWord, fetchLists, fetchWordDetails } = useVocabulary();
   const { searchDictionary, loading: aiLoading } = useAi();
 
-  const { 
+  const {
     searchWord, setSearchWord, useAiMode, setUseAiMode, searchResults, aiContext,
     setAiContext, handleSubmit, handleSelectResult, handleSearch, setSelectedListId,
     selectedListId, error, formData, setFormData, imageQuery, setImageQuery, imageResults,
     isSearchingImages, imagePage, setImagePage, handleImageSearchSubmit,
-    handleLoadMoreImages, toggleListSelection, saving, loadingWord, toggleWordType 
+    handleLoadMoreImages, toggleListSelection, saving, loadingWord, toggleWordType
   } = useEditWord(id, lists, updateWord, fetchLists, fetchWordDetails, searchDictionary, aiLoading);
 
   if (loadingWord) {
@@ -77,7 +77,7 @@ export default function EditWord() {
                 {aiLoading ? "..." : "Search"}
               </button>
             </div>
-            
+
             <div className="flex items-center gap-3">
               <button
                 type="button"
@@ -136,11 +136,10 @@ export default function EditWord() {
                         key={type}
                         type="button"
                         onClick={() => toggleWordType(type)}
-                        className={`text-[10px] font-bold uppercase tracking-wider px-3 py-1.5 rounded-full border transition-all duration-300 ${
-                          isSelected 
-                            ? 'bg-[#00c3ff] border-[#00c3ff] text-[#071320] shadow-[0_0_10px_rgba(0,195,255,0.4)]' 
+                        className={`text-[10px] font-bold uppercase tracking-wider px-3 py-1.5 rounded-full border transition-all duration-300 ${isSelected
+                            ? 'bg-[#00c3ff] border-[#00c3ff] text-[#071320] shadow-[0_0_10px_rgba(0,195,255,0.4)]'
                             : 'bg-transparent border-[#00c3ff]/30 text-[#a0a0a0] hover:border-[#00c3ff] hover:text-[#00c3ff]'
-                        }`}
+                          }`}
                       >
                         {type}
                       </button>
@@ -173,7 +172,7 @@ export default function EditWord() {
                 className="w-full bg-[#071320] border border-[#00c3ff]/30 rounded-[15px] px-4 py-3 text-white min-h-[100px]"
               />
             </div>
-            
+
             <div>
               <label className="block text-xs font-bold text-[#00c3ff] uppercase tracking-widest mb-2">Examples (one per line)</label>
               <textarea
@@ -254,7 +253,7 @@ export default function EditWord() {
                   </div>
                 </div>
               )}
-              
+
               <div className="mt-4">
                 <label className="block text-[10px] font-bold text-[#a0a0a0] uppercase tracking-widest mb-2">Or paste image URL directly:</label>
                 <input type="url" value={formData.image} onChange={(e) => setFormData({ ...formData, image: e.target.value })} placeholder="https://example.com/image.jpg" className="w-full bg-[#071320] border border-[#00c3ff]/20 rounded-[15px] px-4 py-2.5 text-[#a0a0a0] text-sm focus:outline-none focus:border-[#00c3ff]/50 transition-all duration-300" />

@@ -43,7 +43,7 @@ export default function SearchUsers() {
             <button
               onClick={handleSearch}
               disabled={searchLoading}
-              className="px-6 py-3 rounded-xl font-bold text-sm bg-gradient-to-r from-[#00c3ff] to-[#0080ff] text-black transition-all hover:shadow-[0_0_20px_rgba(0,195,255,0.4)]"
+              className="px-6 py-3 rounded-xl font-bold text-sm bg-[#00c3ff] text-black transition-all hover:shadow-[0_0_20px_rgba(0,195,255,0.4)]"
             >
               <FaSearch />
             </button>

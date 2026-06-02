@@ -1,4 +1,4 @@
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useEffect } from 'react';
 import { useVocabulary } from './useVocabulary';
 import { useAi } from './useAi';
 import { progressService } from '../services/progressService';
@@ -20,6 +20,16 @@ export const useWritingGame = () => {
     const loadLists = useCallback(async () => {
         if (lists.length === 0) await fetchLists();
     }, [lists.length, fetchLists]);
+
+    useEffect(() => {
+        loadLists();
+    }, [loadLists]);
+
+    const currentWords = [
+        shuffledWords[index],
+        shuffledWords[index + 1],
+        shuffledWords[index + 2]
+    ].filter(Boolean);
 
     const startGame = async (listId) => {
         setLoading(true);
@@ -124,6 +134,6 @@ export const useWritingGame = () => {
     return {
         lists, loading, showGame, shuffledWords, index, text, setText,
         selectedListId, setSelectedListId, aiFeedback, aiError, aiLoading,
-        loadLists, startGame, handleCheck, nextLevel, quitGame
+        loadLists, startGame, handleCheck, nextLevel, quitGame, currentWords
     };
 };

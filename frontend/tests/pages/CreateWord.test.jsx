@@ -103,8 +103,8 @@ describe('CreateWord Page', () => {
         <CreateWord />
       </MemoryRouter>
     );
-    
-    // We mock handleSubmit in hook return, just checking if it is wired to the button
+
+
     fireEvent.click(screen.getByRole('button', { name: /Save Word/i }));
     expect(mockCreateWordState.handleSubmit).toHaveBeenCalled();
   });

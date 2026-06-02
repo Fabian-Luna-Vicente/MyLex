@@ -29,6 +29,14 @@ export const useChatView = (roomId, user) => {
   const recognitionRef = useRef(null);
   const startTimeoutRef = useRef(null);
 
+  const [showParticipants, setShowParticipants] = useState(false);
+  const [showRoomInfo, setShowRoomInfo] = useState(false);
+  const [isEditingInfo, setIsEditingInfo] = useState(false);
+  const [editData, setEditData] = useState({ name: '', description: '', context: '' });
+  const [mentionQuery, setMentionQuery] = useState(null);
+  const inputRef = useRef(null);
+  const scrollContainerRef = useRef(null);
+
   useEffect(() => {
     fetchLists();
     loadRoomData();
@@ -47,6 +55,63 @@ export const useChatView = (roomId, user) => {
       messagesEndRef.current?.scrollIntoView({ behavior: 'auto' });
     }, 100);
   };
+
+  useEffect(() => {
+    if (showRoomInfo) {
+      if (scrollContainerRef.current) {
+        scrollContainerRef.current.scrollTop = 0;
+      }
+    } else {
+      setTimeout(() => {
+        messagesEndRef.current?.scrollIntoView({ behavior: 'auto' });
+      }, 100);
+    }
+  }, [showRoomInfo]);
+
+  const startEditing = () => {
+    setEditData({ name: room?.name || '', description: room?.description || '', context: room?.context || '' });
+    setIsEditingInfo(true);
+  };
+
+  const saveEditing = async () => {
+    const success = await handleUpdateRoomInfo(editData);
+    if (success) setIsEditingInfo(false);
+  };
+
+  const handleInputChange = (e) => {
+    const val = e.target.value;
+    setInput(val);
+
+    const cursor = e.target.selectionStart;
+    const textBeforeCursor = val.slice(0, cursor);
+    const words = textBeforeCursor.split(/\s+/);
+    const lastWord = words[words.length - 1];
+
+    if (lastWord.startsWith('@')) {
+      setMentionQuery(lastWord.slice(1).toLowerCase());
+    } else {
+      setMentionQuery(null);
+    }
+  };
+
+  const handleMentionSelect = (aiName) => {
+    const cursor = inputRef.current.selectionStart;
+    const textBeforeCursor = input.slice(0, cursor);
+    const textAfterCursor = input.slice(cursor);
+    const words = textBeforeCursor.split(/\s+/);
+    words.pop();
+
+    const prefix = words.length > 0 ? words.join(' ') + ' ' : '';
+    const newText = prefix + `@${aiName} ` + textAfterCursor;
+
+    setInput(newText);
+    setMentionQuery(null);
+    inputRef.current?.focus();
+  };
+
+  const mentionSuggestions = mentionQuery !== null && room?.participants
+    ? room.participants.filter(p => p.is_ai && p.ai_name && p.ai_name.toLowerCase().includes(mentionQuery))
+    : [];
 
   const loadRoomData = async () => {
     setLoading(true);
@@ -441,6 +506,23 @@ export const useChatView = (roomId, user) => {
     setGrammarResult,
     lists,
     interimResult,
-    speechStatus
+    speechStatus,
+    showParticipants,
+    setShowParticipants,
+    showRoomInfo,
+    setShowRoomInfo,
+    isEditingInfo,
+    setIsEditingInfo,
+    editData,
+    setEditData,
+    mentionQuery,
+    setMentionQuery,
+    inputRef,
+    scrollContainerRef,
+    startEditing,
+    saveEditing,
+    handleInputChange,
+    handleMentionSelect,
+    mentionSuggestions
   };
 };

@@ -1,7 +1,6 @@
 
 from fastapi import WebSocket
 
-# --- Connection Manager ---
 class ConnectionManager:
     def __init__(self):
         self.active_connections: dict[int, list[WebSocket]] = {}

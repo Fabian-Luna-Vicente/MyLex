@@ -75,7 +75,7 @@ function App() {
               <Route path="/games/listening" element={<ProtectedRoute><Layout><ListeningGame /></Layout></ProtectedRoute>} />
               <Route path="/games/writing" element={<ProtectedRoute><Layout><WritingGame /></Layout></ProtectedRoute>} />
 
-              {/* Redirect root to dashboard */}
+
               <Route path="/" element={<Navigate to="/dashboard" replace />} />
             </Routes>
           </Router>

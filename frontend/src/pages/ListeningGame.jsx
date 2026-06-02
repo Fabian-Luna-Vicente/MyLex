@@ -9,70 +9,12 @@ import { motion, AnimatePresence } from 'framer-motion';
 
 export default function ListeningGame() {
   const navigate = useNavigate();
-  const [subIndex, setSubIndex] = useState(0);
   const {
     lists, loading, showGame, shuffledWords, index, userAnswers, setUserAnswers,
     gameStatus, selectedListId, setSelectedListId, score, setGameStatus,
-    loadLists, startGame, handleAnswer, nextLevel, quitGame, playFullAudio
+    loadLists, startGame, handleAnswer, nextLevel, quitGame, playFullAudio,
+    subIndex, setSubIndex, inputRef, currentWord, puzzle
   } = useListeningGame();
-
-  const inputRef = useRef(null);
-  const currentWord = shuffledWords[index];
-  useEffect(() => { loadLists(); }, [loadLists]);
-
-  useEffect(() => {
-    if (showGame && gameStatus === 'playing') {
-      inputRef.current?.focus();
-    }
-  }, [index, showGame, gameStatus]);
-
-  useEffect(() => {
-    if (showGame && currentWord) {
-      console.log(" [DEBUG] Answers for", currentWord.name);
-    }
-  }, [currentWord, showGame]);
-
-
-
-  const puzzle = useMemo(() => {
-    if (!currentWord) return null;
-    const correctAnswers = {};
-    const baseWordLower = currentWord.name.toLowerCase();
-
-    const baseRoot = baseWordLower.length > 4 ? baseWordLower.slice(0, -2) : baseWordLower;
-
-    const processedExamples = (currentWord.examples || []).map((ex, exIdx) => {
-      const words = ex.split(' ');
-      let extraBlanksCount = 0;
-      const targetExtra = words.length > 8 ? 2 : 1;
-
-      return words.map((w, wIdx) => {
-        const match = w.match(/^([^a-zA-Z]*)([a-zA-Z'-]+)([^a-zA-Z]*)$/);
-        const prefix = match ? match[1] : '';
-        const clean = match ? match[2] : w.replace(/[.,!?;:()"]/g, '');
-        const suffix = match ? match[3] : '';
-        const isMain = clean.toLowerCase() === baseWordLower ||
-          (clean.toLowerCase().startsWith(baseRoot) && Math.abs(clean.length - baseWordLower.length) <= 4);
-
-        if (isMain) {
-          const id = `ex-${exIdx}-main-${wIdx}`;
-          correctAnswers[id] = clean;
-          return { type: 'blank', id, correct: clean, prefix, suffix, isMain: true };
-        }
-
-        if (extraBlanksCount < targetExtra && clean.length > 4 && Math.random() > 0.6) {
-          const id = `ex-${exIdx}-extra-${wIdx}`;
-          correctAnswers[id] = clean;
-          extraBlanksCount++;
-          return { type: 'blank', id, correct: clean, prefix, suffix, isMain: false };
-        }
-
-        return { type: 'text', content: w + ' ' };
-      });
-    });
-
-    return { examples: processedExamples, correctAnswers };
-  }, [currentWord]);
 
 
   return (

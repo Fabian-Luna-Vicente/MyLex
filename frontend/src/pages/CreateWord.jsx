@@ -3,7 +3,8 @@ import { useNavigate } from 'react-router-dom';
 import { useVocabulary } from '../hooks/useVocabulary';
 import { useAi } from '../hooks/useAi';
 import { GrPrevious } from "react-icons/gr";
-import { FaSearch, FaRobot, FaSave, FaImage, FaChevronDown } from "react-icons/fa";
+import { FaSearch, FaSave, FaImage, FaChevronDown } from "react-icons/fa";
+import { RiRobot3Fill } from 'react-icons/ri';
 import { useCreateWord } from '../hooks/useCreateWord';
 import { MdDeleteOutline } from "react-icons/md";
 
@@ -83,7 +84,7 @@ export default function CreateWord() {
                 <span className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${useAiMode ? 'translate-x-6' : 'translate-x-1'}`} />
               </button>
               <span className="text-sm font-bold tracking-wide text-[#a0a0a0]">
-                AI Contextual Search {useAiMode && <span className="text-[#00c3ff] ml-1 inline-flex items-center gap-1"><FaRobot /> Groq</span>}
+                AI Contextual Search {useAiMode && <span className="text-[#00c3ff] ml-1 inline-flex items-center gap-1"><RiRobot3Fill /> Groq</span>}
               </span>
             </div>
 
@@ -164,11 +165,10 @@ export default function CreateWord() {
                         key={type}
                         type="button"
                         onClick={() => toggleWordType(type)}
-                        className={`text-[10px] font-bold uppercase tracking-wider px-3 py-1.5 rounded-full border transition-all duration-300 ${
-                          isSelected 
-                            ? 'bg-[#00c3ff] border-[#00c3ff] text-[#071320] shadow-[0_0_10px_rgba(0,195,255,0.4)]' 
-                            : 'bg-transparent border-[#00c3ff]/30 text-[#a0a0a0] hover:border-[#00c3ff] hover:text-[#00c3ff]'
-                        }`}
+                        className={`text-[10px] font-bold uppercase tracking-wider px-3 py-1.5 rounded-full border transition-all duration-300 ${isSelected
+                          ? 'bg-[#00c3ff] border-[#00c3ff] text-[#071320] shadow-[0_0_10px_rgba(0,195,255,0.4)]'
+                          : 'bg-transparent border-[#00c3ff]/30 text-[#a0a0a0] hover:border-[#00c3ff] hover:text-[#00c3ff]'
+                          }`}
                       >
                         {type}
                       </button>

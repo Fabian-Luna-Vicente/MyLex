@@ -45,7 +45,6 @@ describe('CreateListModal Component', () => {
     const input = screen.getByPlaceholderText('e.g. Travel Vocabulary, Irregular Verbs...');
     fireEvent.change(input, { target: { value: 'My Test List' } });
 
-    // Since privacy defaults to public and language to English, we can just submit
     fireEvent.click(screen.getByRole('button', { name: /Create List/i }));
 
     await waitFor(() => {

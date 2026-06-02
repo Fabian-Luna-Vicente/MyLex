@@ -12,16 +12,8 @@ export default function WritingGame() {
   const {
     lists, loading, showGame, shuffledWords, index, text, setText,
     selectedListId, setSelectedListId, aiFeedback, aiError, aiLoading,
-    loadLists, startGame, handleCheck, nextLevel, quitGame
+    loadLists, startGame, handleCheck, nextLevel, quitGame, currentWords
   } = useWritingGame();
-
-  useEffect(() => { loadLists(); }, [loadLists]);
-
-  const currentWords = [
-    shuffledWords[index],
-    shuffledWords[index + 1],
-    shuffledWords[index + 2]
-  ].filter(Boolean);
 
   return (
     <div className="min-h-screen bg-[#071320] text-white font-sans relative overflow-hidden">

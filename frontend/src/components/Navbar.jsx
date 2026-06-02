@@ -35,7 +35,7 @@ export default function Navbar() {
 
         <div className="flex items-center gap-3">
           {/* Mobile Hamburger Button */}
-          <button 
+          <button
             className="md:hidden text-white p-2 -ml-2"
             onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
           >
@@ -57,8 +57,8 @@ export default function Navbar() {
               key={link.path}
               to={link.path}
               className={`flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-bold transition-all duration-300 ${isActive(link.path)
-                  ? 'bg-[#00c3ff]/10 text-[#00c3ff] border border-[#00c3ff]/20'
-                  : 'text-[#a0a0a0] hover:text-white hover:bg-white/5'
+                ? 'bg-[#00c3ff]/10 text-[#00c3ff] border border-[#00c3ff]/20'
+                : 'text-[#a0a0a0] hover:text-white hover:bg-white/5'
                 }`}
             >
               <span className={isActive(link.path) ? 'text-[#00c3ff]' : 'text-[#a0a0a0]'}>
@@ -73,8 +73,8 @@ export default function Navbar() {
             <button
               onClick={() => setIsCommunityOpen(!isCommunityOpen)}
               className={`flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-bold transition-all duration-300 ${isCommunityActive
-                  ? 'bg-[#00c3ff]/10 text-[#00c3ff] border border-[#00c3ff]/20'
-                  : 'text-[#a0a0a0] hover:text-white hover:bg-white/5'
+                ? 'bg-[#00c3ff]/10 text-[#00c3ff] border border-[#00c3ff]/20'
+                : 'text-[#a0a0a0] hover:text-white hover:bg-white/5'
                 }`}
             >
               <span className={isCommunityActive ? 'text-[#00c3ff]' : 'text-[#a0a0a0]'}>
@@ -119,7 +119,7 @@ export default function Navbar() {
 
           <Link
             to="/create-word"
-            className="flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-[#00c3ff] to-[#0080ff] text-black rounded-xl text-sm font-black hover:shadow-[0_0_20px_rgba(0,195,255,0.5)] transition-all ml-2"
+            className="flex items-center gap-2 px-4 py-2 bg-[#00c3ff] text-black rounded-xl text-sm font-black hover:shadow-[0_0_20px_rgba(0,195,255,0.5)] transition-all ml-2"
           >
             <FaPlusCircle />
             ADD WORD
@@ -175,7 +175,7 @@ export default function Navbar() {
 
                   <button
                     onClick={handleLogout}
-                    className="w-full flex items-center gap-3 px-4 py-2.5 text-sm font-bold text-[#a0a0a0] hover:text-white hover:bg-white/5 rounded-xl transition-all"
+                    className="w-full flex items-center gap-3 px-4 py-2.5 text-sm font-bold text-red-500 hover:text-red-400 hover:bg-red-500/10 rounded-xl transition-all"
                   >
                     <FaSignOutAlt /> Log Out
                   </button>
@@ -202,8 +202,8 @@ export default function Navbar() {
                   to={link.path}
                   onClick={() => setIsMobileMenuOpen(false)}
                   className={`flex items-center gap-3 px-4 py-3 rounded-xl font-bold transition-all ${isActive(link.path)
-                      ? 'bg-[#00c3ff]/10 text-[#00c3ff]'
-                      : 'text-[#a0a0a0] hover:text-white hover:bg-white/5'
+                    ? 'bg-[#00c3ff]/10 text-[#00c3ff]'
+                    : 'text-[#a0a0a0] hover:text-white hover:bg-white/5'
                     }`}
                 >
                   {link.icon}
@@ -213,7 +213,7 @@ export default function Navbar() {
 
               <div className="w-full h-px bg-white/10 my-2"></div>
               <p className="text-[10px] text-[#00c3ff] font-bold uppercase tracking-widest px-4 mb-1">Community</p>
-              
+
               <Link to="/friends" onClick={() => setIsMobileMenuOpen(false)} className="flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-bold text-[#a0a0a0] hover:text-white hover:bg-white/5 transition-all">
                 <FaUsers className="text-[#00c3ff]" /> Friends
               </Link>
@@ -225,14 +225,14 @@ export default function Navbar() {
               </Link>
 
               <div className="w-full h-px bg-white/10 my-2"></div>
-              
+
               <Link
                 to="/create-word"
                 onClick={() => setIsMobileMenuOpen(false)}
-                className="flex items-center justify-center gap-2 w-full py-3 bg-gradient-to-r from-[#00c3ff] to-blue-500 text-black rounded-xl font-black hover:shadow-[0_0_20px_rgba(0,195,255,0.5)] transition-all"
+                className="flex items-center justify-center gap-2 w-full py-3 bg-[#00c3ff] text-black rounded-xl font-black hover:shadow-[0_0_20px_rgba(0,195,255,0.5)] transition-all"
               >
                 <FaPlusCircle />
-                ADD WORD
+                Add Vocabulary
               </Link>
             </div>
           </motion.div>

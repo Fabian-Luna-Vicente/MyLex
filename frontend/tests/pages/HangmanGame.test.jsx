@@ -51,7 +51,7 @@ describe('HangmanGame Page', () => {
         <HangmanGame />
       </MemoryRouter>
     );
-    
+
     const startBtn = screen.getByRole('button', { name: /Start Game/i });
     expect(startBtn).not.toBeDisabled();
     fireEvent.click(startBtn);
@@ -94,8 +94,8 @@ describe('HangmanGame Page', () => {
       </MemoryRouter>
     );
 
-    expect(screen.getByText('🎉 You Found It!')).toBeInTheDocument();
-    
+    expect(screen.getByText(' You Found It!')).toBeInTheDocument();
+
     const nextBtn = screen.getByRole('button', { name: /Next Word/i });
     fireEvent.click(nextBtn);
     expect(mockGameState.goNext).toHaveBeenCalled();
@@ -118,6 +118,6 @@ describe('HangmanGame Page', () => {
       </MemoryRouter>
     );
 
-    expect(screen.getByText('💀 You Lost')).toBeInTheDocument();
+    expect(screen.getByText(' You Lost')).toBeInTheDocument();
   });
 });

@@ -61,7 +61,7 @@ describe('ChatView Page', () => {
     vi.clearAllMocks();
     useAuthHook.useAuth.mockReturnValue({ user: { id: 1 } });
     useChatViewHook.useChatView.mockReturnValue(mockChatViewState);
-    
+
     // Mock scrollIntoView
     window.HTMLElement.prototype.scrollIntoView = vi.fn();
   });
@@ -102,12 +102,9 @@ describe('ChatView Page', () => {
 
     const input = screen.getByPlaceholderText(/Type a message/i);
     fireEvent.change(input, { target: { value: 'New Message', selectionStart: 11 } });
-    
+
     expect(mockChatViewState.setInput).toHaveBeenCalledWith('New Message');
 
-    // Simulate clicking send (assuming we can just find the button)
-    const buttons = screen.getAllByRole('button');
-    // The send button is likely the last one or near the end. We mock its handler directly via hook return checking.
     // Instead of finding exact button, just test if pressing Enter works.
     fireEvent.keyDown(input, { key: 'Enter', code: 'Enter' });
     expect(mockChatViewState.handleSend).toHaveBeenCalled();
@@ -124,14 +121,14 @@ describe('ChatView Page', () => {
 
     const titleBtn = screen.getByText('Test Room');
     fireEvent.click(titleBtn);
-    
+
     expect(screen.getByText('Room Details')).toBeInTheDocument();
     expect(screen.getByText('Current Context')).toBeInTheDocument();
   });
 
   it('renders vocab panel when toggled', () => {
     useChatViewHook.useChatView.mockReturnValue({ ...mockChatViewState, showVocabPanel: true });
-    
+
     render(
       <MemoryRouter initialEntries={['/chat/1']}>
         <Routes>
@@ -144,11 +141,11 @@ describe('ChatView Page', () => {
   });
 
   it('shows grammar result modal', () => {
-    useChatViewHook.useChatView.mockReturnValue({ 
-      ...mockChatViewState, 
-      grammarResult: { has_errors: true, corrected_text: 'Fixed text', explanation: 'Because reason' } 
+    useChatViewHook.useChatView.mockReturnValue({
+      ...mockChatViewState,
+      grammarResult: { has_errors: true, corrected_text: 'Fixed text', explanation: 'Because reason' }
     });
-    
+
     render(
       <MemoryRouter initialEntries={['/chat/1']}>
         <Routes>

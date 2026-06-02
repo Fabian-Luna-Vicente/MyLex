@@ -1,6 +1,7 @@
 import { useState, useContext, useEffect } from "react";
 import { useDraggable } from "../hooks/useDraggable";
-import { FaTools, FaSearch, FaTimes, FaRobot } from "react-icons/fa";
+import { FaTools, FaSearch, FaTimes } from "react-icons/fa";
+import { RiRobot3Fill } from "react-icons/ri";
 import { IoSettingsSharp } from "react-icons/io5";
 import { BsTranslate } from "react-icons/bs";
 import { CiPlay1 } from "react-icons/ci";
@@ -63,8 +64,8 @@ const FloatingMenu = ({
 
   return (
     <div {...bind} className={`floating-fab-container ${isDragging ? "dragging" : ""}`}>
-      <button 
-        className="fab-button" 
+      <button
+        className="fab-button"
         onClick={() => handleToggle(isDragging)}
         style={{ background: '#000000', border: '2px solid #00c3ff', boxShadow: '0 5px 15px rgba(0, 0, 0, 0.5)' }}
       >
@@ -94,7 +95,7 @@ const FloatingMenu = ({
                     transition: "0.3s", display: "flex", alignItems: "center", gap: "5px",
                   }}
                 >
-                  <FaRobot /> {useAI ? "ON" : "OFF"}
+                  <RiRobot3Fill /> {useAI ? "ON" : "OFF"}
                 </button>
               </div>
 

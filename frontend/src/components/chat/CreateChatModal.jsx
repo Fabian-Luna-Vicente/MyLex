@@ -1,6 +1,7 @@
 import React from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { FaTimes, FaRobot, FaUserCircle, FaPlus, FaCheck, FaGlobe, FaInfoCircle, FaTheaterMasks, FaUsers, FaUserPlus } from 'react-icons/fa';
+import { FaTimes, FaUserCircle, FaPlus, FaCheck, FaGlobe, FaInfoCircle, FaTheaterMasks, FaUsers, FaUserPlus } from 'react-icons/fa';
+import { RiRobot3Fill } from 'react-icons/ri';
 import { LANGUAGES } from '../../config/constants';
 import { useCreateChat } from '../../hooks/useCreateChat';
 
@@ -39,20 +40,20 @@ export default function CreateChatModal({ onClose, onSuccess }) {
   } = useCreateChat(onSuccess);
 
   return (
-    <div className="fixed top-[80px] left-0 right-0 bottom-0 bg-black/60 backdrop-blur-sm z-[90] flex items-center justify-center p-4">
+    <div className="fixed inset-0 pt-20 pb-4 px-4 bg-black/60 backdrop-blur-sm z-[90] flex items-center justify-center">
       <motion.div
         initial={{ opacity: 0, scale: 0.95, y: 20 }} animate={{ opacity: 1, scale: 1, y: 0 }}
-        className="bg-[#0e0c1d] border border-white/10 rounded-3xl w-full max-w-3xl h-[600px] overflow-hidden flex flex-col shadow-[0_0_50px_rgba(0,195,255,0.05)] relative"
+        className="bg-[#0e0c1d] border border-white/10 rounded-3xl w-full max-w-3xl h-[85vh] md:h-[700px] max-h-full overflow-hidden flex flex-col shadow-[0_0_50px_rgba(0,195,255,0.05)] relative"
       >
         {/* Header */}
-        <div className="p-6 border-b border-white/5 flex items-center justify-between">
-          <div>
-            <h2 className="text-2xl font-black text-white flex items-center gap-3">
-              <FaUsers className="text-[#00c3ff]" /> Create Group Chat
+        <div className="p-4 sm:p-6 border-b border-white/5 flex items-center justify-between">
+          <div className="min-w-0 pr-4">
+            <h2 className="text-xl sm:text-2xl font-black text-white flex items-center gap-2 sm:gap-3 truncate">
+              <FaUsers className="text-[#00c3ff] flex-shrink-0" /> <span className="truncate">Create Group Chat</span>
             </h2>
-            <p className="text-[#a0a0a0] text-sm mt-1">Design your perfect language practice scenario</p>
+            <p className="text-[#a0a0a0] text-xs sm:text-sm mt-1 truncate">Design your perfect language practice scenario</p>
           </div>
-          <button onClick={onClose} className="w-10 h-10 rounded-full bg-white/5 flex items-center justify-center text-[#a0a0a0] hover:bg-[#00c3ff] hover:text-black transition-all">
+          <button onClick={onClose} className="w-10 h-10 flex-shrink-0 rounded-full bg-white/5 flex items-center justify-center text-[#a0a0a0] hover:bg-[#00c3ff] hover:text-black transition-all">
             <FaTimes />
           </button>
         </div>
@@ -95,7 +96,7 @@ export default function CreateChatModal({ onClose, onSuccess }) {
                   <textarea value={context} onChange={e => setContext(e.target.value)} rows="3" className="w-full bg-black/50 border border-white/10 rounded-xl p-4 text-white focus:border-[#00c3ff] focus:ring-1 focus:ring-[#00c3ff] transition-all resize-none" placeholder="Describe the situation. e.g. We are in a crowded coffee shop in London. We are trying to order complex drinks." />
                 </div>
                 <div className="flex justify-end pt-4">
-                  <button onClick={() => setStep(2)} className="bg-[#00c3ff] text-black font-black px-8 py-4 rounded-xl hover:shadow-[0_0_20px_rgba(0,195,255,0.2)] transition-all flex items-center gap-2">
+                  <button onClick={() => setStep(2)} className="w-full sm:w-auto bg-[#00c3ff] text-black font-black px-8 py-4 rounded-xl hover:shadow-[0_0_20px_rgba(0,195,255,0.2)] transition-all flex items-center justify-center gap-2">
                     Next Step <FaArrowRight />
                   </button>
                 </div>
@@ -118,7 +119,7 @@ export default function CreateChatModal({ onClose, onSuccess }) {
                       <div key={idx} className="bg-white/5 border border-white/10 p-3 rounded-xl flex items-center justify-between group">
                         <div className="flex items-center gap-3">
                           <div className={`w-10 h-10 rounded-full flex items-center justify-center bg-[#00c3ff]/10 text-[#00c3ff]`}>
-                            {p.avatar_display || p.ai_avatar_url ? <img src={p.avatar_display || p.ai_avatar_url} className="w-full h-full rounded-full object-cover" /> : (p.is_ai ? <FaRobot size={20} /> : <FaUserCircle size={20} />)}
+                            {p.avatar_display || p.ai_avatar_url ? <img src={p.avatar_display || p.ai_avatar_url} className="w-full h-full rounded-full object-cover" /> : (p.is_ai ? <RiRobot3Fill size={20} /> : <FaUserCircle size={20} />)}
                           </div>
                           <div>
                             <p className="text-white font-bold text-sm">{p.is_ai ? p.ai_name : p.name_display}</p>
@@ -135,9 +136,9 @@ export default function CreateChatModal({ onClose, onSuccess }) {
 
                 {/* Add Actions */}
                 {!showAddAI && !showAddHuman && (
-                  <div className="flex gap-4">
+                  <div className="flex flex-col sm:flex-row gap-4">
                     <button onClick={() => setShowAddAI(true)} className="flex-1 py-4 rounded-xl border border-white/10 bg-white/5 text-white hover:bg-white/10 transition-all font-bold flex items-center justify-center gap-2">
-                      <FaRobot className="text-[#00c3ff]" /> Add AI Character
+                      <RiRobot3Fill className="text-[#00c3ff]" /> Add AI Character
                     </button>
                     <button onClick={() => setShowAddHuman(true)} className="flex-1 py-4 rounded-xl border border-white/10 bg-white/5 text-white hover:bg-white/10 transition-all font-bold flex items-center justify-center gap-2">
                       <FaUserPlus className="text-[#00c3ff]" /> Invite Friend
@@ -149,7 +150,7 @@ export default function CreateChatModal({ onClose, onSuccess }) {
                 {showAddAI && (
                   <motion.div initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: 'auto' }} className="bg-white/5 border border-white/10 p-5 rounded-2xl space-y-4">
                     <div className="flex justify-between items-center mb-2">
-                      <h3 className="text-white font-bold flex items-center gap-2"><FaRobot className="text-[#00c3ff]" /> Select AI Character</h3>
+                      <h3 className="text-white font-bold flex items-center gap-2"><RiRobot3Fill className="text-[#00c3ff]" /> Select AI Character</h3>
                       <button onClick={() => setShowAddAI(false)} className="text-[#a0a0a0] hover:text-white"><FaTimes /></button>
                     </div>
                     {aiPersonas.length === 0 ? (
@@ -159,28 +160,28 @@ export default function CreateChatModal({ onClose, onSuccess }) {
                         {aiPersonas.map(persona => {
                           const isAdded = participants.some(p => p.is_ai && p.ai_name === persona.name);
                           return (
-                            <div key={persona.id} className={`flex items-center justify-between p-2 rounded-lg border ${isAdded ? 'border-white/5 bg-white/5 opacity-50' : 'border-white/10 bg-[#0e0c1d]'}`}>
+                            <div key={persona.id} className={`flex flex-col sm:flex-row sm:items-center justify-between p-3 gap-3 rounded-lg border ${isAdded ? 'border-white/5 bg-white/5 opacity-50' : 'border-white/10 bg-[#0e0c1d]'}`}>
                               <div className="flex items-center gap-3">
-                                <div className="w-8 h-8 rounded-full bg-[#00c3ff]/20 flex items-center justify-center text-[#00c3ff]">
-                                  {persona.avatar_url ? <img src={persona.avatar_url} className="w-full h-full rounded-full object-cover" /> : <FaRobot />}
+                                <div className="w-10 h-10 flex-shrink-0 rounded-full bg-[#00c3ff]/20 flex items-center justify-center text-[#00c3ff]">
+                                  {persona.avatar_url ? <img src={persona.avatar_url} className="w-full h-full rounded-full object-cover" /> : <RiRobot3Fill />}
                                 </div>
-                                <div>
-                                  <span className="text-white text-sm font-bold block">{persona.name}</span>
-                                  <span className="text-[#a0a0a0] text-[10px] truncate max-w-[120px] block">{persona.personality}</span>
+                                <div className="min-w-0">
+                                  <span className="text-white text-sm font-bold block truncate">{persona.name}</span>
+                                  <span className="text-[#a0a0a0] text-[10px] truncate block max-w-full">{persona.personality}</span>
                                 </div>
                               </div>
-                              <div className="flex items-center gap-2">
+                              <div className="flex items-center gap-2 w-full sm:w-auto">
                                 <input
                                   type="text"
                                   placeholder="Role..."
-                                  className="w-20 bg-black/50 border border-white/10 rounded-lg p-1.5 text-white text-xs focus:border-[#00c3ff] outline-none"
+                                  className="flex-1 sm:w-24 bg-black/50 border border-white/10 rounded-lg p-2 text-white text-xs focus:border-[#00c3ff] outline-none"
                                   id={`role-${persona.id}`}
                                   disabled={isAdded}
                                 />
                                 {!isAdded && (
                                   <button
                                     onClick={() => handleAddAI(persona, document.getElementById(`role-${persona.id}`).value)}
-                                    className="text-xs bg-[#00c3ff]/10 text-[#00c3ff] px-3 py-1.5 rounded-lg font-bold hover:bg-[#00c3ff] hover:text-black transition-all"
+                                    className="text-xs bg-[#00c3ff]/10 text-[#00c3ff] px-4 py-2 rounded-lg font-bold hover:bg-[#00c3ff] hover:text-black transition-all flex-shrink-0"
                                   >
                                     Add
                                   </button>
@@ -208,15 +209,15 @@ export default function CreateChatModal({ onClose, onSuccess }) {
                         {friends.map(friend => {
                           const isAdded = participants.some(p => p.user_id === friend.user_id);
                           return (
-                            <div key={friend.user_id} className={`flex items-center justify-between p-2 rounded-lg border ${isAdded ? 'border-white/5 bg-white/5 opacity-50' : 'border-white/10 bg-[#0e0c1d]'}`}>
-                              <div className="flex items-center gap-3">
-                                <div className="w-8 h-8 rounded-full bg-[#00c3ff]/20 flex items-center justify-center text-[#00c3ff]">
+                            <div key={friend.user_id} className={`flex items-center justify-between p-3 rounded-lg border ${isAdded ? 'border-white/5 bg-white/5 opacity-50' : 'border-white/10 bg-[#0e0c1d]'}`}>
+                              <div className="flex items-center gap-3 min-w-0">
+                                <div className="w-10 h-10 flex-shrink-0 rounded-full bg-[#00c3ff]/20 flex items-center justify-center text-[#00c3ff]">
                                   {friend.avatar_url ? <img src={friend.avatar_url} className="w-full h-full rounded-full object-cover" /> : <FaUserCircle />}
                                 </div>
-                                <span className="text-white text-sm font-bold">{friend.username}</span>
+                                <span className="text-white text-sm font-bold truncate">{friend.username}</span>
                               </div>
                               {!isAdded && (
-                                <button onClick={() => handleAddHuman(friend, 'Participant')} className="text-xs bg-[#00c3ff]/10 text-[#00c3ff] px-3 py-1.5 rounded-lg font-bold hover:bg-[#00c3ff] hover:text-black transition-all">
+                                <button onClick={() => handleAddHuman(friend, 'Participant')} className="text-xs bg-[#00c3ff]/10 text-[#00c3ff] px-4 py-2 rounded-lg font-bold hover:bg-[#00c3ff] hover:text-black transition-all flex-shrink-0">
                                   Add
                                 </button>
                               )}
@@ -228,12 +229,12 @@ export default function CreateChatModal({ onClose, onSuccess }) {
                   </motion.div>
                 )}
 
-                <div className="flex justify-between pt-4">
-                  <button onClick={() => setStep(1)} className="text-[#a0a0a0] font-bold px-6 py-4 rounded-xl hover:bg-white/5 transition-all">
+                <div className="flex flex-col-reverse sm:flex-row justify-between gap-3 pt-4">
+                  <button onClick={() => setStep(1)} className="text-[#a0a0a0] font-bold px-6 py-4 rounded-xl hover:bg-white/5 transition-all text-center">
                     Back
                   </button>
-                  <button onClick={handleCreate} disabled={loading} className="bg-[#00c3ff] text-black font-black px-8 py-4 rounded-xl hover:shadow-[0_0_20px_rgba(0,195,255,0.2)] transition-all flex items-center gap-2 disabled:opacity-50">
-                    {loading ? 'Creating...' : 'Create Chat Room'} <FaCheck />
+                  <button onClick={handleCreate} disabled={loading} className="w-full sm:w-auto bg-[#00c3ff] text-black font-black px-8 py-4 rounded-xl hover:shadow-[0_0_20px_rgba(0,195,255,0.2)] transition-all flex items-center justify-center gap-2 disabled:opacity-50">
+                    {loading ? 'Creating...' : 'Create Chat Room'}
                   </button>
                 </div>
               </motion.div>

@@ -68,7 +68,7 @@ describe('WordDetailModal Component', () => {
     );
 
     const buttons = screen.getAllByRole('button');
-    fireEvent.click(buttons[0]); // Close button is first
+    fireEvent.click(buttons[0]);
     expect(mockOnClose).toHaveBeenCalled();
   });
 });

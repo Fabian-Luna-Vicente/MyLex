@@ -57,12 +57,11 @@ describe('Navbar Component', () => {
         <Navbar />
       </MemoryRouter>
     );
-    
-    // desktop community button
+
     const communityBtn = screen.getByText('Community');
     fireEvent.click(communityBtn);
 
-    const friendsBtn = screen.getAllByText('Friends')[0]; 
+    const friendsBtn = screen.getAllByText('Friends')[0];
     expect(friendsBtn).toBeInTheDocument();
 
     fireEvent.click(friendsBtn);
@@ -87,7 +86,7 @@ describe('Navbar Component', () => {
 
     const logoutBtn = screen.getByText(/Log Out/i);
     fireEvent.click(logoutBtn);
-    
+
     expect(mockLogout).toHaveBeenCalled();
     expect(mockNavigate).toHaveBeenCalledWith('/login');
   });

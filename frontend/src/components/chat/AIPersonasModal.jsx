@@ -1,6 +1,7 @@
 import React from 'react';
 import { motion } from 'framer-motion';
-import { FaTimes, FaRobot, FaPlus, FaTrash } from 'react-icons/fa';
+import { FaTimes, FaPlus, FaTrash } from 'react-icons/fa';
+import { RiRobot3Fill } from 'react-icons/ri';
 import { useAIPersonas } from '../../hooks/useAIPersonas';
 
 export default function AIPersonasModal({ onClose }) {
@@ -65,7 +66,7 @@ export default function AIPersonasModal({ onClose }) {
                     <div key={p.id} className="bg-white/5 border border-white/10 p-4 rounded-2xl relative group">
                       <div className="flex items-start gap-4">
                         <div className="w-12 h-12 rounded-full bg-[#00c3ff]/10 flex items-center justify-center flex-shrink-0 text-[#00c3ff]">
-                          {p.avatar_url ? <img src={p.avatar_url} className="w-full h-full rounded-full object-cover" /> : <FaRobot size={24} />}
+                          {p.avatar_url ? <img src={p.avatar_url} className="w-full h-full rounded-full object-cover" /> : <RiRobot3Fill size={24} />}
                         </div>
                         <div className="flex-1 min-w-0">
                           <h3 className="text-white font-bold truncate">{p.name}</h3>

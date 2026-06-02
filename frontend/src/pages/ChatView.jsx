@@ -6,22 +6,16 @@ import { useAuth } from '../hooks/useAuth';
 import { useChatView } from '../hooks/useChatView';
 import {
   FaPaperPlane, FaMicrophone, FaVolumeUp, FaArrowLeft,
-  FaBookOpen, FaTimes, FaRobot, FaUserCircle, FaPlus,
+  FaBookOpen, FaTimes, FaUserCircle, FaPlus,
   FaEdit, FaSave, FaGlobe, FaComments, FaSpellCheck, FaSignOutAlt
 } from 'react-icons/fa';
+import { RiRobot3Fill } from 'react-icons/ri';
 import { GiMeltingIceCube } from "react-icons/gi";
 
 export default function ChatView() {
   const { roomId } = useParams();
   const navigate = useNavigate();
   const { user } = useAuth();
-  const [showParticipants, setShowParticipants] = useState(false);
-  const [showRoomInfo, setShowRoomInfo] = useState(false);
-  const [isEditingInfo, setIsEditingInfo] = useState(false);
-  const [editData, setEditData] = useState({ name: '', description: '', context: '' });
-  const [mentionQuery, setMentionQuery] = useState(null);
-  const inputRef = useRef(null);
-  const scrollContainerRef = useRef(null);
 
   const {
     room,
@@ -51,66 +45,23 @@ export default function ChatView() {
     setGrammarResult,
     lists,
     interimResult,
-    speechStatus
+    speechStatus,
+    showParticipants,
+    setShowParticipants,
+    showRoomInfo,
+    setShowRoomInfo,
+    isEditingInfo,
+    setIsEditingInfo,
+    editData,
+    setEditData,
+    inputRef,
+    scrollContainerRef,
+    startEditing,
+    saveEditing,
+    handleInputChange,
+    handleMentionSelect,
+    mentionSuggestions
   } = useChatView(roomId, user);
-
-  // Handle Scroll positions for Room Info vs Messages
-  useEffect(() => {
-    if (showRoomInfo) {
-      if (scrollContainerRef.current) {
-        scrollContainerRef.current.scrollTop = 0;
-      }
-    } else {
-      setTimeout(() => {
-        messagesEndRef.current?.scrollIntoView({ behavior: 'auto' });
-      }, 100);
-    }
-  }, [showRoomInfo, messagesEndRef]);
-
-  const startEditing = () => {
-    setEditData({ name: room.name, description: room.description || '', context: room.context || '' });
-    setIsEditingInfo(true);
-  };
-
-  const saveEditing = async () => {
-    const success = await handleUpdateRoomInfo(editData);
-    if (success) setIsEditingInfo(false);
-  };
-
-  const handleInputChange = (e) => {
-    const val = e.target.value;
-    setInput(val);
-
-    const cursor = e.target.selectionStart;
-    const textBeforeCursor = val.slice(0, cursor);
-    const words = textBeforeCursor.split(/\s+/);
-    const lastWord = words[words.length - 1];
-
-    if (lastWord.startsWith('@')) {
-      setMentionQuery(lastWord.slice(1).toLowerCase());
-    } else {
-      setMentionQuery(null);
-    }
-  };
-
-  const handleMentionSelect = (aiName) => {
-    const cursor = inputRef.current.selectionStart;
-    const textBeforeCursor = input.slice(0, cursor);
-    const textAfterCursor = input.slice(cursor);
-    const words = textBeforeCursor.split(/\s+/);
-    words.pop();
-
-    const prefix = words.length > 0 ? words.join(' ') + ' ' : '';
-    const newText = prefix + `@${aiName} ` + textAfterCursor;
-
-    setInput(newText);
-    setMentionQuery(null);
-    inputRef.current?.focus();
-  };
-
-  const mentionSuggestions = mentionQuery !== null && room?.participants
-    ? room.participants.filter(p => p.is_ai && p.ai_name && p.ai_name.toLowerCase().includes(mentionQuery))
-    : [];
 
   if (loading || !room) {
     return (
@@ -173,13 +124,13 @@ export default function ChatView() {
                   ) : (
                     <button onClick={startEditing} className="bg-white/10 text-white px-4 py-2 rounded-full font-bold flex items-center gap-2 hover:bg-white/20 transition-colors"><FaEdit /> Edit</button>
                   )}
-                  <button 
+                  <button
                     onClick={async () => {
-                      if(window.confirm("Are you sure you want to leave this room?")) {
+                      if (window.confirm("Are you sure you want to leave this room?")) {
                         const success = await handleLeaveRoom();
                         if (success) navigate('/chat');
                       }
-                    }} 
+                    }}
                     className="bg-white/5 text-white px-4 py-2 rounded-full font-bold flex items-center gap-2 hover:bg-white/10 transition-colors"
                   >
                     <FaSignOutAlt /> Leave
@@ -228,7 +179,7 @@ export default function ChatView() {
                 {room.participants?.map(p => (
                   <div key={p.id} className="bg-white/5 border border-white/10 p-4 rounded-3xl flex items-center gap-4 hover:bg-white/10 transition-colors">
                     <div className="w-14 h-14 rounded-full flex items-center justify-center bg-gradient-to-br from-[#00c3ff]/20 to-[#0080ff]/20 border border-[#00c3ff]/30 text-[#00c3ff] shadow-[0_0_15px_rgba(0,195,255,0.1)]">
-                      {p.avatar_display ? <img src={p.avatar_display} className="w-full h-full rounded-full object-cover" /> : (p.is_ai ? <FaRobot size={24} /> : <FaUserCircle size={24} />)}
+                      {p.avatar_display ? <img src={p.avatar_display} className="w-full h-full rounded-full object-cover" /> : (p.is_ai ? <RiRobot3Fill size={24} /> : <FaUserCircle size={24} />)}
                     </div>
                     <div>
                       <div className="flex items-center gap-2">
@@ -316,7 +267,7 @@ export default function ChatView() {
                     className="w-full text-left px-3 py-2 rounded-lg hover:bg-white/5 flex items-center gap-3 transition-colors"
                   >
                     <div className="w-6 h-6 rounded-full bg-[#00c3ff]/20 text-[#00c3ff] flex items-center justify-center">
-                      {p.avatar_display ? <img src={p.avatar_display} className="w-full h-full rounded-full object-cover" /> : <FaRobot size={12} />}
+                      {p.avatar_display ? <img src={p.avatar_display} className="w-full h-full rounded-full object-cover" /> : <RiRobot3Fill size={12} />}
                     </div>
                     <span className="text-white font-bold text-sm">{p.ai_name}</span>
                   </button>
@@ -341,21 +292,50 @@ export default function ChatView() {
                 <div className="flex items-center gap-2 bg-[#1a182c] border border-white/30 px-4 py-1.5 rounded-full shadow-lg">
                   <div className={`w-2 h-2 rounded-full bg-white ${speechStatus === 'speaking' || speechStatus === 'detecting_sound' ? 'animate-ping' : ''}`}></div>
                   <span className="text-[10px] font-bold text-white uppercase tracking-widest">
-                    {speechStatus === 'listening' ? 'Escuchando ambiente...' : 
-                     speechStatus === 'detecting_sound' ? 'Detectando sonido...' : 
-                     speechStatus === 'speaking' ? 'Capturando voz...' : 
-                     speechStatus === 'processing' ? 'Procesando frase...' : 
-                     speechStatus === 'no_match' ? 'No se entendió, repite' : 'Iniciando micro...'}
+                    {speechStatus === 'listening' ? 'Escuchando ambiente...' :
+                      speechStatus === 'detecting_sound' ? 'Detectando sonido...' :
+                        speechStatus === 'speaking' ? 'Capturando voz...' :
+                          speechStatus === 'processing' ? 'Procesando frase...' :
+                            speechStatus === 'no_match' ? 'No se entendió, repite' : 'Iniciando micro...'}
                   </span>
                 </div>
               </motion.div>
             )}
           </AnimatePresence>
 
-          <div className="flex items-center gap-2 bg-[#1a182c] p-1.5 rounded-full border border-white/10 shadow-2xl relative z-20">
+          {/* Mobile auxiliary buttons */}
+          <div className="flex md:hidden items-center gap-2 mb-2 px-1">
             <button
               onClick={toggleRecording}
-              className={`w-11 h-11 rounded-full flex-none flex items-center justify-center transition-all ${isRecording
+              className={`w-10 h-10 rounded-full flex-none flex items-center justify-center transition-all ${isRecording
+                ? 'bg-white/20 text-white animate-pulse'
+                : 'bg-white/5 text-[#a0a0a0] hover:bg-[#00c3ff]/10 hover:text-[#00c3ff]'
+                }`}
+            >
+              <FaMicrophone size={14} />
+            </button>
+            <button
+              onClick={handleIcebreaker}
+              disabled={loadingIcebreaker}
+              className="w-10 h-10 rounded-full flex-none bg-white/5 text-[#00c3ff] flex items-center justify-center transition-all hover:bg-[#00c3ff]/10 hover:scale-105 disabled:opacity-50"
+            >
+              <GiMeltingIceCube size={16} className={loadingIcebreaker ? "animate-spin" : ""} />
+            </button>
+            <button
+              onClick={handleGrammarCheck}
+              disabled={checkingGrammar || !input.trim()}
+              className="w-10 h-10 rounded-full flex-none bg-white/5 text-[#00c3ff] flex items-center justify-center transition-all hover:bg-[#00c3ff]/10 hover:scale-105 disabled:opacity-50"
+              title="Autocorregir texto actual antes de enviar"
+            >
+              <FaSpellCheck size={14} className={checkingGrammar ? "animate-pulse" : ""} />
+            </button>
+          </div>
+
+          <div className="flex items-center gap-2 bg-[#1a182c] p-1.5 rounded-full border border-white/10 shadow-2xl relative z-20">
+            {/* Desktop auxiliary buttons */}
+            <button
+              onClick={toggleRecording}
+              className={`hidden md:flex w-11 h-11 rounded-full flex-none items-center justify-center transition-all ${isRecording
                 ? 'bg-white/20 text-white animate-pulse'
                 : 'bg-white/5 text-[#a0a0a0] hover:bg-[#00c3ff]/10 hover:text-[#00c3ff]'
                 }`}
@@ -365,14 +345,14 @@ export default function ChatView() {
             <button
               onClick={handleIcebreaker}
               disabled={loadingIcebreaker}
-              className="w-11 h-11 rounded-full flex-none bg-white/5 text-[#00c3ff] flex items-center justify-center transition-all hover:bg-[#00c3ff]/10 hover:scale-105 disabled:opacity-50"
+              className="hidden md:flex w-11 h-11 rounded-full flex-none bg-white/5 text-[#00c3ff] items-center justify-center transition-all hover:bg-[#00c3ff]/10 hover:scale-105 disabled:opacity-50"
             >
               <GiMeltingIceCube size={18} className={loadingIcebreaker ? "animate-spin" : ""} />
             </button>
             <button
               onClick={handleGrammarCheck}
               disabled={checkingGrammar || !input.trim()}
-              className="w-11 h-11 rounded-full flex-none bg-white/5 text-[#eab308] flex items-center justify-center transition-all hover:bg-[#eab308]/10 hover:scale-105 disabled:opacity-50"
+              className="hidden md:flex w-11 h-11 rounded-full flex-none bg-white/5 text-[#00c3ff] items-center justify-center transition-all hover:bg-[#00c3ff]/10 hover:scale-105 disabled:opacity-50"
               title="Autocorregir texto actual antes de enviar"
             >
               <FaSpellCheck size={16} className={checkingGrammar ? "animate-pulse" : ""} />
@@ -540,7 +520,7 @@ export default function ChatView() {
                 return (
                   <div key={p.id} className="bg-white/5 border border-white/10 p-3 rounded-xl flex items-center gap-4">
                     <div className="w-12 h-12 rounded-full flex items-center justify-center bg-[#00c3ff]/10 text-[#00c3ff]">
-                      {p.avatar_display ? <img src={p.avatar_display} className="w-full h-full rounded-full object-cover" /> : (p.is_ai ? <FaRobot size={24} /> : <FaUserCircle size={24} />)}
+                      {p.avatar_display ? <img src={p.avatar_display} className="w-full h-full rounded-full object-cover" /> : (p.is_ai ? <RiRobot3Fill size={24} /> : <FaUserCircle size={24} />)}
                     </div>
                     <div>
                       <div className="flex items-center gap-2">
@@ -570,11 +550,11 @@ export default function ChatView() {
             initial={{ opacity: 0, scale: 0.9, y: 20 }} animate={{ opacity: 1, scale: 1, y: 0 }}
             className="bg-[#0e0c1d] border border-white/10 rounded-3xl p-6 w-full max-w-md shadow-2xl relative overflow-hidden"
           >
-            <div className="absolute top-0 right-0 p-4 opacity-10 pointer-events-none"><FaSpellCheck size={80} className="text-[#eab308]" /></div>
-            
+            <div className="absolute top-0 right-0 p-4 opacity-10 pointer-events-none"><FaSpellCheck size={80} className="text-[#00c3ff]" /></div>
+
             <div className="flex justify-between items-center mb-6 relative z-10">
               <h2 className="text-xl font-black text-white flex items-center gap-2">
-                <FaSpellCheck className="text-[#eab308]" /> Corrección Gramatical
+                <FaSpellCheck className="text-[#00c3ff]" /> Corrección Gramatical
               </h2>
               <button onClick={() => setGrammarResult(null)} className="text-[#a0a0a0] hover:text-white"><FaTimes /></button>
             </div>

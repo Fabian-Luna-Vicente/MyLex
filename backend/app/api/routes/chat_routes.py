@@ -7,6 +7,7 @@ from app.models.user import User
 from app.services.chat_service import ChatService
 from app.schemas.chat import ChatRoomCreate, ChatRoomUpdate, RoomVocabularyListCreate, AIChatRequest, IcebreakerRequest, GrammarCheckRequest, ChatParticipantCreate, AIPersonaCreate, AIPersonaUpdate
 from app.services.ai_service import AIService
+from app.repositories.profile_repository import ProfileRepository
 from app.core.limiter import limiter
 from fastapi import Request
 from app.core.ws_connection import ConnectionManager
@@ -182,28 +183,38 @@ async def get_icebreaker(
 async def check_grammar(
     request: Request,
     payload: GrammarCheckRequest,
-    current_user: User = Depends(get_current_user)
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db)
 ):
     ai_service = AIService()
     
-    prompt = f"""
-    Eres un profesor de idiomas amigable. Un estudiante está escribiendo el siguiente mensaje para enviarlo en un chat: "{payload.message}".
-    El idioma objetivo del chat es: {payload.language}.
-    Por favor, revisa el mensaje en busca de errores gramaticales, ortográficos o de naturalidad.
-    Si hay errores, corrige el mensaje y proporciona una explicación corta y amable de por qué.
-    Si está perfecto, dile que está muy bien escrito.
+    profile = ProfileRepository(db).get_profile_by_user_id(current_user.id) if current_user else None
+    native_lang = profile.native_language if profile and profile.native_language else "Spanish"
     
-    Devuelve la respuesta ESTRICTAMENTE en este formato JSON:
+    prompt = f"""
+    You are an expert language teacher. A student is writing the following message to send in a chat: "{payload.message}".
+    The target language of the chat is: {payload.language}.
+    The student's native language is: {native_lang}.
+    
+    Please review the message for grammatical, spelling, or unnatural phrasing errors in {payload.language}.
+    If there are errors, correct the message and provide a highly precise grammatical explanation of WHY it was wrong and WHY the correction is right. 
+    For example, if they wrote "how is you" (in English), do not just say "use 'are'". Explain that 'you' is a second-person pronoun and requires the verb 'to be' conjugated as 'are'. Be as technically precise as possible with grammatical terms.
+    
+    IMPORTANT: The `explanation` field MUST be written ENTIRELY in the student's native language ({native_lang}), while referencing the grammatical rules of the target language ({payload.language}).
+    
+    If the message is perfect, tell them it is perfectly written in their native language ({native_lang}).
+    
+    Return the response STRICTLY in this JSON format:
     {{
         "has_errors": boolean,
-        "corrected_text": "texto corregido o el mismo si está bien",
-        "explanation": "explicación de la corrección o elogio"
+        "corrected_text": "the corrected text in the target language (or the original message if it is perfect)",
+        "explanation": "detailed grammatical explanation in {native_lang}"
     }}
     """
     try:
         response_str = await ai_service._call_llm(
             prompt=prompt,
-            system_prompt="Eres un corrector gramatical estricto pero amable. Siempre devuelves JSON válido.",
+            system_prompt=f"You are a strict but friendly grammar checker. You must respond in {native_lang} and provide JSON.",
             json_format=True,
             temp=0.3
         )

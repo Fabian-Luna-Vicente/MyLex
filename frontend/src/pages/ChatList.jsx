@@ -1,6 +1,7 @@
 import React from 'react';
 import { motion } from 'framer-motion';
-import { FaRobot, FaUserCircle, FaPlus, FaComments, FaArrowRight, FaTimes, FaUsersCog } from 'react-icons/fa';
+import { FaUserCircle, FaPlus, FaComments, FaArrowRight, FaTimes, FaUsersCog } from 'react-icons/fa';
+import { RiRobot3Fill } from 'react-icons/ri';
 import CreateChatModal from '../components/chat/CreateChatModal';
 import AIPersonasModal from '../components/chat/AIPersonasModal';
 import { useChatList } from '../hooks/useChatList';
@@ -63,7 +64,7 @@ export default function ChatList() {
               >
                 <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-[#00c3ff]/20 to-[#0080ff]/20 border border-[#00c3ff]/30 flex items-center justify-center overflow-hidden flex-shrink-0">
                   {room.is_ai_chat ? (
-                    <FaRobot size={24} className="text-[#00c3ff]" />
+                    <RiRobot3Fill size={24} className="text-[#00c3ff]" />
                   ) : room.partner_avatar ? (
                     <img src={room.partner_avatar} className="w-full h-full object-cover" alt="" />
                   ) : (
