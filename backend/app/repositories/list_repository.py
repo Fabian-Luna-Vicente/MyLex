@@ -77,3 +77,39 @@ class ListRepository:
             VocabularyList.id.in_(list_ids),
             VocabularyList.user_id == user_id
         ).all()
+
+    def copy_list(self, list_id: int, new_user_id: str) -> Optional[VocabularyList]:
+        from app.models.vocabulary import Word
+        db_list = self.get_list_with_privacy_check(list_id, new_user_id)
+        if not db_list:
+            return None
+            
+        new_list = VocabularyList(
+            user_id=new_user_id,
+            name=f"{db_list.name} (Copy)",
+            privacy=db_list.privacy,
+            language=db_list.language
+        )
+        self.db.add(new_list)
+        
+        # Duplicate words
+        for word in db_list.words:
+            new_word = Word(
+                user_id=new_user_id,
+                name=word.name,
+                past=word.past,
+                gerund=word.gerund,
+                participle=word.participle,
+                meaning=word.meaning,
+                word_types=word.word_types,
+                examples=word.examples,
+                image=word.image,
+                synonyms=word.synonyms,
+                antonyms=word.antonyms
+            )
+            new_list.words.append(new_word)
+            self.db.add(new_word)
+            
+        self.db.commit()
+        self.db.refresh(new_list)
+        return new_list

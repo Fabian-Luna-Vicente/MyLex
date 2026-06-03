@@ -92,6 +92,18 @@ def delete_list(
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="List not found")
     return {"detail": "List deleted successfully"}
 
+@router.post("/lists/{list_id}/copy", response_model=VocabularyListBasic)
+def copy_list(
+    request: Request,
+    list_id: int,
+    current_user: User = Depends(get_current_user),
+    list_service: ListService = Depends(get_list_service)
+):
+    new_list = list_service.copy_list(list_id, current_user.id)
+    if not new_list:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="List not found or cannot be copied")
+    return new_list
+
 
 # --- Words Endpoints ---
 

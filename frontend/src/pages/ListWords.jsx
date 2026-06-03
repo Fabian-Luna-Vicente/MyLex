@@ -28,8 +28,8 @@ export default function ListWords() {
     currentPage, setCurrentPage,
     itemsPerPage,
     playSound,
-    handleEditList, handleDeleteList, handleDeleteWord, handleMoveWord,
-    openDetail
+    handleEditList, handleDeleteList, handleDeleteWord, handleMoveWord, handleCopyList,
+    openDetail, isOwner
   } = useListWords();
 
   const { currentItems, totalPages } = usePaginate(currentPage, itemsPerPage, list?.words || []);
@@ -71,15 +71,16 @@ export default function ListWords() {
 
             <h1 className="text-3xl md:text-[2.5rem] font-bold text-white drop-shadow-[0_0_10px_rgba(0,195,255,0.5)] tracking-wide flex items-center gap-3">
               {list.name}
-              {/* Botones rápidos de lista */}
-              <button onClick={() => {
-                setNewTitle(list.name);
-                setNewPrivacy(list.privacy || 'public');
-                setNewLanguage(list.language || 'English');
-                setShowEditListMenu(true);
-              }} className="text-[#a0a0a0] hover:text-[#00c3ff] transition-colors text-xl" title="Settings">
-                <FaCog />
-              </button>
+              {isOwner && (
+                <button onClick={() => {
+                  setNewTitle(list.name);
+                  setNewPrivacy(list.privacy || 'public');
+                  setNewLanguage(list.language || 'English');
+                  setShowEditListMenu(true);
+                }} className="text-[#a0a0a0] hover:text-[#00c3ff] transition-colors text-xl" title="Settings">
+                  <FaCog />
+                </button>
+              )}
             </h1>
 
             <div className="flex gap-2 mt-3 mb-2">
@@ -98,13 +99,23 @@ export default function ListWords() {
             </p>
           </div>
 
-          <button
-            onClick={() => navigate(`/create-word?listId=${id}`)}
-            className="flex items-center gap-2 px-6 py-2.5 bg-[#0e0c1d]/60 backdrop-blur-sm border border-[#00c3ff]/50 text-[#00c3ff] rounded-full hover:bg-[#00c3ff]/20 hover:border-[#00c3ff] shadow-[0_0_10px_rgba(0,195,255,0.2)] hover:shadow-[0_0_20px_rgba(0,195,255,0.5)] transition-all duration-300 font-bold tracking-wider uppercase text-sm"
-          >
-            <IoAddCircleSharp size={20} />
-            Add Word
-          </button>
+          {isOwner ? (
+            <button
+              onClick={() => navigate(`/create-word?listId=${id}`)}
+              className="flex items-center gap-2 px-6 py-2.5 bg-[#0e0c1d]/60 backdrop-blur-sm border border-[#00c3ff]/50 text-[#00c3ff] rounded-full hover:bg-[#00c3ff]/20 hover:border-[#00c3ff] shadow-[0_0_10px_rgba(0,195,255,0.2)] hover:shadow-[0_0_20px_rgba(0,195,255,0.5)] transition-all duration-300 font-bold tracking-wider uppercase text-sm"
+            >
+              <IoAddCircleSharp size={20} />
+              Add Word
+            </button>
+          ) : (
+            <button
+              onClick={handleCopyList}
+              className="flex items-center gap-2 px-6 py-2.5 bg-[#0e0c1d]/60 backdrop-blur-sm border border-[#00c3ff]/50 text-[#00c3ff] rounded-full hover:bg-[#00c3ff]/20 hover:border-[#00c3ff] shadow-[0_0_10px_rgba(0,195,255,0.2)] hover:shadow-[0_0_20px_rgba(0,195,255,0.5)] transition-all duration-300 font-bold tracking-wider uppercase text-sm"
+            >
+              <MdOutlineDriveFileMove size={20} />
+              Copy List
+            </button>
+          )}
         </header>
 
         {/* GRID DE PALABRAS */}
@@ -161,15 +172,19 @@ export default function ListWords() {
                   <button onClick={() => playSound(word.name)} className="text-[#a0a0a0] hover:text-[#00c3ff] transition-colors" title="Listen">
                     <CiPlay1 size={22} />
                   </button>
-                  <button onClick={() => navigate(`/word/edit/${word.id}`)} className="text-[#a0a0a0] hover:text-[#00c3ff] transition-colors" title="Edit">
-                    <MdOutlineModeEdit size={22} />
-                  </button>
-                  <button onClick={() => { setWordToMove(word); setShowMoveMenu(true); }} className="text-[#a0a0a0] hover:text-[#00c3ff] transition-colors" title="Move/Copy">
-                    <MdOutlineDriveFileMove size={22} />
-                  </button>
-                  <button onClick={() => { setWordToDelete(word); setShowConfirmDelete(true); }} className="text-[#a0a0a0] hover:text-white transition-colors" title="Delete">
-                    <MdDeleteOutline size={22} />
-                  </button>
+                  {isOwner && (
+                    <>
+                      <button onClick={() => navigate(`/word/edit/${word.id}`)} className="text-[#a0a0a0] hover:text-[#00c3ff] transition-colors" title="Edit">
+                        <MdOutlineModeEdit size={22} />
+                      </button>
+                      <button onClick={() => { setWordToMove(word); setShowMoveMenu(true); }} className="text-[#a0a0a0] hover:text-[#00c3ff] transition-colors" title="Move/Copy">
+                        <MdOutlineDriveFileMove size={22} />
+                      </button>
+                      <button onClick={() => { setWordToDelete(word); setShowConfirmDelete(true); }} className="text-[#a0a0a0] hover:text-white transition-colors" title="Delete">
+                        <MdDeleteOutline size={22} />
+                      </button>
+                    </>
+                  )}
                 </div>
               </div>
 

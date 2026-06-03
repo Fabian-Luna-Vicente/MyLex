@@ -24,3 +24,6 @@ class ListService:
 
     def delete_list(self, list_id: int, user_id: str):
         return self.repo.delete_list(list_id, user_id)
+
+    def copy_list(self, list_id: int, user_id: str):
+        return self.repo.copy_list(list_id, user_id)

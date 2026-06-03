@@ -1,11 +1,13 @@
 import { useState, useEffect, useCallback } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { useVocabulary } from "./useVocabulary";
+import { useAuth } from "./useAuth";
 
 export const useListWords = () => {
     const { id } = useParams();
     const navigate = useNavigate();
-    const { fetchListDetails, editList, deleteList, deleteWord, lists } = useVocabulary();
+    const { user } = useAuth();
+    const { fetchListDetails, editList, deleteList, deleteWord, lists, copyList } = useVocabulary();
 
     const [list, setList] = useState(null);
     const [loading, setLoading] = useState(true);
@@ -95,8 +97,21 @@ export const useListWords = () => {
         setShowDetailModal(true);
     };
 
+    const handleCopyList = async () => {
+        try {
+            const newList = await copyList(id);
+            if (newList && newList.id) {
+                navigate(`/list/${newList.id}`);
+            }
+        } catch (error) {
+            console.error(error);
+        }
+    };
+
+    const isOwner = list?.user_id === user?.id;
+
     return { 
-        list, lists, loading, id, navigate,
+        list, lists, loading, id, navigate, isOwner,
         showEditListMenu, setShowEditListMenu, 
         showMoveMenu, setShowMoveMenu, 
         showConfirmDelete, setShowConfirmDelete, 
@@ -111,7 +126,7 @@ export const useListWords = () => {
         currentPage, setCurrentPage, 
         itemsPerPage, 
         playSound,
-        handleEditList, handleDeleteList, handleDeleteWord, handleMoveWord,
+        handleEditList, handleDeleteList, handleDeleteWord, handleMoveWord, handleCopyList,
         openDetail
     };
 }

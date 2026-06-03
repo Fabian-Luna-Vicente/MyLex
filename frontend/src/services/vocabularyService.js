@@ -54,5 +54,10 @@ export const vocabularyService = {
   deleteList: async (listId) => {
     const response = await api.delete(`/api/vocabulary/lists/${listId}`);
     return response.data;
+  },
+
+  copyList: async (listId) => {
+    const response = await api.post(`/api/vocabulary/lists/${listId}/copy`);
+    return response.data;
   }
 };

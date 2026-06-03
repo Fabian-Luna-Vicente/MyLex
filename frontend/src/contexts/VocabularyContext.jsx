@@ -118,6 +118,17 @@ export const VocabularyProvider = ({ children }) => {
     }
   };
 
+  const copyList = async (listId) => {
+    try {
+      const data = await vocabularyService.copyList(listId);
+      setLists(prev => [...prev, data]);
+      return data;
+    } catch (error) {
+      console.error("Error copying list", error);
+      throw error;
+    }
+  };
+
   const fetchWordDetails = async (id) => {
     setLoading(true);
     try {
@@ -154,7 +165,7 @@ export const VocabularyProvider = ({ children }) => {
     <VocabularyContext.Provider value={{
       words, lists, loading,
       fetchWords, addWord, updateWord, deleteWord,
-      fetchLists, addList, deleteList, editList, fetchListDetails, handleMoveWord, fetchWordDetails,
+      fetchLists, addList, deleteList, editList, fetchListDetails, copyList, handleMoveWord, fetchWordDetails,
       fetchWordsForGame
     }}>
       {children}
