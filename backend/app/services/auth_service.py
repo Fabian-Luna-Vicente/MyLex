@@ -213,7 +213,9 @@ class AuthService:
             # Verify and delete old token (Rotation)
             deleted = self.user_repo.delete_refresh_token(jti=old_jti, user_id=user_id)
             if not deleted:
-                raise AuthenticationError("Token already used or invalid")
+                # Token reuse detected! Delete all refresh tokens for this user to revoke access for everyone (including the attacker)
+                self.user_repo.delete_all_refresh_tokens_for_user(user_id)
+                raise AuthenticationError("Security Breach: Token reuse detected. Please log in again.")
             
             user = self.user_repo.get_user_by_id(user_id)
             if not user or not user.is_active:
