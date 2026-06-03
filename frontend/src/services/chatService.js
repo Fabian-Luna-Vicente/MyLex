@@ -37,7 +37,13 @@ export const chatService = {
   },
 
   sendAIMessage: async (roomId, message, contextWords = []) => {
-    const response = await api.post('/api/chat/ai/message', { room_id: roomId, message, context_words: contextWords });
+    const aiLanguage = localStorage.getItem('ai_language') || 'es';
+    const response = await api.post('/api/chat/ai/message', { 
+      room_id: roomId, 
+      message, 
+      context_words: contextWords,
+      ai_language: aiLanguage
+    });
     return response.data;
   },
 

@@ -98,12 +98,15 @@ class AIChatRequest(BaseModel):
     room_id: int
     context_words: Optional[List[str]] = []
     mentioned_ai_participant_ids: Optional[List[int]] = []
+    ai_language: str = "es"
 
 class IcebreakerRequest(BaseModel):
     room_id: int
     language: str
     vocabulary_words: List[str]
+    ai_language: str = "es"
 
 class GrammarCheckRequest(BaseModel):
     message: str
     language: str = "es"
+    ai_language: str = "es"

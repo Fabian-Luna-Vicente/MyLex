@@ -186,11 +186,13 @@ export const useChatView = (roomId, user) => {
           });
         });
 
+        const aiLanguage = localStorage.getItem('ai_language') || 'es';
         const res = await api.post('/api/chat/ai/message', {
           room_id: room.id,
           message: text,
           context_words: contextWords,
-          mentioned_ai_participant_ids: []
+          mentioned_ai_participant_ids: [],
+          ai_language: aiLanguage
         });
 
         const newMessages = res.data; // The endpoint returns a list of messages [user_msg, ai_msg_1, ...]
@@ -401,10 +403,12 @@ export const useChatView = (roomId, user) => {
         });
       });
 
+      const aiLanguage = localStorage.getItem('ai_language') || 'es';
       const response = await api.post('/api/chat/icebreaker', {
         room_id: room.id,
         language: room.language || "English",
-        vocabulary_words: vocabWords
+        vocabulary_words: vocabWords,
+        ai_language: aiLanguage
       });
 
       if (response.data.status) {
@@ -461,9 +465,11 @@ export const useChatView = (roomId, user) => {
     setCheckingGrammar(true);
     setGrammarResult(null);
     try {
+      const aiLanguage = localStorage.getItem('ai_language') || 'es';
       const res = await api.post('/api/chat/grammar-check', {
         message: input,
-        language: room?.language || "English"
+        language: room?.language || "English",
+        ai_language: aiLanguage
       });
       if (res.data.status) {
         setGrammarResult(res.data.data);

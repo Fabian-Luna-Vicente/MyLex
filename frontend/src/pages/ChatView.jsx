@@ -202,7 +202,7 @@ export default function ChatView() {
               <p className="text-[#a0a0a0] text-sm max-w-xs">Link a vocabulary list to practice specific words while chatting.</p>
               {loadingIcebreaker && (
                 <div className="text-[#00c3ff] italic text-center animate-pulse mt-10">
-                  La IA está pensando en cómo iniciar la conversación...
+                  The AI is thinking about how to start the conversation...
                 </div>
               )}
             </div>
@@ -292,11 +292,11 @@ export default function ChatView() {
                 <div className="flex items-center gap-2 bg-[#1a182c] border border-white/30 px-4 py-1.5 rounded-full shadow-lg">
                   <div className={`w-2 h-2 rounded-full bg-white ${speechStatus === 'speaking' || speechStatus === 'detecting_sound' ? 'animate-ping' : ''}`}></div>
                   <span className="text-[10px] font-bold text-white uppercase tracking-widest">
-                    {speechStatus === 'listening' ? 'Escuchando ambiente...' :
-                      speechStatus === 'detecting_sound' ? 'Detectando sonido...' :
-                        speechStatus === 'speaking' ? 'Capturando voz...' :
-                          speechStatus === 'processing' ? 'Procesando frase...' :
-                            speechStatus === 'no_match' ? 'No se entendió, repite' : 'Iniciando micro...'}
+                    {speechStatus === 'listening' ? 'Listening...' :
+                      speechStatus === 'detecting_sound' ? 'Detecting sound...' :
+                        speechStatus === 'speaking' ? 'Capturing voice...' :
+                          speechStatus === 'processing' ? 'Processing phrase...' :
+                            speechStatus === 'no_match' ? 'Not understood, please repeat' : 'Starting mic...'}
                   </span>
                 </div>
               </motion.div>
@@ -325,7 +325,7 @@ export default function ChatView() {
               onClick={handleGrammarCheck}
               disabled={checkingGrammar || !input.trim()}
               className="w-10 h-10 rounded-full flex-none bg-white/5 text-[#00c3ff] flex items-center justify-center transition-all hover:bg-[#00c3ff]/10 hover:scale-105 disabled:opacity-50"
-              title="Autocorregir texto actual antes de enviar"
+              title="Auto-correct current text before sending"
             >
               <FaSpellCheck size={14} className={checkingGrammar ? "animate-pulse" : ""} />
             </button>
@@ -353,7 +353,7 @@ export default function ChatView() {
               onClick={handleGrammarCheck}
               disabled={checkingGrammar || !input.trim()}
               className="hidden md:flex w-11 h-11 rounded-full flex-none bg-white/5 text-[#00c3ff] items-center justify-center transition-all hover:bg-[#00c3ff]/10 hover:scale-105 disabled:opacity-50"
-              title="Autocorregir texto actual antes de enviar"
+              title="Auto-correct current text before sending"
             >
               <FaSpellCheck size={16} className={checkingGrammar ? "animate-pulse" : ""} />
             </button>
@@ -548,31 +548,31 @@ export default function ChatView() {
         <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-[200] flex items-center justify-center p-4">
           <motion.div
             initial={{ opacity: 0, scale: 0.9, y: 20 }} animate={{ opacity: 1, scale: 1, y: 0 }}
-            className="bg-[#0e0c1d] border border-white/10 rounded-3xl p-6 w-full max-w-md shadow-2xl relative overflow-hidden"
+            className="bg-[#0e0c1d] border border-white/10 rounded-3xl p-5 md:p-6 w-full max-w-md shadow-2xl relative overflow-hidden flex flex-col max-h-[85vh]"
           >
             <div className="absolute top-0 right-0 p-4 opacity-10 pointer-events-none"><FaSpellCheck size={80} className="text-[#00c3ff]" /></div>
 
-            <div className="flex justify-between items-center mb-6 relative z-10">
-              <h2 className="text-xl font-black text-white flex items-center gap-2">
-                <FaSpellCheck className="text-[#00c3ff]" /> Corrección Gramatical
+            <div className="flex justify-between items-center mb-6 relative z-10 flex-shrink-0">
+              <h2 className="text-lg md:text-xl font-black text-white flex items-center gap-2">
+                <FaSpellCheck className="text-[#00c3ff]" /> Grammar Check
               </h2>
-              <button onClick={() => setGrammarResult(null)} className="text-[#a0a0a0] hover:text-white"><FaTimes /></button>
+              <button onClick={() => setGrammarResult(null)} className="text-[#a0a0a0] hover:text-white p-1"><FaTimes size={18}/></button>
             </div>
 
-            <div className="space-y-4 relative z-10">
+            <div className="space-y-4 relative z-10 overflow-y-auto pr-1">
               {grammarResult.has_errors ? (
                 <>
                   <div className="bg-white/10 border border-white/20 p-4 rounded-2xl">
-                    <h3 className="text-[10px] text-white font-bold uppercase tracking-widest mb-1">Se encontraron errores</h3>
-                    <p className="text-[#a0a0a0] text-sm italic">Tu texto necesita mejoras.</p>
+                    <h3 className="text-[10px] text-white font-bold uppercase tracking-widest mb-1">Errors Found</h3>
+                    <p className="text-[#a0a0a0] text-sm italic">Your text needs some improvements.</p>
                   </div>
-                  <div className="bg-blue-600/10 border border-blue-500/20 p-4 rounded-2xl">
-                    <h3 className="text-[10px] text-white font-bold uppercase tracking-widest mb-1">Corrección Sugerida</h3>
+                  <div className="bg-[#00c3ff]/10 border border-[#00c3ff]/20 p-4 rounded-2xl">
+                    <h3 className="text-[10px] text-white font-bold uppercase tracking-widest mb-1">Suggested Correction</h3>
                     <p className="text-white font-medium text-lg leading-relaxed">{grammarResult.corrected_text}</p>
                   </div>
                   <div className="bg-white/5 border border-white/10 p-4 rounded-2xl">
-                    <h3 className="text-[10px] text-[#00c3ff] font-bold uppercase tracking-widest mb-2">Explicación</h3>
-                    <p className="text-[#a0a0a0] text-sm">{grammarResult.explanation}</p>
+                    <h3 className="text-[10px] text-[#00c3ff] font-bold uppercase tracking-widest mb-2">Explanation</h3>
+                    <p className="text-[#a0a0a0] text-sm leading-relaxed">{grammarResult.explanation}</p>
                   </div>
                 </>
               ) : (
@@ -580,10 +580,16 @@ export default function ChatView() {
                   <div className="w-16 h-16 rounded-full bg-[#00c3ff]/20 flex items-center justify-center mx-auto mb-4">
                     <FaSpellCheck size={30} className="text-[#00c3ff]" />
                   </div>
-                  <h3 className="text-lg font-black text-[#00c3ff] mb-2">¡Excelente Trabajo!</h3>
-                  <p className="text-[#a0a0a0] text-sm">{grammarResult.explanation || "Tu mensaje no tiene errores gramaticales."}</p>
+                  <h3 className="text-lg font-black text-[#00c3ff] mb-2">Great Job!</h3>
+                  <p className="text-[#a0a0a0] text-sm">{grammarResult.explanation || "Your message has no grammatical errors."}</p>
                 </div>
               )}
+            </div>
+
+            <div className="mt-6 pt-4 border-t border-white/5 relative z-10 flex-shrink-0">
+               <button onClick={() => setGrammarResult(null)} className="w-full bg-white/5 hover:bg-white/10 text-white font-bold py-3 rounded-xl transition-colors">
+                  Close
+               </button>
             </div>
           </motion.div>
         </div>

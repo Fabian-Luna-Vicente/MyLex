@@ -19,6 +19,7 @@ export function useSettings() {
         const profile = await profileService.getMyProfile();
         if (profile) {
           setSettings(prev => ({ ...prev, language: profile.ai_language || 'en' }));
+          localStorage.setItem('ai_language', profile.ai_language || 'en');
         }
       } catch (err) {
         console.error("Error fetching profile", err);
@@ -29,6 +30,7 @@ export function useSettings() {
 
   const handleLanguageChange = async (val) => {
     setSettings(prev => ({ ...prev, language: val }));
+    localStorage.setItem('ai_language', val);
     try {
       await profileService.updateProfile({ ai_language: val });
     } catch (err) {

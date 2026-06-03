@@ -184,7 +184,7 @@ class ChatService:
         }
         return ChatMessageResponse(**m_dict)
 
-    async def send_ai_message(self, room_id: int, user_id: str, content: str, context_words: list[str] = None, mentioned_ai_participant_ids: list[int] = None, background_tasks = None):
+    async def send_ai_message(self, room_id: int, user_id: str, content: str, context_words: list[str] = None, mentioned_ai_participant_ids: list[int] = None, ai_language: str = "es", background_tasks = None):
         room = self.repo.get_room_by_id(room_id)
         if not room:
             raise ResourceNotFoundError("Room not found")
@@ -275,7 +275,8 @@ class ChatService:
             pending_human_messages=[],
             should_interrupt=False,
             thread_id=str(room_id),
-            sent_messages=[]
+            sent_messages=[],
+            ai_language=ai_language
         )
 
         graph = build_chat_graph(self.ai_service, self.repo)

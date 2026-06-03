@@ -60,3 +60,4 @@ class ChatState(TypedDict):
 
     thread_id: str
     sent_messages: Annotated[list[ChatMessagePayload], operator.add]
+    ai_language: str

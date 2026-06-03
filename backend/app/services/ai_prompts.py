@@ -259,3 +259,49 @@ def get_chat_system_context_default(ai_language: str = "es") -> str:
     if ai_language == "en":
         return "You are a friendly language exchange partner. Your goal is to help the user practice."
     return "Eres un amable compañero de intercambio de idiomas. Tu objetivo es ayudar al usuario a practicar."
+
+def get_grammar_check_prompt(message: str, target_language: str, ai_language: str = "es") -> str:
+    if ai_language == "en":
+        return f"""
+        You are an expert language teacher. A student is writing the following message to send in a chat: "{message}".
+        
+        Please review the message for grammatical, spelling, or unnatural phrasing errors in {target_language}.
+        If there are errors, correct the message and provide a highly precise grammatical explanation of WHY it was wrong and WHY the correction is right. 
+        For example, if they wrote "how is you" (in English), do not just say "use 'are'". Explain that 'you' is a second-person pronoun and requires the verb 'to be' conjugated as 'are'. Be as technically precise as possible with grammatical terms.
+        
+        IMPORTANT: The `explanation` field MUST be written ENTIRELY in {ai_language}, but the `corrected_text` MUST be strictly in {target_language}.
+        
+        If the message is perfect, tell them it is perfectly written in {ai_language}.
+        
+        Return the response STRICTLY in this JSON format:
+        {{
+            "has_errors": boolean,
+            "corrected_text": "the corrected text strictly in {target_language} (or the original message if it is perfect)",
+            "explanation": "detailed grammatical explanation in {ai_language}"
+        }}
+        """
+    else:
+        return f"""
+        Eres un profesor de idiomas experto. Un estudiante está escribiendo el siguiente mensaje para enviarlo en un chat: "{message}".
+        
+        Por favor, revisa el mensaje en busca de errores gramaticales, ortográficos o de fraseo poco natural en el idioma {target_language}.
+        Si hay errores, corrige el mensaje y proporciona una explicación gramatical muy precisa de POR QUÉ estaba mal y POR QUÉ la corrección es correcta. 
+        Por ejemplo, si escribieron "how is you" (en inglés), no digas simplemente "usa 'are'". Explica que 'you' es un pronombre de segunda persona y requiere el verbo 'to be' conjugado como 'are'. Sé lo más preciso técnicamente posible con los términos gramaticales.
+        
+        IMPORTANTE: El campo `explanation` DEBE estar escrito COMPLETAMENTE en {ai_language}, pero el texto corregido (`corrected_text`) DEBE estar estrictamente en {target_language}.
+        
+        Si el mensaje es perfecto, dile que está perfectamente escrito en {ai_language}.
+        
+        Devuelve la respuesta ESTRICTAMENTE en este formato JSON:
+        {{
+            "has_errors": boolean,
+            "corrected_text": "el texto corregido estrictamente en {target_language} (o el mensaje original si es perfecto)",
+            "explanation": "explicación gramatical detallada en {ai_language}"
+        }}
+        """
+
+def get_grammar_check_system_prompt(ai_language: str = "es") -> str:
+    if ai_language == "en":
+        return f"You are a strict but friendly grammar checker. You must respond in {ai_language} and provide JSON."
+    else:
+        return f"Eres un corrector gramatical estricto pero amable. Debes responder en {ai_language} y proporcionar JSON."

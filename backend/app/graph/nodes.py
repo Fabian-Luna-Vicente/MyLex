@@ -61,7 +61,8 @@ class ChatGraphNodes:
         selected_ids = await self.ai_service.select_ai_to_reply(
             state["room_context"],
             last_msg,
-            dummy_ais
+            dummy_ais,
+            state.get("ai_language", "es")
         )
         
         # The queue combines explicitly mentioned AIs (which always reply) and those selected by the router
@@ -109,7 +110,8 @@ class ChatGraphNodes:
             user_message=f"Recent chat log:\n{chat_log}\n\nRespond as {ai['name']}.",
             context_words=vocab,
             system_context=system_context,
-            language=state['conversation_language']
+            language=state['conversation_language'],
+            ai_language=state.get("ai_language", "es")
         )
         
         correction_attempts = state.get("correction_attempts", 0)

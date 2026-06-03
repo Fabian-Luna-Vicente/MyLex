@@ -3,11 +3,19 @@ import api from './api';
 export const profileService = {
   getMyProfile: async () => {
     const response = await api.get('/api/profile/me');
+    if (response.data) {
+      localStorage.setItem('ai_language', response.data.ai_language || 'es');
+    }
     return response.data;
   },
 
   updateProfile: async (data) => {
     const response = await api.put('/api/profile/me', data);
+    if (data.ai_language) {
+      localStorage.setItem('ai_language', data.ai_language);
+    } else if (response.data) {
+      localStorage.setItem('ai_language', response.data.ai_language || 'es');
+    }
     return response.data;
   },
 
