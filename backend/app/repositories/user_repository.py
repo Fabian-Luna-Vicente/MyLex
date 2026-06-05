@@ -46,3 +46,7 @@ class UserRepository:
         expired_tokens.delete(synchronize_session=False)
         self.db.commit()
         return count
+
+    def delete_all_refresh_tokens_for_user(self, user_id: str) -> None:
+        self.db.query(UserRefreshToken).filter(UserRefreshToken.user_id == user_id).delete(synchronize_session=False)
+        self.db.commit()
