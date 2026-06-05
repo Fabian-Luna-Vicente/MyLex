@@ -41,7 +41,6 @@
 
   ::-webkit-scrollbar-thumb:hover {
     background-color: #00c3ffd2;
-    /* Equivalente a bg-blue-500/60 */
   }
 
   /* Para Firefox */
