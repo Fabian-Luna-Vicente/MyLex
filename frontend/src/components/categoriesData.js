@@ -1,15 +1,25 @@
+import imgAddVocab from '../assets/categories/add_vocab.png';
+import imgLists from '../assets/categories/lists.png';
+import imgRandom from '../assets/categories/random.png';
+import imgHangman from '../assets/categories/hangman.png';
+import imgVisualMemory from '../assets/categories/visual_memory.png';
+import imgSynAnt from '../assets/categories/syn_ant.png';
+import imgListening from '../assets/categories/listening.png';
+import imgWriting from '../assets/categories/writing.png';
+import imgStats from '../assets/categories/stats.png';
+
 export const categories = {
     "Learning & Management": [
         {
             title: "Add Vocabulary",
             description: "Add new vocabulary to your lists.",
-            img: "https://i.postimg.cc/3wxkyDWH/unnamed_2_removebg_preview.png",
+            img: imgAddVocab,
             onClick: "create-word?listId=0",
         },
         {
             title: "Your Lists",
             description: "Review and edit your word collections. Check your progress and keep learning!",
-            img: "https://i.postimg.cc/JhzsyBtD/Gemini_Generated_Image_6916jg6916jg6916_removebg_preview.png",
+            img: imgLists,
             onClick: "lists",
         }
     ],
@@ -17,25 +27,25 @@ export const categories = {
         {
             title: "Random Repetition",
             description: "Flashcards for quick review.",
-            img: "https://i.postimg.cc/N0jKyrLt/unnamed_4_removebg_preview.png",
+            img: imgRandom,
             onClick: "/games/random",
         },
         {
             title: "Hangman",
             description: "Guess the hidden word.",
-            img: "https://i.postimg.cc/k4jF6m7j/ahorcado.png",
+            img: imgHangman,
             onClick: "/games/hangman",
         },
         {
             title: "Visual Memory",
             description: "Match words with images.",
-            img: "https://i.postimg.cc/C1vHBgwc/imgg.png",
+            img: imgVisualMemory,
             onClick: "games/visual-memory",
         },
         {
             title: "Synonyms & Antonyms",
             description: "Challenge your word relations.",
-            img: "https://i.postimg.cc/VNkJSb5k/unnamed_removebg_preview.png",
+            img: imgSynAnt,
             onClick: "games/syn-ant",
         },
     ],
@@ -43,13 +53,13 @@ export const categories = {
         {
             title: "Listening Practice",
             description: "Train your ear with audio games.",
-            img: "https://i.postimg.cc/fbRV30kb/Gemini_Generated_Image_1bj7k1bj7k1bj7k1_removebg_preview.png",
+            img: imgListening,
             onClick: "games/listening",
         },
         {
             title: "Writing Skills",
             description: "Practice writing with AI feedback.",
-            img: "https://i.postimg.cc/rpwDdtzV/unnamed_5_removebg_preview.png",
+            img: imgWriting,
             onClick: "games/writing",
         }
     ],
@@ -57,7 +67,7 @@ export const categories = {
         {
             title: "Performance Stats",
             description: "Detailed analytics of your learning journey.",
-            img: "https://i.postimg.cc/GmmnTCs7/ac6500a5-c218-4ea7-8633-f26a599c7782-removebg-preview.png",
+            img: imgStats,
             onClick: "statistics",
         }
     ]
