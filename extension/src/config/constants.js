@@ -18,3 +18,15 @@ export const CONFIG = {
         { code: "pt", name: "Portuguese" },
     ]
 };
+
+export const getSpeechCode = (langCode) => {
+    const map = {
+        'en': 'en-US',
+        'es': 'es-ES',
+        'fr': 'fr-FR',
+        'de': 'de-DE',
+        'it': 'it-IT',
+        'pt': 'pt-BR'
+    };
+    return map[langCode] || 'en-US';
+};

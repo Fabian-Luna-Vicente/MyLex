@@ -4,6 +4,7 @@ import { CiPlay1 } from "react-icons/ci";
 import { FaImage, FaSearch } from "react-icons/fa";
 import AddWordToList from "./AddWordToList";
 import { useElementCard } from "../hooks/useElementCard";
+import { CONFIG } from "../config/constants";
 
 function ElementCard({
     CurrentListId,
@@ -30,7 +31,10 @@ function ElementCard({
         handleImageSearch,
         handleSelectImage,
         handleRemoveImage,
-        playSound
+        playSound,
+        cardAudioLang,
+        setCardAudioLang,
+        globalAudioLang
     } = useElementCard({
         propSelectedObjects,
         propSetSelectedObjects,
@@ -165,9 +169,19 @@ function ElementCard({
                         </div>
 
                         <div style={{ display: 'flex', flexWrap: 'wrap', gap: '16px', justifyContent: 'flex-start', marginBottom: '32px' }}>
-                            <button onClick={() => playSound(currentWord.name)} style={{ display: 'flex', alignItems: 'center', gap: '8px', padding: '12px 24px', background: '#00c3ff', color: 'black', borderRadius: '9999px', fontWeight: 'bold', border: 'none', cursor: 'pointer', transition: 'all 0.2s', boxShadow: '0 0 20px rgba(0,195,255,0.5)' }}>
+                            <button onClick={() => playSound(currentWord.name, currentWord.language)} style={{ display: 'flex', alignItems: 'center', gap: '8px', padding: '12px 24px', background: '#00c3ff', color: 'black', borderRadius: '9999px', fontWeight: 'bold', border: 'none', cursor: 'pointer', transition: 'all 0.2s', boxShadow: '0 0 20px rgba(0,195,255,0.5)' }}>
                                 <CiPlay1 size={20} /> Listen
                             </button>
+                            <select 
+                                value={cardAudioLang || currentWord.language || globalAudioLang || ""} 
+                                onChange={(e) => setCardAudioLang(e.target.value)}
+                                style={{ background: '#0e0c1d', color: '#00c3ff', border: '1px solid rgba(0, 195, 255, 0.3)', borderRadius: '9999px', padding: '10px 16px', fontSize: '14px', cursor: 'pointer' }}
+                            >
+                                <option value="">Default</option>
+                                {CONFIG.SUPPORTED_LANGUAGES.filter(l => l.code !== "auto").map((l) => (
+                                    <option key={l.code} value={l.code}>{l.name}</option>
+                                ))}
+                            </select>
                             <button onClick={() => setAddWordB(!AddWordB)} title="Add to List" style={{ padding: '12px', background: '#0e0c1d', border: '1px solid rgba(0, 195, 255, 0.3)', color: '#00c3ff', borderRadius: '9999px', cursor: 'pointer', transition: 'all 0.2s' }}>
                                 <IoMdAdd size={24} />
                             </button>
@@ -180,7 +194,7 @@ function ElementCard({
                         {currentWord.originalContext && (
                             <section>
                                 <h4 style={{ color: '#00c3ff', fontSize: '12px', fontWeight: 900, textTransform: 'uppercase', letterSpacing: '3px', marginBottom: '12px', margin: 0 }}>Context Found</h4>
-                                <div style={{ fontSize: '16px', color: 'rgba(255, 255, 255, 0.9)', fontStyle: 'italic', background: 'rgba(255, 255, 255, 0.05)', padding: '20px', borderRadius: '16px', borderLeft: '3px solid #00c3ff' }}>
+                                <div style={{ fontSize: '16px', color: 'rgba(255, 255, 255, 0.9)', fontStyle: 'italic', background: 'rgba(255, 255, 255, 0.05)', padding: '20px', borderRadius: '16px', border: '1px solid rgba(0, 195, 255, 0.4)', boxShadow: '0 6px 0 rgba(0, 195, 255, 0.2)' }}>
                                     "{currentWord.originalContext}"
                                 </div>
                             </section>
@@ -248,13 +262,13 @@ function ElementCard({
                         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '32px' }}>
                             <section>
                                 <h4 style={{ color: '#00ff88', fontSize: '12px', fontWeight: 900, textTransform: 'uppercase', letterSpacing: '3px', margin: '0 0 12px 0' }}>Synonyms</h4>
-                                <div style={{ fontSize: '14px', color: '#a0a0a0', background: 'rgba(0, 255, 136, 0.05)', padding: '16px', borderRadius: '12px', border: '1px solid rgba(0, 255, 136, 0.1)', minHeight: '60px' }}>
+                                <div style={{ fontSize: '14px', color: '#a0a0a0', background: 'rgba(0, 255, 136, 0.05)', padding: '12px 16px', borderRadius: '12px', border: '1px solid rgba(0, 255, 136, 0.1)', minHeight: 'auto' }}>
                                     {safeString(currentWord.synonyms) || "None"}
                                 </div>
                             </section>
                             <section>
                                 <h4 style={{ color: '#ff4d4d', fontSize: '12px', fontWeight: 900, textTransform: 'uppercase', letterSpacing: '3px', margin: '0 0 12px 0' }}>Antonyms</h4>
-                                <div style={{ fontSize: '14px', color: '#a0a0a0', background: 'rgba(255, 77, 77, 0.05)', padding: '16px', borderRadius: '12px', border: '1px solid rgba(255, 77, 77, 0.1)', minHeight: '60px' }}>
+                                <div style={{ fontSize: '14px', color: '#a0a0a0', background: 'rgba(255, 77, 77, 0.05)', padding: '12px 16px', borderRadius: '12px', border: '1px solid rgba(255, 77, 77, 0.1)', minHeight: 'auto' }}>
                                     {safeString(currentWord.antonyms) || "None"}
                                 </div>
                             </section>

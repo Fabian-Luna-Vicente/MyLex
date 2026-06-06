@@ -44,6 +44,8 @@ const FloatingMenu = ({
     setSourceLang,
     targetLang,
     setTargetLang,
+    audioLang,
+    handleAudioLangChange,
     handleToggle,
     handleGrammar,
     handleTranslate,
@@ -110,6 +112,14 @@ const FloatingMenu = ({
                 <div className="fab-lang-column">
                   <label className="fab-lang-label">To:</label>
                   <select value={targetLang} onChange={(e) => setTargetLang(e.target.value)} className="fab-lang-select">
+                    {languages.filter((l) => l.code !== "auto").map((l) => (<option key={l.code} value={l.code}>{l.name}</option>))}
+                  </select>
+                </div>
+              </div>
+              <div className="fab-language-row" style={{ marginTop: '10px' }}>
+                <div className="fab-lang-column" style={{ width: '100%' }}>
+                  <label className="fab-lang-label">Audio Language:</label>
+                  <select value={audioLang} onChange={(e) => handleAudioLangChange(e.target.value)} className="fab-lang-select" style={{ width: '100%' }}>
                     {languages.filter((l) => l.code !== "auto").map((l) => (<option key={l.code} value={l.code}>{l.name}</option>))}
                   </select>
                 </div>

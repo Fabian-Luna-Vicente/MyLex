@@ -14,6 +14,8 @@ from app.schemas.vocabulary import (
     VocabularyListCreate, VocabularyListUpdate, VocabularyListResponse, VocabularyListBasic
 )
 from fastapi import Request
+import httpx
+from fastapi.responses import StreamingResponse
 
 router = APIRouter()
 
@@ -161,3 +163,25 @@ def delete_word(
     if not success:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Word not found")
     return {"detail": "Word deleted successfully"}
+
+# --- TTS Proxy Endpoint ---
+
+@router.get("/tts")
+async def get_tts(
+    text: str,
+    lang: str,
+    request: Request
+):
+    import urllib.parse
+    url = f"https://translate.googleapis.com/translate_tts?client=gtx&ie=UTF-8&tl={lang}&q={urllib.parse.quote(text)}"
+    
+    async def stream():
+        async with httpx.AsyncClient() as client:
+            async with client.stream("GET", url) as response:
+                if response.status_code != 200:
+                    yield b""
+                    return
+                async for chunk in response.aiter_bytes():
+                    yield chunk
+                    
+    return StreamingResponse(stream(), media_type="audio/mpeg")

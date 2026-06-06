@@ -4,16 +4,18 @@ import { useNavigate } from 'react-router-dom';
 import { useListeningGame } from '../hooks/useListeningGame';
 import { GrPrevious, GrLinkNext } from 'react-icons/gr';
 import { MdNotStarted } from 'react-icons/md';
-import { CiPlay1 } from 'react-icons/ci';
+import { CiPlay1, CiPause1, CiStop1 } from 'react-icons/ci';
 import { motion, AnimatePresence } from 'framer-motion';
+import { LANGUAGES } from '../config/constants';
 
 export default function ListeningGame() {
   const navigate = useNavigate();
   const {
     lists, loading, showGame, shuffledWords, index, userAnswers, setUserAnswers,
     gameStatus, selectedListId, setSelectedListId, score, setGameStatus,
-    loadLists, startGame, handleAnswer, nextLevel, quitGame, playFullAudio,
-    subIndex, setSubIndex, inputRef, currentWord, puzzle
+    loadLists, startGame, handleAnswer, nextLevel, quitGame, playFullAudio, stopAudio,
+    subIndex, setSubIndex, inputRef, currentWord, puzzle, overrideLang, setOverrideLang,
+    audioState, toggleAudio
   } = useListeningGame();
 
 
@@ -108,17 +110,43 @@ export default function ListeningGame() {
               className="flex flex-col items-center gap-4 md:gap-8 mt-2 md:mt-4"
             >
               <div className="text-center space-y-4 md:space-y-6 flex flex-col items-center">
+                <div className="flex gap-4 items-center">
+                  <span className="text-[#a0a0a0] text-[10px] font-bold uppercase tracking-widest">Audio:</span>
+                  <select
+                    value={overrideLang}
+                    onChange={(e) => setOverrideLang(e.target.value)}
+                    className="bg-[#071320] text-white border border-[#00c3ff]/30 rounded-md px-2 py-1 text-xs outline-none focus:border-[#00c3ff] transition-colors"
+                  >
+                    <option value="auto">Auto (List Language)</option>
+                    {LANGUAGES.map(l => (
+                      <option key={l} value={l}>{l}</option>
+                    ))}
+                  </select>
+                </div>
+                
                 <h2 className="text-[#a0a0a0] uppercase tracking-[2px] md:tracking-[4px] font-bold text-xs md:text-sm">
                   What did you hear?
                 </h2>
-                <button
-                  onClick={() => playFullAudio(currentWord)}
-                  className="relative group w-16 h-16 md:w-24 md:h-24 rounded-full bg-gradient-to-br from-[#0e0c1d] to-[#071320] border-2 border-[#00c3ff] shadow-[0_0_20px_rgba(0,195,255,0.3)] flex items-center justify-center hover:scale-105 transition-all"
-                >
-                  <div className="absolute inset-0 rounded-full bg-[#00c3ff]/20 animate-ping opacity-30 group-hover:opacity-100"></div>
-                  <CiPlay1 className="text-[#00c3ff] ml-1.5 relative z-10 w-8 h-8 md:w-10 md:h-10" />
-                </button>
-                <p className="text-[10px] text-[#00c3ff]/60 uppercase tracking-widest font-bold">Listen to word and examples</p>
+                <div className="flex gap-4">
+                  <button
+                    onClick={toggleAudio}
+                    title={audioState === 'playing' ? "Pause Audio" : audioState === 'paused' ? "Resume Audio" : "Play Audio"}
+                    className={`relative group w-12 h-12 md:w-16 md:h-16 rounded-full border-2 shadow-xl flex items-center justify-center hover:scale-105 transition-all
+                      ${audioState === 'stopped' ? 'bg-gradient-to-br from-[#0e0c1d] to-[#071320] border-[#00c3ff] shadow-[0_0_15px_rgba(0,195,255,0.3)]' :
+                        audioState === 'playing' ? 'bg-gradient-to-br from-[#1a0f14] to-[#20070e] border-[#ff0055] shadow-[0_0_15px_rgba(255,0,85,0.3)]' :
+                        'bg-gradient-to-br from-[#1a150f] to-[#201707] border-[#ffa500] shadow-[0_0_15px_rgba(255,165,0,0.3)]'
+                      }`}
+                  >
+                    {audioState === 'playing' && <div className="absolute inset-0 rounded-full bg-[#ff0055]/20 animate-ping opacity-30 group-hover:opacity-100"></div>}
+                    
+                    {audioState === 'stopped' && <CiPlay1 className="text-[#00c3ff] ml-1 relative z-10 w-6 h-6 md:w-8 md:h-8" />}
+                    {audioState === 'playing' && <CiPause1 className="text-[#ff0055] relative z-10 w-6 h-6 md:w-8 md:h-8" />}
+                    {audioState === 'paused' && <CiStop1 className="text-[#ffa500] relative z-10 w-6 h-6 md:w-8 md:h-8" />}
+                  </button>
+                </div>
+                <p className="text-[10px] text-[#00c3ff]/60 uppercase tracking-widest font-bold">
+                  {audioState === 'stopped' ? 'Play' : audioState === 'playing' ? 'Pause' : 'Resume'}
+                </p>
               </div>
 
               <div className="w-full max-w-3xl bg-[#0e0c1d]/40 backdrop-blur-md border border-[#ffffff05] rounded-[20px] md:rounded-[40px] p-4 md:p-8 shadow-2xl space-y-4 md:space-y-8">

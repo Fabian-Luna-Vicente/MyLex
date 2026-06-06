@@ -2,6 +2,7 @@ import { useState, useEffect, useCallback } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { useVocabulary } from "./useVocabulary";
 import { useAuth } from "./useAuth";
+import { getLangCode } from "../config/constants";
 
 export const useListWords = () => {
     const { id } = useParams();
@@ -44,12 +45,48 @@ export const useListWords = () => {
 
     useEffect(() => {
         loadList();
+        
+        if (typeof window !== 'undefined' && window.speechSynthesis) {
+            window.speechSynthesis.getVoices();
+            window.speechSynthesis.onvoiceschanged = () => {
+                window.speechSynthesis.getVoices();
+            };
+        }
     }, [loadList]);
 
     const playSound = async (text) => {
         const utterance = new SpeechSynthesisUtterance(text);
-        utterance.lang = 'en-US';
-        window.speechSynthesis.speak(utterance);
+        const langCode = list ? getLangCode(list.language) : 'en-US';
+        utterance.lang = langCode;
+
+        const voices = window.speechSynthesis.getVoices();
+        if (voices.length > 0) {
+            const matchingVoices = voices.filter(v => v.lang === langCode || v.lang.replace('_', '-') === langCode || v.lang.startsWith(langCode.split('-')[0]));
+            if (matchingVoices.length > 0) {
+                let voice = matchingVoices.find(v => v.name.includes("Google"));
+                if (!voice) voice = matchingVoices[0];
+                utterance.voice = voice;
+                window.speechSynthesis.speak(utterance);
+                return;
+            }
+        }
+
+        const fallbackLang = list ? list.language : 'English';
+        const fallbackCode = getLangCode(fallbackLang).split('-')[0];
+
+        // El usuario pidió usar la voz nativa para inglés y español
+        if (fallbackCode === 'en' || fallbackCode === 'es') {
+            window.speechSynthesis.speak(utterance);
+            return;
+        }
+
+        const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000';
+        const url = `${API_URL}/api/vocabulary/tts?lang=${fallbackCode}&text=${encodeURIComponent(text)}`;
+        const audio = new Audio(url);
+        audio.play().catch(e => {
+            console.error("[TTS Debug] Fallback audio failed:", e);
+            window.speechSynthesis.speak(utterance);
+        });
     };
 
     const handleEditList = async () => {

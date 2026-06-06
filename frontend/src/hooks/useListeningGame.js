@@ -1,6 +1,7 @@
 import { useState, useCallback, useEffect, useRef, useMemo } from 'react';
 import { useVocabulary } from './useVocabulary';
 import { progressService } from '../services/progressService';
+import { getLangCode } from '../config/constants';
 
 export const useListeningGame = () => {
     const { fetchWordsForGame, lists, fetchLists } = useVocabulary();
@@ -8,9 +9,11 @@ export const useListeningGame = () => {
     const [loading, setLoading] = useState(false);
     const [showGame, setShowGame] = useState(false);
     const [selectedListId, setSelectedListId] = useState('');
+    const [overrideLang, setOverrideLang] = useState('auto');
 
     const [shuffledWords, setShuffledWords] = useState([]);
     const [index, setIndex] = useState(0);
+    const [audioState, setAudioState] = useState('stopped'); // stopped, playing, paused
 
     // Estados para "Rellenar huecos"
     const [userAnswers, setUserAnswers] = useState({});
@@ -24,10 +27,18 @@ export const useListeningGame = () => {
 
     useEffect(() => {
         loadLists();
+        
+        if (typeof window !== 'undefined' && window.speechSynthesis) {
+            window.speechSynthesis.getVoices();
+            window.speechSynthesis.onvoiceschanged = () => {
+                window.speechSynthesis.getVoices();
+            };
+        }
     }, [loadLists]);
 
     const [subIndex, setSubIndex] = useState(0);
     const inputRef = useRef(null);
+    const currentAudioRef = useRef(null);
 
     const currentWord = shuffledWords[index];
 
@@ -83,21 +94,105 @@ export const useListeningGame = () => {
         return { examples: processedExamples, correctAnswers };
     }, [currentWord]);
 
-    // 1) Reproducir audio de la palabra + los ejemplos
-    const playFullAudio = useCallback((wordObj) => {
-        if (!wordObj) return;
+    const stopAudio = useCallback(() => {
         window.speechSynthesis.cancel();
+        if (currentAudioRef.current) {
+            currentAudioRef.current.onended = null; // Prevent next chunk
+            currentAudioRef.current.pause();
+            currentAudioRef.current.currentTime = 0;
+        }
+        setAudioState('stopped');
+    }, []);
+
+    // 1) Reproducir audio de la palabra + el ejemplo actual
+    const playFullAudio = useCallback((wordObj, specificSubIndex = subIndex) => {
+        if (!wordObj) return;
+        stopAudio();
 
         let textToSpeak = wordObj.name + ". ";
-        if (wordObj.examples && wordObj.examples.length > 0) {
-            textToSpeak += wordObj.examples.map((e, i) => "Example " + (i + 1) + ". " + e).join(". ");
+        if (wordObj.examples && wordObj.examples.length > specificSubIndex) {
+            textToSpeak += wordObj.examples[specificSubIndex];
         }
 
+        const currentList = lists.find(l => l.id === selectedListId);
+        const targetLangName = overrideLang !== 'auto' ? overrideLang : (currentList ? currentList.language : 'English');
+        const langCode = getLangCode(targetLangName);
+
         const utterance = new SpeechSynthesisUtterance(textToSpeak);
-        utterance.lang = 'en-US';
+        utterance.lang = langCode;
         utterance.rate = 0.85; // Un poco más lento para dictado
-        window.speechSynthesis.speak(utterance);
-    }, []);
+        
+        utterance.onstart = () => setAudioState('playing');
+        utterance.onend = () => setAudioState('stopped');
+        utterance.onerror = () => setAudioState('stopped');
+        utterance.onpause = () => setAudioState('paused');
+        utterance.onresume = () => setAudioState('playing');
+
+        const voices = window.speechSynthesis.getVoices();
+        if (voices.length > 0) {
+            const matchingVoices = voices.filter(v => v.lang === langCode || v.lang.replace('_', '-') === langCode || v.lang.startsWith(langCode.split('-')[0]));
+            if (matchingVoices.length > 0) {
+                let voice = matchingVoices.find(v => v.name.includes("Google"));
+                if (!voice) voice = matchingVoices[0];
+                utterance.voice = voice;
+                window.speechSynthesis.speak(utterance);
+                return;
+            }
+        }
+
+        const fallbackCode = langCode.split('-')[0];
+        
+        // El usuario pidió usar la voz nativa para inglés y español
+        if (fallbackCode === 'en' || fallbackCode === 'es') {
+            window.speechSynthesis.speak(utterance);
+            return;
+        }
+
+        const sentences = [wordObj.name];
+        if (wordObj.examples && wordObj.examples.length > specificSubIndex) {
+            sentences.push(wordObj.examples[specificSubIndex]);
+        }
+
+        const playSequential = (idx) => {
+            if (idx >= sentences.length) return;
+            const chunk = sentences[idx];
+            
+            // Limit chunk size if needed, though usually examples are short enough
+            const safeChunk = chunk.substring(0, 199);
+            const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000';
+            const url = `${API_URL}/api/vocabulary/tts?lang=${fallbackCode}&text=${encodeURIComponent(safeChunk)}`;
+            const audio = new Audio(url);
+            currentAudioRef.current = audio;
+            audio.playbackRate = 0.85;
+
+            audio.onplay = () => setAudioState('playing');
+            audio.onpause = () => {
+                if (audio.currentTime !== 0 && !audio.ended) setAudioState('paused');
+            };
+
+            audio.onended = () => {
+                if (idx + 1 >= sentences.length) {
+                    setAudioState('stopped');
+                } else {
+                    playSequential(idx + 1);
+                }
+            };
+
+            audio.onerror = (e) => {
+                console.error("[TTS Debug] Fallback audio chunk failed:", e);
+                setAudioState('stopped');
+                if (idx === 0) window.speechSynthesis.speak(utterance); // fallback to native only if first chunk fails
+            };
+
+            audio.play().catch(e => {
+                console.error("[TTS Debug] Fallback audio play failed:", e);
+                setAudioState('stopped');
+                if (idx === 0) window.speechSynthesis.speak(utterance);
+            });
+        };
+
+        playSequential(0);
+    }, [lists, selectedListId, stopAudio]);
 
     const startGame = async (listId) => {
         setLoading(true);
@@ -113,10 +208,11 @@ export const useListeningGame = () => {
             setIndex(0);
             setScore({ correct: 0, wrong: 0 });
             setUserAnswers({});
+            setSubIndex(0);
             setGameStatus('playing');
             setShowGame(true);
 
-            setTimeout(() => playFullAudio(words[0]), 500);
+            setTimeout(() => playFullAudio(words[0], 0), 500);
 
         } catch (error) {
             console.error("Error starting game", error);
@@ -167,8 +263,9 @@ export const useListeningGame = () => {
             const nextIdx = index + 1;
             setIndex(nextIdx);
             setUserAnswers({});
+            setSubIndex(0);
             setGameStatus('playing');
-            setTimeout(() => playFullAudio(shuffledWords[nextIdx]), 500);
+            setTimeout(() => playFullAudio(shuffledWords[nextIdx], 0), 500);
         } else {
             if (pendingProgress.length > 0) {
                 saveBulkProgress(pendingProgress);
@@ -191,15 +288,30 @@ export const useListeningGame = () => {
         if (pendingProgress.length > 0) {
             saveBulkProgress(pendingProgress);
         }
-        window.speechSynthesis.cancel();
+        stopAudio();
         setShowGame(false);
         setPendingProgress([]);
     };
 
+    const toggleAudio = useCallback(() => {
+        if (audioState === 'playing') {
+            window.speechSynthesis.pause();
+            if (currentAudioRef.current) currentAudioRef.current.pause();
+            setAudioState('paused');
+        } else if (audioState === 'paused') {
+            window.speechSynthesis.resume();
+            if (currentAudioRef.current) currentAudioRef.current.play();
+            setAudioState('playing');
+        } else {
+            playFullAudio(currentWord, subIndex);
+        }
+    }, [audioState, playFullAudio, currentWord, subIndex]);
+
     return {
         lists, loading, showGame, shuffledWords, index, userAnswers, setUserAnswers,
         gameStatus, setGameStatus, selectedListId, setSelectedListId, score,
-        loadLists, startGame, handleAnswer, nextLevel, quitGame, playFullAudio,
-        subIndex, setSubIndex, inputRef, currentWord, puzzle
+        loadLists, startGame, handleAnswer, nextLevel, quitGame, playFullAudio, stopAudio,
+        subIndex, setSubIndex, inputRef, currentWord, puzzle, overrideLang, setOverrideLang,
+        audioState, toggleAudio
     };
 };

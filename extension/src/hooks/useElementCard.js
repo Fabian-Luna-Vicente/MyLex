@@ -2,6 +2,7 @@ import { useState, useEffect, useContext } from "react";
 import { Context } from "../Contexts/Context";
 import { ListsContext } from "../Contexts/ListsContext";
 import { useImageSearch } from "./useImageSearch";
+import { getSpeechCode, CONFIG } from "../config/constants";
 
 export const useElementCard = ({
     propSelectedObjects,
@@ -19,6 +20,25 @@ export const useElementCard = ({
     const [Index, setIndex] = useState(0);
     const [imageQuery, setImageQuery] = useState("");
     const [showSearch, setShowSearch] = useState(false);
+    const [globalAudioLang, setGlobalAudioLang] = useState("en");
+    const [cardAudioLang, setCardAudioLang] = useState("");
+
+    useEffect(() => {
+        if (typeof chrome !== 'undefined' && chrome.storage && chrome.storage.local) {
+            chrome.storage.local.get(['audioLang'], (result) => {
+                if (result.audioLang) {
+                    setGlobalAudioLang(result.audioLang);
+                }
+            });
+        }
+        
+        if (typeof window !== 'undefined' && window.speechSynthesis) {
+            window.speechSynthesis.getVoices();
+            window.speechSynthesis.onvoiceschanged = () => {
+                window.speechSynthesis.getVoices();
+            };
+        }
+    }, []);
 
     const { imageResults, isSearchingImages, searchImages, clearResults } = useImageSearch();
 
@@ -80,10 +100,37 @@ export const useElementCard = ({
         setImageQuery(SelectedObjects[Index]?.name || "");
     };
 
-    const playSound = (text) => {
+    const playSound = (text, wordLang) => {
         const utterance = new SpeechSynthesisUtterance(text);
-        utterance.lang = 'en-US';
-        window.speechSynthesis.speak(utterance);
+        const code = getSpeechCode(cardAudioLang || wordLang || globalAudioLang || 'en');
+        utterance.lang = code;
+
+        const voices = window.speechSynthesis.getVoices();
+        if (voices.length > 0) {
+            const matchingVoices = voices.filter(v => v.lang === code || v.lang.replace('_', '-') === code || v.lang.startsWith(code.split('-')[0]));
+            if (matchingVoices.length > 0) {
+                let voice = matchingVoices.find(v => v.name.includes("Google"));
+                if (!voice) voice = matchingVoices[0];
+                utterance.voice = voice;
+                window.speechSynthesis.speak(utterance);
+                return;
+            }
+        }
+
+        const fallbackLang = cardAudioLang || wordLang || globalAudioLang || 'en';
+        const fallbackCode = fallbackLang.split('-')[0];
+
+        if (fallbackCode === 'en' || fallbackCode === 'es') {
+            window.speechSynthesis.speak(utterance);
+            return;
+        }
+
+        const url = `${CONFIG.API_BASE_URL}/api/vocabulary/tts?lang=${fallbackCode}&text=${encodeURIComponent(text)}`;
+        const audio = new Audio(url);
+        audio.play().catch(e => {
+            console.error("[TTS Debug] Fallback audio failed:", e);
+            window.speechSynthesis.speak(utterance);
+        });
     };
 
     return {
@@ -106,6 +153,9 @@ export const useElementCard = ({
         handleImageSearch,
         handleSelectImage,
         handleRemoveImage,
-        playSound
+        playSound,
+        cardAudioLang,
+        setCardAudioLang,
+        globalAudioLang
     };
 };

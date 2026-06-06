@@ -3,6 +3,7 @@ import { Context } from "../Contexts/Context";
 import { ListsContext } from "../Contexts/ListsContext";
 import { useAiActions } from "./useAiActions";
 import { listService } from "../services/listService";
+import { getSpeechCode } from "../config/constants";
 
 export const useFloatingMenu = ({
   propSelectedObjects,
@@ -40,6 +41,33 @@ export const useFloatingMenu = ({
   const [useAI, setUseAI] = useState(true);
   const [sourceLang, setSourceLang] = useState("auto");
   const [targetLang, setTargetLang] = useState("en");
+  const [audioLang, setAudioLang] = useState("en");
+
+  useEffect(() => {
+    if (typeof chrome !== 'undefined' && chrome.storage && chrome.storage.local) {
+      chrome.storage.local.get(['audioLang'], (result) => {
+        if (result.audioLang) {
+          setAudioLang(result.audioLang);
+        }
+      });
+    }
+  }, []);
+
+  const handleAudioLangChange = (newLang) => {
+    setAudioLang(newLang);
+    if (typeof chrome !== 'undefined' && chrome.storage && chrome.storage.local) {
+      chrome.storage.local.set({ audioLang: newLang });
+    }
+  };
+
+  useEffect(() => {
+    if (typeof window !== 'undefined' && window.speechSynthesis) {
+        window.speechSynthesis.getVoices();
+        window.speechSynthesis.onvoiceschanged = () => {
+            window.speechSynthesis.getVoices();
+        };
+    }
+  }, []);
 
   useEffect(() => {
     const handleSelection = () => {
@@ -112,7 +140,8 @@ export const useFloatingMenu = ({
       setIsOpen(false);
       const wordWithContext = {
         ...data[0],
-        originalContext: contextNode
+        originalContext: contextNode,
+        language: data[0].language || (sourceLang !== "auto" ? sourceLang : null)
       };
       setSelectedObjects([...SelectedObjects, wordWithContext]);
     }
@@ -121,8 +150,44 @@ export const useFloatingMenu = ({
   const handleVoice = () => {
     if (!inputValue) return;
     const utterance = new SpeechSynthesisUtterance(inputValue);
-    utterance.lang = sourceLang === "auto" ? "en-US" : sourceLang;
-    window.speechSynthesis.speak(utterance);
+    const code = getSpeechCode(audioLang === "auto" ? "en" : audioLang);
+    utterance.lang = code;
+
+    console.log(`[TTS Debug] Attempting to speak in language code: ${code} (audioLang: ${audioLang})`);
+
+    const voices = window.speechSynthesis.getVoices();
+    console.log(`[TTS Debug] Total voices available: ${voices.length}`);
+    
+    if (voices.length > 0) {
+        const matchingVoices = voices.filter(v => v.lang === code || v.lang.replace('_', '-') === code || v.lang.startsWith(code.split('-')[0]));
+        console.log(`[TTS Debug] Matching voices for ${code}:`, matchingVoices.map(v => `${v.name} (${v.lang})`));
+
+        if (matchingVoices.length > 0) {
+            let voice = matchingVoices.find(v => v.name.includes("Google"));
+            if (!voice) voice = matchingVoices[0];
+            
+            console.log(`[TTS Debug] Selected Voice: ${voice.name} (${voice.lang})`);
+            utterance.voice = voice;
+            window.speechSynthesis.speak(utterance);
+            return;
+        }
+    }
+
+    console.warn(`[TTS Debug] No matching voices found for ${code}. Using Google TTS fallback.`);
+    const fallbackLang = audioLang === "auto" ? "en" : audioLang;
+    const fallbackCode = fallbackLang.split('-')[0];
+
+    if (fallbackCode === 'en' || fallbackCode === 'es') {
+        window.speechSynthesis.speak(utterance);
+        return;
+    }
+
+    const url = `${CONFIG.API_BASE_URL}/api/vocabulary/tts?lang=${fallbackCode}&text=${encodeURIComponent(inputValue)}`;
+    const audio = new Audio(url);
+    audio.play().catch(e => {
+        console.error("[TTS Debug] Fallback audio failed:", e);
+        window.speechSynthesis.speak(utterance); // absolute last resort
+    });
   };
 
   return {
@@ -138,6 +203,8 @@ export const useFloatingMenu = ({
     setSourceLang,
     targetLang,
     setTargetLang,
+    audioLang,
+    handleAudioLangChange,
     handleToggle,
     handleGrammar,
     handleTranslate,
