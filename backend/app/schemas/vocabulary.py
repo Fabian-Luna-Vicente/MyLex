@@ -1,20 +1,20 @@
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 from typing import Optional, List
 from datetime import datetime
 
 # --- Word Schemas ---
 
 class WordBase(BaseModel):
-    name: str
-    past: Optional[str] = None
-    gerund: Optional[str] = None
-    participle: Optional[str] = None
-    meaning: Optional[str] = None
-    word_types: Optional[List[str]] = []
-    examples: Optional[List[str]] = []
-    image: Optional[str] = None
-    synonyms: Optional[str] = None
-    antonyms: Optional[str] = None
+    name: str = Field(..., max_length=100)
+    past: Optional[str] = Field(None, max_length=100)
+    gerund: Optional[str] = Field(None, max_length=100)
+    participle: Optional[str] = Field(None, max_length=100)
+    meaning: Optional[str] = Field(None, max_length=500)
+    word_types: Optional[List[str]] = Field([], max_length=10)
+    examples: Optional[List[str]] = Field([], max_length=15)
+    image: Optional[str] = Field(None, max_length=1000)
+    synonyms: Optional[str] = Field(None, max_length=500)
+    antonyms: Optional[str] = Field(None, max_length=500)
 
 class WordCreate(WordBase):
     list_ids: Optional[List[int]] = []
@@ -44,7 +44,7 @@ from app.models.vocabulary import PrivacyLevel
 # --- Vocabulary List Schemas ---
 
 class VocabularyListBase(BaseModel):
-    name: str
+    name: str = Field(..., max_length=100)
     privacy: Optional[PrivacyLevel] = PrivacyLevel.PUBLIC
     language: Optional[str] = 'English'
 

@@ -1,23 +1,23 @@
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 from typing import Optional, List
 from datetime import datetime, date
 
 class ChatParticipantBase(BaseModel):
-    role: Optional[str] = None
+    role: Optional[str] = Field(None, max_length=100)
     is_ai: bool = False
-    ai_name: Optional[str] = None
-    ai_gender: Optional[str] = None
-    ai_personality: Optional[str] = None
-    ai_avatar_url: Optional[str] = None
+    ai_name: Optional[str] = Field(None, max_length=100)
+    ai_gender: Optional[str] = Field(None, max_length=50)
+    ai_personality: Optional[str] = Field(None, max_length=1000)
+    ai_avatar_url: Optional[str] = Field(None, max_length=1000)
 
 class ChatParticipantCreate(ChatParticipantBase):
     user_id: Optional[str] = None
 
 class AIPersonaBase(BaseModel):
-    name: str
-    gender: str = "female"
-    personality: str
-    avatar_url: Optional[str] = None
+    name: str = Field(..., max_length=100)
+    gender: str = Field("female", max_length=50)
+    personality: str = Field(..., max_length=1000)
+    avatar_url: Optional[str] = Field(None, max_length=1000)
 
 class AIPersonaCreate(AIPersonaBase):
     pass
@@ -47,10 +47,10 @@ class ChatParticipantResponse(ChatParticipantBase):
         from_attributes = True
 
 class ChatRoomBase(BaseModel):
-    name: str = "New Chat"
-    description: Optional[str] = None
-    context: Optional[str] = None
-    language: str = "en"
+    name: str = Field("New Chat", max_length=100)
+    description: Optional[str] = Field(None, max_length=500)
+    context: Optional[str] = Field(None, max_length=1000)
+    language: str = Field("en", max_length=10)
 
 class ChatRoomCreate(ChatRoomBase):
     initial_participants: List[ChatParticipantCreate] = []
@@ -70,8 +70,8 @@ class ChatRoomResponse(ChatRoomBase):
         from_attributes = True
 
 class ChatMessageBase(BaseModel):
-    content: str
-    message_type: str = "text"
+    content: str = Field(..., max_length=2000)
+    message_type: str = Field("text", max_length=50)
 
 class ChatMessageCreate(ChatMessageBase):
     room_id: int
@@ -94,19 +94,19 @@ class WordUsageUpdate(BaseModel):
     usage_count: int = 1
 
 class AIChatRequest(BaseModel):
-    message: str
+    message: str = Field(..., max_length=2000)
     room_id: int
-    context_words: Optional[List[str]] = []
-    mentioned_ai_participant_ids: Optional[List[int]] = []
-    ai_language: str = "es"
+    context_words: Optional[List[str]] = Field([], max_length=50)
+    mentioned_ai_participant_ids: Optional[List[int]] = Field([], max_length=10)
+    ai_language: str = Field("es", max_length=10)
 
 class IcebreakerRequest(BaseModel):
     room_id: int
-    language: str
-    vocabulary_words: List[str]
-    ai_language: str = "es"
+    language: str = Field(..., max_length=10)
+    vocabulary_words: List[str] = Field(..., max_length=50)
+    ai_language: str = Field("es", max_length=10)
 
 class GrammarCheckRequest(BaseModel):
-    message: str
-    language: str = "es"
-    ai_language: str = "es"
+    message: str = Field(..., max_length=2000)
+    language: str = Field("es", max_length=10)
+    ai_language: str = Field("es", max_length=10)

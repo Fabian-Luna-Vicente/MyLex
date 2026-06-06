@@ -23,15 +23,15 @@ class GrammarRequest(BaseModel):
 # --- Corrector / Writing Schemas ---
 
 class CorrectorRequest(BaseModel):
-    userText: str
-    targetWords: List[str] = []
-    ai_language: str = "es"
+    userText: str = Field(..., max_length=2000)
+    targetWords: List[str] = Field([], max_length=20)
+    ai_language: str = Field("es", max_length=10)
 
 # --- Translation Schemas ---
 
 class TranslationRequest(BaseModel):
-    text: str
-    source: str = "auto"
-    target: str = "en"
-    ai_language: str = "es"
+    text: str = Field(..., max_length=2000)
+    source: str = Field("auto", max_length=10)
+    target: str = Field("en", max_length=10)
+    ai_language: str = Field("es", max_length=10)
 

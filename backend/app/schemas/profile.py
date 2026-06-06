@@ -1,15 +1,15 @@
-from pydantic import BaseModel, field_validator
+from pydantic import BaseModel, Field, field_validator
 from typing import Optional, List
 from datetime import datetime, date
 from app.core.constants import VALID_LANGUAGES, VALID_COUNTRIES
 
 class ProfileUpdate(BaseModel):
-    bio: Optional[str] = None
-    avatar_url: Optional[str] = None
+    bio: Optional[str] = Field(None, max_length=500)
+    avatar_url: Optional[str] = Field(None, max_length=1000)
     country: Optional[str] = None
     native_language: Optional[str] = None
     ai_language: Optional[str] = None
-    learning_languages: Optional[List[str]] = None
+    learning_languages: Optional[List[str]] = Field(None, max_length=10)
     level: Optional[str] = None
 
     @field_validator("country")
