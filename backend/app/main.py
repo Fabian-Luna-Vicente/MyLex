@@ -24,6 +24,7 @@ app.add_middleware(
         "http://localhost:8000",
         "http://localhost:5174",
         "http://127.0.0.1:5174",
+        "https://my-lex.vercel.app"
     ],
     allow_origin_regex="chrome-extension://.*",
     allow_credentials=True,
