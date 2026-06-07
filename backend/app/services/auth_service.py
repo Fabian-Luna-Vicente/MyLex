@@ -16,7 +16,7 @@ from fastapi import BackgroundTasks
 
 API_URL = "https://oauth2.googleapis.com/tokeninfo?id_token="
 
-CLIENT_ID = os.getenv("GOOGLE_CLIENT_ID") 
+CLIENT_ID = settings.GOOGLE_CLIENT_ID
 
 class AuthService:
     def __init__(self, db: Session):

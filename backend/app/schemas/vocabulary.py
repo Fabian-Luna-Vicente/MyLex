@@ -9,12 +9,12 @@ class WordBase(BaseModel):
     past: Optional[str] = Field(None, max_length=100)
     gerund: Optional[str] = Field(None, max_length=100)
     participle: Optional[str] = Field(None, max_length=100)
-    meaning: Optional[str] = Field(None, max_length=500)
+    meaning: Optional[str] = None
     word_types: Optional[List[str]] = Field([], max_length=10)
     examples: Optional[List[str]] = Field([], max_length=15)
     image: Optional[str] = Field(None, max_length=1000)
-    synonyms: Optional[str] = Field(None, max_length=500)
-    antonyms: Optional[str] = Field(None, max_length=500)
+    synonyms: Optional[str] = None
+    antonyms: Optional[str] = None
 
 class WordCreate(WordBase):
     list_ids: Optional[List[int]] = []

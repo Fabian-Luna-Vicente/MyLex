@@ -1,11 +1,11 @@
-import os
 import smtplib
 from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
+from app.core.config import settings
 
-EMAIL_SENDER = os.getenv("EMAIL_SENDER")
-EMAIL_PASSWORD = os.getenv("EMAIL_PASSWORD")
-FRONTEND_BASE_URL = os.getenv("FRONTEND_BASE_URL", "http://localhost:5173")
+EMAIL_SENDER = settings.EMAIL_SENDER
+EMAIL_PASSWORD = settings.EMAIL_PASSWORD
+FRONTEND_BASE_URL = settings.FRONTEND_BASE_URL or "http://localhost:5173"
 
 def send_registration_verification_email(email: str, token: str):
     verification_link = f"{FRONTEND_BASE_URL}/verify-email?token={token}"

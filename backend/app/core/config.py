@@ -13,17 +13,24 @@ class Settings(BaseSettings):
     ALGORITHM: str
     ACCESS_TOKEN_EXPIRE_MINUTES: int
 
-    # Credenciales Externas (agregadas para evitar el error 'extra_forbidden')
-    GOOGLE_CLIENT_ID: str
-    GOOGLE_CLIENT_SECRET: str
-    GEMINI_API_KEY: str
+    GOOGLE_CLIENT_ID: Optional[str] = None
+    GOOGLE_CLIENT_SECRET: Optional[str] = None
+    GEMINI_API_KEY: Optional[str] = None
     GROQ_API_KEY: str
 
-    # Configuración de Pydantic v2
+    REDIS_URL: Optional[str] = None
+    GOOGLE_IMAGE_API_KEY: Optional[str] = None
+    SEARCH_ENGINE_ID: Optional[str] = None
+    BACKEND_BASE_URL: Optional[str] = None
+    RESEND_API_KEY: Optional[str] = None
+    FRONTEND_BASE_URL: Optional[str] = None
+    EMAIL_SENDER: Optional[str] = None
+    EMAIL_PASSWORD: Optional[str] = None
+
     model_config = SettingsConfigDict(
         env_file=".env",
         case_sensitive=True,
-        extra="ignore"  # Le dice a Pydantic que ignore cualquier otra variable que no esté definida arriba
+        extra="ignore"
     )
 
 settings = Settings()
