@@ -32,10 +32,10 @@ def send_registration_verification_email(email: str, token: str):
         server.login(EMAIL_SENDER, EMAIL_PASSWORD) 
         server.send_message(msg)
         server.quit()
-        print(f"Correo de verificación enviado exitosamente a {email}")
+        print(f"Correo de verificación enviado exitosamente a {email}", flush=True)
         
     except Exception as e:
-        print(f"Error enviando email de verificación por Gmail: {e}")
+        print(f"Error enviando email de verificación por Gmail: {e}", flush=True)
 
 def send_password_reset_email(email: str, token: str):
     reset_link = f"{FRONTEND_BASE_URL}/reset-password?token={token}"
@@ -63,7 +63,7 @@ def send_password_reset_email(email: str, token: str):
         server.login(EMAIL_SENDER, EMAIL_PASSWORD) 
         server.send_message(msg)
         server.quit()
-        print(f"Correo de recuperación enviado exitosamente a {email}")
+        print(f"Correo de recuperación enviado exitosamente a {email}", flush=True)
         
     except Exception as e:
-        print(f"Error enviando email de recuperación: {e}")
+        print(f"Error enviando email de recuperación: {e}", flush=True)
