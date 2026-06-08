@@ -1,4 +1,5 @@
 import smtplib
+import resend
 from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
 from app.core.config import settings
@@ -6,10 +7,47 @@ from app.core.config import settings
 EMAIL_SENDER = settings.EMAIL_SENDER
 EMAIL_PASSWORD = settings.EMAIL_PASSWORD
 FRONTEND_BASE_URL = settings.FRONTEND_BASE_URL or "http://localhost:5173"
+RESEND_API_KEY = settings.RESEND_API_KEY
+
+if RESEND_API_KEY:
+    resend.api_key = RESEND_API_KEY
+
+def send_via_resend(email: str, subject: str, html_content: str):
+    try:
+        # Resend requiere que el remitente sea un dominio verificado (ej. no-reply@tudominio.com)
+        # Si usas el sandbox gratuito de Resend, solo puedes enviar a tu propio correo verificado.
+        # Por defecto, Resend te da el correo 'onboarding@resend.dev' para pruebas.
+        sender = EMAIL_SENDER if EMAIL_SENDER and '@gmail.com' not in EMAIL_SENDER else 'onboarding@resend.dev'
+        
+        r = resend.Emails.send({
+            "from": sender,
+            "to": email,
+            "subject": subject,
+            "html": html_content
+        })
+        print(f"Correo enviado exitosamente usando Resend a {email}: {r}", flush=True)
+    except Exception as e:
+        print(f"Error enviando email por Resend: {e}", flush=True)
+
+def send_via_smtp(email: str, subject: str, html_content: str):
+    msg = MIMEMultipart()
+    msg['From'] = EMAIL_SENDER
+    msg['To'] = email
+    msg['Subject'] = subject
+    msg.attach(MIMEText(html_content, 'html'))
+    
+    try:
+        server = smtplib.SMTP('smtp.gmail.com', 587)
+        server.starttls() 
+        server.login(EMAIL_SENDER, EMAIL_PASSWORD) 
+        server.send_message(msg)
+        server.quit()
+        print(f"Correo enviado exitosamente usando Gmail SMTP a {email}", flush=True)
+    except Exception as e:
+        print(f"Error enviando email por Gmail SMTP: {e}", flush=True)
 
 def send_registration_verification_email(email: str, token: str):
     verification_link = f"{FRONTEND_BASE_URL}/verify-email?token={token}"
-    
     html_content = f"""
     <div style="font-family: Arial, sans-serif; max-width: 600px; margin: auto;">
         <h2>Verifica tu cuenta</h2>
@@ -19,27 +57,13 @@ def send_registration_verification_email(email: str, token: str):
     </div>
     """
     
-    msg = MIMEMultipart()
-    msg['From'] = EMAIL_SENDER
-    msg['To'] = email
-    msg['Subject'] = "Verifica tu cuenta"
-    
-    msg.attach(MIMEText(html_content, 'html'))
-    
-    try:
-        server = smtplib.SMTP('smtp.gmail.com', 587)
-        server.starttls() 
-        server.login(EMAIL_SENDER, EMAIL_PASSWORD) 
-        server.send_message(msg)
-        server.quit()
-        print(f"Correo de verificación enviado exitosamente a {email}", flush=True)
-        
-    except Exception as e:
-        print(f"Error enviando email de verificación por Gmail: {e}", flush=True)
+    if RESEND_API_KEY:
+        send_via_resend(email, "Verifica tu cuenta - MyLex", html_content)
+    else:
+        send_via_smtp(email, "Verifica tu cuenta - MyLex", html_content)
 
 def send_password_reset_email(email: str, token: str):
     reset_link = f"{FRONTEND_BASE_URL}/reset-password?token={token}"
-    
     html_content = f"""
     <div style="font-family: Arial, sans-serif; max-width: 600px; margin: auto;">
         <h2>Recuperación de Contraseña</h2>
@@ -50,20 +74,7 @@ def send_password_reset_email(email: str, token: str):
     </div>
     """
     
-    msg = MIMEMultipart()
-    msg['From'] = EMAIL_SENDER
-    msg['To'] = email
-    msg['Subject'] = "Restablece tu contraseña - MyLex"
-    
-    msg.attach(MIMEText(html_content, 'html'))
-    
-    try:
-        server = smtplib.SMTP('smtp.gmail.com', 587)
-        server.starttls() 
-        server.login(EMAIL_SENDER, EMAIL_PASSWORD) 
-        server.send_message(msg)
-        server.quit()
-        print(f"Correo de recuperación enviado exitosamente a {email}", flush=True)
-        
-    except Exception as e:
-        print(f"Error enviando email de recuperación: {e}", flush=True)
+    if RESEND_API_KEY:
+        send_via_resend(email, "Restablece tu contraseña - MyLex", html_content)
+    else:
+        send_via_smtp(email, "Restablece tu contraseña - MyLex", html_content)
