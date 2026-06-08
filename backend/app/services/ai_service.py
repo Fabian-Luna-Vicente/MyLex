@@ -48,6 +48,7 @@ class AIService:
                 return chat_completion.choices[0].message.content
             except Exception as e:
                 error_msg = str(e).lower()
+                print(f"[DEBUG AI Service] Groq API Error on attempt {attempt}: {e}", flush=True)
                 if "rate limit" in error_msg or "429" in error_msg or "api_key" in error_msg or "api key" in error_msg or "401" in error_msg or "403" in error_msg or "authentication" in error_msg:
                     api_key_manager.mark_key_failed(active_key)
                     last_error = e
