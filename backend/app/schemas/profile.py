@@ -11,6 +11,7 @@ class ProfileUpdate(BaseModel):
     ai_language: Optional[str] = None
     learning_languages: Optional[List[str]] = Field(None, max_length=10)
     level: Optional[str] = None
+    username: Optional[str] = Field(None, min_length=3, max_length=50)
 
     @field_validator("country")
     @classmethod

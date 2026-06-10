@@ -98,7 +98,7 @@ export default function Settings() {
             <div className="w-20 h-20 mx-auto rounded-2xl bg-white/5 border border-white/10 flex items-center justify-center mb-4 overflow-hidden">
               {user?.avatar ? <img src={user.avatar} className="w-full h-full object-cover" /> : <FaUser size={40} className="text-[#00c3ff]" />}
             </div>
-            <h3 className="text-white font-black">{user?.full_name || 'My Profile'}</h3>
+            <h3 className="text-white font-black">{user?.username || 'My Profile'}</h3>
             <p className="text-xs text-[#a0a0a0] mb-6">{user?.email}</p>
             <button
               onClick={() => navigate('/profile')}

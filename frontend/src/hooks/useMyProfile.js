@@ -1,10 +1,12 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useContext } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { profileService } from '../services/profileService';
 import { vocabularyService } from '../services/vocabularyService';
+import { AuthContext } from '../contexts/AuthContext';
 
 export function useMyProfile() {
   const navigate = useNavigate();
+  const { user, setUser } = useContext(AuthContext);
   const [profile, setProfile] = useState(null);
   const [lists, setLists] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -23,6 +25,7 @@ export function useMyProfile() {
       const userLists = await vocabularyService.getUserLists(data.user_id);
       setLists(userLists);
       setForm({
+        username: data.username || '',
         bio: data.bio || '',
         country: data.country || '',
         native_language: data.native_language || '',
@@ -43,6 +46,13 @@ export function useMyProfile() {
       const updated = await profileService.updateProfile(form);
       setProfile(updated);
       setEditing(false);
+      
+      // Update global user object
+      if (user && form.username && user.username !== form.username) {
+        const updatedUser = { ...user, username: form.username };
+        setUser(updatedUser);
+        localStorage.setItem('mylex_user', JSON.stringify(updatedUser));
+      }
     } catch (e) {
       console.error(e);
     } finally {

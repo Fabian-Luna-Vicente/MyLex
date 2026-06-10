@@ -105,6 +105,19 @@ export default function MyProfile() {
             <h2 className="text-lg font-black text-white mb-6">Edit Profile</h2>
 
             <div className="space-y-5">
+              {/* Username */}
+              <div>
+                <label className="text-[10px] font-bold text-[#a0a0a0] uppercase tracking-widest block mb-2">Username</label>
+                <input
+                  type="text"
+                  value={form.username}
+                  onChange={(e) => setForm({ ...form, username: e.target.value })}
+                  maxLength={50}
+                  className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white text-sm focus:border-[#00c3ff]/50 focus:outline-none"
+                  placeholder="Your username"
+                />
+              </div>
+
               {/* Bio */}
               <div>
                 <label className="text-[10px] font-bold text-[#a0a0a0] uppercase tracking-widest block mb-2">Bio</label>

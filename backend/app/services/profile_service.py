@@ -64,6 +64,14 @@ class ProfileService:
 
     def update_profile(self, user_id: str, data: ProfileUpdate) -> ProfilePublic:
         update_data = data.model_dump(exclude_none=True)
+        username = update_data.pop("username", None)
+        
+        if username is not None:
+            user = self.repo.get_user_by_id(user_id)
+            if user:
+                user.name = username
+                self.db.commit()
+
         self.repo.update_profile(user_id, update_data)
         return self.get_my_profile(user_id)
 
