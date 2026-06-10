@@ -17,7 +17,7 @@ export default function Login() {
     formData,
     handleChange,
     handleEmailSubmit,
-    handleFakeGoogleLogin
+    handleGoogleLogin
   } = useLogin();
 
   if (user) {
@@ -125,7 +125,7 @@ export default function Login() {
 
         <button
           type="button"
-          onClick={handleFakeGoogleLogin}
+          onClick={() => handleGoogleLogin()}
           disabled={loading}
           className="w-full bg-white text-[#071320] py-3.5 rounded-full font-extrabold flex items-center justify-center gap-3 hover:bg-gray-200 transition-colors duration-300 disabled:opacity-50 shadow-[0_5px_15px_rgba(255,255,255,0.1)] hover:shadow-[0_5px_20px_rgba(255,255,255,0.2)]"
         >

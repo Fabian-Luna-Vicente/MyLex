@@ -14,7 +14,7 @@ from app.repositories.auth_repository import AuthRepository
 from app.services.email_service import send_registration_verification_email, send_password_reset_email
 from fastapi import BackgroundTasks
 
-API_URL = "https://oauth2.googleapis.com/tokeninfo?id_token="
+API_URL = "https://www.googleapis.com/oauth2/v3/userinfo?access_token="
 
 CLIENT_ID = settings.GOOGLE_CLIENT_ID
 
@@ -175,16 +175,31 @@ class AuthService:
         user_info = await self.verify_google_token(id_token)
         email = user_info.get("email")
         sub = user_info.get("sub")
+        name = user_info.get("name")
 
         if not email or not sub:
             raise ValidationError("Missing email or sub in token")
 
-        user = self.user_repo.get_user_by_id(sub)
+        user = self.user_repo.get_user_by_email(email)
         if not user:
-            raise ResourceNotFoundError("User does not exist, please sign in")
+            # Auto-register new users from Google
+            user_id = str(uuid.uuid4())
+            user = self.user_repo.create_user(
+                id=user_id,
+                email=email,
+                name=name or email.split("@")[0],
+                age=None,
+                hashed_password=None,
+                is_verified=True
+            )
         
         if not user.is_active:
             raise ValidationError("Inactive user")
+            
+        # Ensure Google users are marked as verified
+        if not user.is_verified:
+            user.is_verified = True
+            self.db.commit()
 
         # Create access token
         access_token = create_access_token(
@@ -221,7 +236,7 @@ class AuthService:
             # Verify and delete old token (Rotation)
             deleted = self.user_repo.delete_refresh_token(jti=old_jti, user_id=user_id)
             if not deleted:
-                # Token reuse detected! Delete all refresh tokens for this user to revoke access for everyone (including the attacker)
+                # Token reuse detected, Delete all refresh tokens for this user to revoke access for everyone (including the attacker)
                 self.user_repo.delete_all_refresh_tokens_for_user(user_id)
                 raise AuthenticationError("Security Breach: Token reuse detected. Please log in again.")
             
@@ -245,9 +260,10 @@ class AuthService:
         except JOSEError:
             raise AuthenticationError("Invalid refresh token")
 
-    def logout(self, refresh_token: str | None, access_token: str | None):
-        # We can implement a Redis blacklist here if needed for access_token,
-        # but for now we just delete the refresh token from DB.
+    async def logout(self, refresh_token: str | None, access_token: str | None):
+        if access_token:
+            await self.revoke_token(access_token)
+            
         if refresh_token:
             try:
                 payload = jwt.decode(refresh_token, settings.SECRET_KEY, algorithms=["HS256"])

@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from './useAuth';
+import { useGoogleLogin } from '@react-oauth/google';
 
 export function useLogin() {
   const { loginWithGoogle, loginWithEmail, registerUser, user, loading: authLoading } = useAuth();
@@ -57,19 +58,24 @@ export function useLogin() {
     setLoading(false);
   };
 
-  const handleFakeGoogleLogin = async () => {
-    setLoading(true);
-    setError('');
-    const fakeToken = "test_token";
-
-    const result = await loginWithGoogle(fakeToken);
-    if (result.success) {
-      navigate('/dashboard');
-    } else {
-      setError(result.message);
+  const handleGoogleLogin = useGoogleLogin({
+    onSuccess: async (tokenResponse) => {
+      setLoading(true);
+      setError('');
+      
+      const result = await loginWithGoogle(tokenResponse.access_token);
+      if (result.success) {
+        navigate('/dashboard');
+      } else {
+        setError(result.message);
+        setLoading(false);
+      }
+    },
+    onError: () => {
+      setError('Google Login Failed');
       setLoading(false);
     }
-  };
+  });
 
   return {
     user,
@@ -85,6 +91,6 @@ export function useLogin() {
     formData,
     handleChange,
     handleEmailSubmit,
-    handleFakeGoogleLogin
+    handleGoogleLogin
   };
 }

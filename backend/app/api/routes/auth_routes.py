@@ -117,7 +117,7 @@ async def google_login(
     id_token: str = Body(embed=True),
     auth_service: AuthService = Depends(get_auth_service)
 ):
-    result = await auth_service.login(id_token)
+    result = await auth_service.login_with_google(id_token)
     
     # We set cookies exactly as before, addressing the cookie vulnerability
     # using HttpOnly, Secure, SameSite=None
@@ -190,10 +190,8 @@ async def logout(
     auth_service: AuthService = Depends(get_auth_service)
 ):
     background_tasks.add_task(cleanup_tokens_task, auth_service)
-    if access_token:
-        await auth_service.revoke_token(access_token)
 
-    auth_service.logout(refresh_token=refresh_token, access_token=access_token)
+    await auth_service.logout(refresh_token=refresh_token, access_token=access_token)
 
     response.delete_cookie(key="access_token", httponly=True, secure=True, samesite="None", path="/")
     response.delete_cookie(key="refresh_token", httponly=True, secure=True, samesite="None", path="/refresh")
