@@ -244,7 +244,6 @@ class AuthService:
             if not user or not user.is_active:
                  raise AuthenticationError("User not found or inactive")
 
-            # Generate new tokens
             new_access_token = create_access_token(
                 subject=user.id, 
                 extra_data={"email": user.email, "username": user.name}
