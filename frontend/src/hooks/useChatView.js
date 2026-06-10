@@ -146,9 +146,9 @@ export const useChatView = (roomId, user) => {
     if (wsRef.current) {
       wsRef.current.close();
     }
-    const wsProtocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
-    const wsHost = window.location.hostname === 'localhost' ? 'localhost:8000' : window.location.host;
-    const wsUrl = `${wsProtocol}//${wsHost}/api/chat/ws/${id}`;
+    const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:8000';
+    const wsBaseUrl = apiUrl.replace(/^http/, 'ws');
+    const wsUrl = `${wsBaseUrl.replace(/\/$/, '')}/api/chat/ws/${id}`;
 
     wsRef.current = new WebSocket(wsUrl);
 
