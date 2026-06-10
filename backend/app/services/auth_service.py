@@ -103,12 +103,14 @@ class AuthService:
             # For security, we don't want to confirm if the user exists
             return {"status": True, "detail": "If the email is registered, a password reset link has been sent."}
             
-        token = self.create_password_reset_token(email)
-        
-        if background_tasks:
-            background_tasks.add_task(send_password_reset_email, email, token)
-        else:
-            send_password_reset_email(email, token)
+        is_production = settings.ENVIRONMENT.lower() == "production"
+        if not is_production:
+            token = self.create_password_reset_token(email)
+            
+            if background_tasks:
+                background_tasks.add_task(send_password_reset_email, email, token)
+            else:
+                send_password_reset_email(email, token)
             
         return {"status": True, "detail": "If the email is registered, a password reset link has been sent."}
 
