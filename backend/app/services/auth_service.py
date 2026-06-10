@@ -53,23 +53,28 @@ class AuthService:
         hashed_pw = get_password_hash(password)
         user_id = str(uuid.uuid4())
         
+        is_production = settings.ENVIRONMENT.lower() == "production"
+        
         user = self.user_repo.create_user(
             id=user_id, 
             email=email, 
             name=name, 
             age=age, 
             hashed_password=hashed_pw,
-            is_verified=False
+            is_verified=is_production
         )
         
-        token = self.create_verification_token(email)
+        if not is_production:
+            token = self.create_verification_token(email)
+            
+            if background_tasks:
+                background_tasks.add_task(send_registration_verification_email, email, token)
+            else:
+                send_registration_verification_email(email, token)
+            
+            return {"status": True, "detail": "User registered successfully. Please verify your email."}
         
-        if background_tasks:
-            background_tasks.add_task(send_registration_verification_email, email, token)
-        else:
-            send_registration_verification_email(email, token)
-        
-        return {"status": True, "detail": "User registered successfully. Please verify your email."}
+        return {"status": True, "detail": "User registered successfully."}
 
     def verify_email(self, token: str):
         try:
@@ -138,7 +143,8 @@ class AuthService:
         if not user.is_active:
             raise ValidationError("Inactive user")
             
-        if not user.is_verified:
+        is_production = settings.ENVIRONMENT.lower() == "production"
+        if not user.is_verified and not is_production:
             raise ValidationError("Please verify your email first")
 
         access_token = create_access_token(
