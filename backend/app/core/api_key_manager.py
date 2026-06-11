@@ -6,28 +6,36 @@ from app.core.config import settings
 
 logger = logging.getLogger(__name__)
 
-STATUS_FILE = "groq_keys_status.json"
+STATUS_FILE = "api_keys_status.json"
 COOLDOWN_SECONDS = 24 * 60 * 60  # 24 hours
 
-class GroqKeyManager:
+class APIKeyManager:
     _instance = None
 
     def __new__(cls):
         if cls._instance is None:
-            cls._instance = super(GroqKeyManager, cls).__new__(cls)
+            cls._instance = super(APIKeyManager, cls).__new__(cls)
             cls._instance._initialize()
         return cls._instance
 
     def _initialize(self):
         # Parse the keys from settings
-        raw_keys = settings.GROQ_API_KEY
-        print(f"[DEBUG GroqKeyManager] raw_keys from settings: {raw_keys}", flush=True)
+        self.is_production = settings.ENVIRONMENT.lower() == "production"
+        
+        if self.is_production:
+            raw_keys = settings.GEMINI_API_KEY
+            self.provider = "gemini"
+        else:
+            raw_keys = settings.GROQ_API_KEY
+            self.provider = "groq"
+            
+        print(f"[DEBUG APIKeyManager] mode: {self.provider}, raw_keys: {raw_keys}", flush=True)
         if not raw_keys:
             self.keys = []
         else:
             self.keys = [k.strip() for k in raw_keys.split(",") if k.strip()]
         
-        print(f"[DEBUG GroqKeyManager] Parsed {len(self.keys)} keys: {self.keys}", flush=True)
+        print(f"[DEBUG APIKeyManager] Parsed {len(self.keys)} keys: {self.keys}", flush=True)
         
         self.status_file_path = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(__file__))), STATUS_FILE)
 
@@ -60,14 +68,12 @@ class GroqKeyManager:
         If passed, it revives the key.
         """
         if not self.keys:
-            raise ValueError("No GROQ API keys configured.")
+            raise ValueError(f"No {self.provider.upper()} API keys configured.")
 
         status = self._load_status()
         current_time = time.time()
         status_changed = False
         
-        print(f"[DEBUG GroqKeyManager] get_active_key called. Current keys: {self.keys}, Status: {status}", flush=True)
-
         for key in self.keys:
             if key in status:
                 failed_time = status[key]
@@ -89,7 +95,7 @@ class GroqKeyManager:
             # If we exit the loop normally, all keys are currently failed
             if status_changed:
                 self._save_status(status)
-            raise RuntimeError("All GROQ API keys are currently exhausted or rate-limited. Please wait or add new keys.")
+            raise RuntimeError(f"All {self.provider.upper()} API keys are currently exhausted or rate-limited. Please wait or add new keys.")
 
         if status_changed:
             self._save_status(status)
@@ -98,10 +104,10 @@ class GroqKeyManager:
 
     def mark_key_failed(self, key: str):
         """Marks the given key as failed by recording the current timestamp."""
-        print(f"[DEBUG GroqKeyManager] mark_key_failed called for key: {key}", flush=True)
+        print(f"[DEBUG APIKeyManager] mark_key_failed called for key: {key}", flush=True)
         status = self._load_status()
         status[key] = time.time()
         self._save_status(status)
-        logger.warning("GROQ API key marked as failed.")
+        logger.warning(f"{self.provider.upper()} API key marked as failed.")
 
-api_key_manager = GroqKeyManager()
+api_key_manager = APIKeyManager()

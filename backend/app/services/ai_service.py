@@ -3,6 +3,7 @@ import logging
 import asyncio
 from app.core.exceptions import ExternalServiceError
 from groq import AsyncGroq
+import google.generativeai as genai
 from app.schemas.ai import DictionaryRequest, GrammarRequest, CorrectorRequest, TranslationRequest
 from app.core.config import settings
 from app.repositories.dictionaryApi_repository import DictionaryApiRepository
@@ -20,7 +21,8 @@ from app.core.api_key_manager import api_key_manager
 
 class AIService:
     def __init__(self):
-        self.model = "llama-3.3-70b-versatile"
+        self.groq_model = "llama-3.3-70b-versatile"
+        self.gemini_model = "gemini-1.5-flash"
         self.dict_repo = DictionaryApiRepository()
 
     def _get_prompt(self, context_type: str, language: str, target_lang: str, ai_language: str = "es") -> str:
@@ -33,28 +35,43 @@ class AIService:
         for attempt in range(max_retries):
             try:
                 active_key = api_key_manager.get_active_key()
-                client = AsyncGroq(api_key=active_key)
+                provider = api_key_manager.provider
                 
-                chat_completion = await client.chat.completions.create(
-                    messages=[
-                        {"role": "system", "content": system_prompt},
-                        {"role": "user", "content": prompt}
-                    ],
-                    model=self.model,
-                    temperature=temp,
-                    response_format={"type": "json_object"} if json_format else None,
-                    max_completion_tokens=1024,
-                )
-                return chat_completion.choices[0].message.content
+                if provider == "groq":
+                    client = AsyncGroq(api_key=active_key)
+                    chat_completion = await client.chat.completions.create(
+                        messages=[
+                            {"role": "system", "content": system_prompt},
+                            {"role": "user", "content": prompt}
+                        ],
+                        model=self.groq_model,
+                        temperature=temp,
+                        response_format={"type": "json_object"} if json_format else None,
+                        max_completion_tokens=1024,
+                    )
+                    return chat_completion.choices[0].message.content
+                else:
+                    genai.configure(api_key=active_key)
+                    model = genai.GenerativeModel(self.gemini_model, system_instruction=system_prompt)
+                    generation_config = genai.types.GenerationConfig(
+                        temperature=temp,
+                        max_output_tokens=1024,
+                        response_mime_type="application/json" if json_format else "text/plain"
+                    )
+                    response = await model.generate_content_async(
+                        contents=prompt,
+                        generation_config=generation_config
+                    )
+                    return response.text
             except Exception as e:
                 error_msg = str(e).lower()
-                print(f"[DEBUG AI Service] Groq API Error on attempt {attempt}: {e}", flush=True)
+                print(f"[DEBUG AI Service] API Error ({provider}) on attempt {attempt}: {e}", flush=True)
                 if "rate limit" in error_msg or "429" in error_msg or "api_key" in error_msg or "api key" in error_msg or "401" in error_msg or "403" in error_msg or "authentication" in error_msg:
                     api_key_manager.mark_key_failed(active_key)
                     last_error = e
                     continue
                 else:
-                    raise ExternalServiceError(f"Error AI: {str(e)}")
+                    raise ExternalServiceError(f"Error AI ({provider}): {str(e)}")
                     
         raise ExternalServiceError(f"Error AI: All keys failed or rate limited. Last error: {str(last_error)}")
 
@@ -196,30 +213,8 @@ class AIService:
         prompt = get_icebreaker_prompt(chat_context, vocab_str, language, participants_info, ai_language)
         sys_prompt = f"You are a creative writer. You must generate the text ONLY in {language}." if ai_language == "en" else f"Eres un escritor creativo. Debes generar el texto ÚNICAMENTE en {language}."
         
-        max_retries = max(1, len(api_key_manager.get_all_keys()))
-        last_error = None
-        
-        for attempt in range(max_retries):
-            try:
-                active_key = api_key_manager.get_active_key()
-                client = AsyncGroq(api_key=active_key)
-                
-                response = await client.chat.completions.create(
-                    model="llama-3.3-70b-versatile",
-                    messages=[{"role": "system", "content": sys_prompt}, {"role": "user", "content": prompt}],
-                    temperature=0.7,
-                    max_tokens=150
-                )
-                return response.choices[0].message.content
-            except Exception as e:
-                error_msg = str(e).lower()
-                if "rate limit" in error_msg or "429" in error_msg or "api_key" in error_msg or "api key" in error_msg or "401" in error_msg or "403" in error_msg or "authentication" in error_msg:
-                    api_key_manager.mark_key_failed(active_key)
-                    last_error = e
-                    continue
-                else:
-                    print(f"Error en generate_icebreaker_message: {e}")
-                    return "¡Hola! Estoy listo para empezar a hablar."
-                    
-        print(f"Error en generate_icebreaker_message: Todos los API keys fallaron. Último error: {last_error}")
-        return "¡Hola! Estoy listo para empezar a hablar."
+        try:
+            return await self._call_llm(prompt, sys_prompt, json_format=False, temp=0.7)
+        except Exception as e:
+            print(f"Error en generate_icebreaker_message: {e}")
+            return "¡Hola! Estoy listo para empezar a hablar."
