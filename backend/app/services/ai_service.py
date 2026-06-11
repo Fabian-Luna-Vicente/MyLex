@@ -1,9 +1,12 @@
 import json
 import logging
 import asyncio
+import base64
 from app.core.exceptions import ExternalServiceError
 from groq import AsyncGroq
 import google.generativeai as genai
+from google import genai as new_genai
+from google.genai import types as genai_types
 from app.schemas.ai import DictionaryRequest, GrammarRequest, CorrectorRequest, TranslationRequest
 from app.core.config import settings
 from app.repositories.dictionaryApi_repository import DictionaryApiRepository
@@ -23,6 +26,8 @@ class AIService:
     def __init__(self):
         self.groq_model = "llama-3.3-70b-versatile"
         self.gemini_model = "gemini-1.5-flash"
+        self.gemini_audio_model = "gemini-2.0-flash-exp"
+        self.dict_repo = DictionaryApiRepository()
         self.dict_repo = DictionaryApiRepository()
 
     def _get_prompt(self, context_type: str, language: str, target_lang: str, ai_language: str = "es") -> str:
@@ -187,6 +192,67 @@ class AIService:
         except Exception as e:
             print(f"Chat AI Error: {e}")
             return "Sorry, I'm having trouble thinking right now."
+
+    async def generate_audio_response(self, audio_bytes: bytes, mime_type: str, system_context: str = None, language: str = "english", ai_language: str = "es") -> dict:
+        """
+        Takes raw audio bytes, sends it to Gemini 2.0 Flash Exp asking for both TEXT and AUDIO output.
+        Returns a dict: {"text": str, "audio_b64": str}
+        """
+        # Ensure we have a valid key
+        max_retries = max(1, len(api_key_manager.get_all_keys()))
+        last_error = None
+        
+        default_sys = get_chat_system_context_default(ai_language)
+        sys_prompt = f"""
+        {system_context or default_sys}
+        
+        {PromptService.get_chat_response_rules(language, [])}
+        """
+        
+        for attempt in range(max_retries):
+            try:
+                active_key = api_key_manager.get_active_key()
+                client = new_genai.Client(api_key=active_key)
+                
+                response = await client.aio.models.generate_content(
+                    model=self.gemini_audio_model,
+                    contents=[
+                        sys_prompt,
+                        "Please respond to my voice message with both text and audio.",
+                        genai_types.Part.from_bytes(data=audio_bytes, mime_type=mime_type)
+                    ],
+                    config=genai_types.GenerateContentConfig(
+                        response_modalities=["TEXT", "AUDIO"],
+                        temperature=0.7
+                    )
+                )
+                
+                text_part = ""
+                audio_b64 = ""
+                
+                if response.candidates and response.candidates[0].content.parts:
+                    for part in response.candidates[0].content.parts:
+                        if part.text:
+                            text_part += part.text
+                        elif part.inline_data:
+                            audio_b64 = base64.b64encode(part.inline_data.data).decode('utf-8')
+                
+                return {
+                    "text": text_part.strip() or "I understood but couldn't generate text.",
+                    "audio_b64": audio_b64
+                }
+                
+            except Exception as e:
+                error_msg = str(e).lower()
+                print(f"[DEBUG AI Service Audio] API Error on attempt {attempt}: {e}", flush=True)
+                if "rate limit" in error_msg or "429" in error_msg or "api_key" in error_msg or "401" in error_msg:
+                    api_key_manager.mark_key_failed(active_key)
+                    last_error = e
+                    continue
+                else:
+                    raise ExternalServiceError(f"Error AI Audio: {str(e)}")
+                    
+        raise ExternalServiceError(f"Error AI Audio: All keys failed. Last error: {str(last_error)}")
 
     async def select_ai_to_reply(self, room_context: str, user_message: str, ai_participants: list, ai_language: str = "es") -> list[int]:
         if len(ai_participants) == 1:

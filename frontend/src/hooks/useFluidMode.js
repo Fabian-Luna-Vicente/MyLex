@@ -24,9 +24,16 @@ export function useFluidMode({ room, user, wsRef, vocabData }) {
   const [currentSubtitle, setCurrentSubtitle] = useState('');
   const [lastAIText, setLastAIText] = useState('');
   const [lastAISpeakerName, setLastAISpeakerName] = useState('');
+  const [lastAISpeakerName, setLastAISpeakerName] = useState('');
   const [isFluidMicActive, setIsFluidMicActive] = useState(false);
+  const [isDirectAudioEnabled, setIsDirectAudioEnabled] = useState(
+    () => localStorage.getItem('fluid_direct_audio') === 'true'
+  );
 
   const recognitionRef = useRef(null);
+  const mediaRecorderRef = useRef(null);
+  const audioChunksRef = useRef([]);
+  const currentAudioRef = useRef(null);
   const subtitleIntervalRef = useRef(null);
   const currentTranscriptRef = useRef('');
   const spokenMessageIds = useRef(new Set());
@@ -121,6 +128,43 @@ export function useFluidMode({ room, user, wsRef, vocabData }) {
       case 'fluid_floor_released':
         setCurrentSpeaker(null);
         break;
+      case 'fluid_audio_response':
+        if (spokenMessageIds.current.has(signal.ai_id + signal.text)) return;
+        spokenMessageIds.current.add(signal.ai_id + signal.text);
+        
+        // Play the base64 audio
+        try {
+          const audioUrl = `data:audio/webm;base64,${signal.audio_b64}`;
+          const audio = new Audio(audioUrl);
+          currentAudioRef.current = audio;
+          
+          setIsAISpeaking(true);
+          setIsAIThinking(false);
+          setLastAIText(signal.text);
+          setLastAISpeakerName(signal.participant?.name_display || 'AI');
+          
+          if (subtitlesEnabledRef.current && signal.text) {
+            let charIdx = 0;
+            setCurrentSubtitle('');
+            subtitleIntervalRef.current = setInterval(() => {
+              charIdx += 3;
+              setCurrentSubtitle(signal.text.slice(0, Math.min(charIdx, signal.text.length)));
+              if (charIdx >= signal.text.length) clearInterval(subtitleIntervalRef.current);
+            }, 40);
+          } else {
+            setCurrentSubtitle(signal.text);
+          }
+          
+          audio.onended = () => {
+            setIsAISpeaking(false);
+            setCurrentSubtitle('');
+            if (subtitleIntervalRef.current) clearInterval(subtitleIntervalRef.current);
+          };
+          audio.play();
+        } catch (e) {
+          console.error("Error playing AI audio response:", e);
+        }
+        break;
       default: break;
     }
   }, []);
@@ -157,36 +201,94 @@ export function useFluidMode({ room, user, wsRef, vocabData }) {
     );
   }, []);
 
-  // ─── Speech recognition ──────────────────────────────────────────────────────
-  const startRecognition = useCallback(() => {
-    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
-    if (!SpeechRecognition) return;
-    const recognition = new SpeechRecognition();
-    recognition.continuous = true;
-    recognition.interimResults = true;
-    recognition.lang = getLangCode(room?.language);
-    currentTranscriptRef.current = '';
+  // ─── Direct Audio / Recognition ──────────────────────────────────────────────
+  const toggleDirectAudio = useCallback(() => {
+    setIsDirectAudioEnabled(prev => {
+      const next = !prev;
+      localStorage.setItem('fluid_direct_audio', String(next));
+      return next;
+    });
+  }, []);
 
-    recognition.onresult = (event) => {
-      let final = '';
-      for (let i = event.resultIndex; i < event.results.length; ++i) {
-        if (event.results[i].isFinal) final += event.results[i][0].transcript;
+  const startRecognition = useCallback(async () => {
+    if (isDirectAudioEnabled) {
+      try {
+        const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+        const mediaRecorder = new MediaRecorder(stream, { mimeType: 'audio/webm' });
+        audioChunksRef.current = [];
+        
+        mediaRecorder.ondataavailable = (e) => {
+          if (e.data.size > 0) audioChunksRef.current.push(e.data);
+        };
+        
+        mediaRecorder.onstop = () => {
+          stream.getTracks().forEach(track => track.stop());
+          const audioBlob = new Blob(audioChunksRef.current, { type: 'audio/webm' });
+          
+          // Convert Blob to Base64
+          const reader = new FileReader();
+          reader.readAsDataURL(audioBlob);
+          reader.onloadend = () => {
+            const base64data = reader.result.split(',')[1];
+            if (base64data && wsRef.current?.readyState === WebSocket.OPEN) {
+              const aiParticipants = room.participants.filter(p => p.is_ai);
+              const targetAIs = selectedAIs.length > 0 ? selectedAIs : aiParticipants.length === 1 ? [aiParticipants[0].id] : [];
+              if (targetAIs.length > 0) {
+                setIsAIThinking(true);
+                wsRef.current.send(JSON.stringify({
+                  _fluid_audio_request: true,
+                  audio_b64: base64data,
+                  mime_type: 'audio/webm',
+                  ai_id: targetAIs[0]
+                }));
+              }
+            }
+          };
+        };
+        
+        mediaRecorderRef.current = mediaRecorder;
+        mediaRecorder.start();
+      } catch (err) {
+        console.error("Microphone access denied or error:", err);
+        setIsFluidMicActive(false);
       }
-      if (final) currentTranscriptRef.current += (currentTranscriptRef.current ? ' ' : '') + final;
-    };
-    recognition.onerror = (e) => {
-      console.error('Fluid mic error:', e.error);
-      setIsFluidMicActive(false);
-    };
-    recognition.onend = () => {};
-    recognitionRef.current = recognition;
-    try { recognition.start(); } catch (e) { console.error('Recognition start error:', e); }
-  }, [room]);
+    } else {
+      const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+      if (!SpeechRecognition) return;
+      const recognition = new SpeechRecognition();
+      recognition.continuous = true;
+      recognition.interimResults = true;
+      recognition.lang = getLangCode(room?.language);
+      currentTranscriptRef.current = '';
+  
+      recognition.onresult = (event) => {
+        let final = '';
+        for (let i = event.resultIndex; i < event.results.length; ++i) {
+          if (event.results[i].isFinal) final += event.results[i][0].transcript;
+        }
+        if (final) currentTranscriptRef.current += (currentTranscriptRef.current ? ' ' : '') + final;
+      };
+      recognition.onerror = (e) => {
+        console.error('Fluid mic error:', e.error);
+        setIsFluidMicActive(false);
+      };
+      recognition.onend = () => {};
+      recognitionRef.current = recognition;
+      try { recognition.start(); } catch (e) { console.error('Recognition start error:', e); }
+    }
+  }, [room, isDirectAudioEnabled, selectedAIs, wsRef]);
 
   const stopRecognition = useCallback(() => {
-    try { recognitionRef.current?.stop(); } catch (e) {}
-    recognitionRef.current = null;
-  }, []);
+    if (isDirectAudioEnabled) {
+      if (mediaRecorderRef.current && mediaRecorderRef.current.state !== 'inactive') {
+        mediaRecorderRef.current.stop();
+      }
+      mediaRecorderRef.current = null;
+    } else {
+      try { recognitionRef.current?.stop(); } catch (e) {}
+      recognitionRef.current = null;
+    }
+  }, [isDirectAudioEnabled]);
 
   // ─── Mic control ─────────────────────────────────────────────────────────────
   const activateMic = useCallback(() => {
@@ -205,9 +307,11 @@ export function useFluidMode({ room, user, wsRef, vocabData }) {
     setCurrentSpeaker(null);
     broadcastFluidSignal({ type: 'fluid_floor_released' });
 
-    if (transcript) sendFluidMessage(transcript);
+    if (!isDirectAudioEnabled && transcript) {
+      sendFluidMessage(transcript);
+    }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [stopRecognition, broadcastFluidSignal]);
+  }, [stopRecognition, broadcastFluidSignal, isDirectAudioEnabled]);
 
   // ─── Send message to AI ──────────────────────────────────────────────────────
   const sendFluidMessage = useCallback(async (text) => {
@@ -288,6 +392,10 @@ export function useFluidMode({ room, user, wsRef, vocabData }) {
 
   const exitFluidMode = useCallback(() => {
     window.speechSynthesis?.cancel();
+    if (currentAudioRef.current) {
+      currentAudioRef.current.pause();
+      currentAudioRef.current = null;
+    }
     stopRecognition();
     if (subtitleIntervalRef.current) clearInterval(subtitleIntervalRef.current);
     broadcastFluidSignal({ type: 'fluid_floor_released' });
@@ -313,6 +421,7 @@ export function useFluidMode({ room, user, wsRef, vocabData }) {
     lastAIText,
     lastAISpeakerName,
     isFluidMicActive,
+    isDirectAudioEnabled,
     raiseHand,
     lowerHand,
     toggleAISelection,
@@ -320,6 +429,7 @@ export function useFluidMode({ room, user, wsRef, vocabData }) {
     deactivateMic,
     replayLastAudio,
     toggleSubtitles,
+    toggleDirectAudio,
     enterFluidMode,
     exitFluidMode,
     handleFluidSignal,

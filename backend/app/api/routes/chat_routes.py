@@ -150,6 +150,43 @@ async def websocket_endpoint(
                 await manager.broadcast(data_str, room_id)
                 continue
 
+            # Fluid Mode Audio Request
+            if data.get("_fluid_audio_request"):
+                import base64
+                audio_b64 = data.get("audio_b64")
+                mime_type = data.get("mime_type", "audio/webm")
+                ai_id = data.get("ai_id")
+                
+                try:
+                    audio_bytes = base64.b64decode(audio_b64)
+                    ai_svc = AIService()
+                    # Just use basic context or fetch from DB if needed
+                    # We'll fetch room language context
+                    room_lang = room.language if room else "english"
+                    ai_lang = user.native_language if user else "es"
+                    
+                    response_data = await ai_svc.generate_audio_response(
+                        audio_bytes, 
+                        mime_type, 
+                        system_context=f"You are participating in a voice chat in {room_lang}.", 
+                        language=room_lang,
+                        ai_language=ai_lang
+                    )
+                    
+                    # Broadcast the audio response
+                    resp_payload = {
+                        "_fluid_signal": True,
+                        "type": "fluid_audio_response",
+                        "text": response_data["text"],
+                        "audio_b64": response_data["audio_b64"],
+                        "ai_id": ai_id,
+                        "participant": {"is_ai": True, "user_id": ai_id}
+                    }
+                    await manager.broadcast(json.dumps(resp_payload), room_id)
+                except Exception as e:
+                    print(f"WS Audio Error: {e}")
+                continue
+
             content = data.get("content")
             msg_type = data.get("message_type", "text")
             

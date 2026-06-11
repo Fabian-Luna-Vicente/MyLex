@@ -21,6 +21,7 @@ redis>=4.3.4
 slowapi
 resend>=2.8.14
 google-generativeai
+google-genai
 
 # Testing
 pytest>=8.0.0
