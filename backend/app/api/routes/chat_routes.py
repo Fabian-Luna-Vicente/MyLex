@@ -144,6 +144,12 @@ async def websocket_endpoint(
         while True:
             data_str = await websocket.receive_text()
             data = json.loads(data_str)
+
+            # Fluid Mode signaling — broadcast as-is, do NOT save to DB
+            if data.get("_fluid_signal"):
+                await manager.broadcast(data_str, room_id)
+                continue
+
             content = data.get("content")
             msg_type = data.get("message_type", "text")
             

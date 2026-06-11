@@ -3,6 +3,7 @@ import { chatService } from '../services/chatService';
 import { profileService } from '../services/profileService';
 import { useVocabulary } from './useVocabulary';
 import api from '../services/api';
+import { useFluidMode } from './useFluidMode';
 
 export const useChatView = (roomId, user) => {
   const { lists, fetchLists } = useVocabulary();
@@ -36,6 +37,17 @@ export const useChatView = (roomId, user) => {
   const [mentionQuery, setMentionQuery] = useState(null);
   const inputRef = useRef(null);
   const scrollContainerRef = useRef(null);
+
+  // Fluid mode hook — room and vocabData may be null initially, used lazily
+  const fluidMode = useFluidMode({ room, user, wsRef, vocabData });
+
+  // Stable refs so the WS onmessage callback always calls the latest handlers
+  const handleFluidSignalRef = useRef(null);
+  const handleIncomingAIMessageRef = useRef(null);
+  const isFluidModeRef = useRef(false);
+  handleFluidSignalRef.current = fluidMode.handleFluidSignal;
+  handleIncomingAIMessageRef.current = fluidMode.handleIncomingAIMessage;
+  isFluidModeRef.current = fluidMode.isFluidMode;
 
   useEffect(() => {
     fetchLists();
@@ -154,11 +166,24 @@ export const useChatView = (roomId, user) => {
 
     wsRef.current.onmessage = (event) => {
       const msg = JSON.parse(event.data);
-      // Ensure we don't duplicate messages sent via REST
+
+      // Fluid Mode signaling — route to fluid handler, don't save as message
+      if (msg._fluid_signal) {
+        handleFluidSignalRef.current?.(msg);
+        return;
+      }
+
+      // Regular chat message
       setMessages(prev => {
         if (prev.find(m => m.id === msg.id)) return prev;
         return [...prev, msg];
       });
+
+      // In Fluid Mode: trigger TTS for incoming AI messages from other users
+      if (isFluidModeRef.current && msg.participant?.is_ai) {
+        handleIncomingAIMessageRef.current?.(msg);
+      }
+
       if (msg.participant && msg.participant.user_id !== user.id) {
         loadVocabulary();
       }
@@ -529,6 +554,7 @@ export const useChatView = (roomId, user) => {
     saveEditing,
     handleInputChange,
     handleMentionSelect,
-    mentionSuggestions
+    mentionSuggestions,
+    fluidMode,
   };
 };

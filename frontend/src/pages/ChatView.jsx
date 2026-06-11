@@ -4,11 +4,13 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useAuth } from '../hooks/useAuth';
 import { useChatView } from '../hooks/useChatView';
+import FluidMode from './FluidMode';
 import {
   FaPaperPlane, FaMicrophone, FaVolumeUp, FaArrowLeft,
   FaBookOpen, FaTimes, FaUserCircle, FaPlus,
   FaEdit, FaSave, FaGlobe, FaComments, FaSpellCheck, FaSignOutAlt
 } from 'react-icons/fa';
+import { MdRecordVoiceOver } from 'react-icons/md';
 import { RiRobot3Fill } from 'react-icons/ri';
 import { GiMeltingIceCube } from "react-icons/gi";
 
@@ -60,8 +62,11 @@ export default function ChatView() {
     saveEditing,
     handleInputChange,
     handleMentionSelect,
-    mentionSuggestions
+    mentionSuggestions,
+    fluidMode,
   } = useChatView(roomId, user);
+
+  const hasAI = room?.participants?.some(p => p.is_ai);
 
   if (loading || !room) {
     return (
@@ -72,6 +77,7 @@ export default function ChatView() {
   }
 
   return (
+    <>
     <div className="max-w-6xl mx-auto px-4 pb-10 pt-4 h-[calc(100vh-80px)] flex flex-col md:flex-row gap-6">
 
       {/* --- CHAT AREA --- */}
@@ -104,12 +110,24 @@ export default function ChatView() {
               </div>
             </div>
           </div>
-          <button
-            onClick={() => setShowVocabPanel(!showVocabPanel)}
-            className={`p-2.5 rounded-xl transition-all ${showVocabPanel ? 'bg-[#00c3ff] text-black' : 'bg-white/5 text-[#a0a0a0] hover:bg-white/10 hover:text-white'}`}
-          >
-            <FaBookOpen />
-          </button>
+          <div className="flex items-center gap-2">
+            {/* Fluid Mode button — only for rooms with AI */}
+            {hasAI && (
+              <button
+                onClick={() => fluidMode.enterFluidMode()}
+                title="Fluid Mode — immersive voice conversation"
+                className="p-2.5 rounded-xl transition-all bg-white/5 text-[#a0a0a0] hover:bg-[#00c3ff]/10 hover:text-[#00c3ff] border border-transparent hover:border-[#00c3ff]/20"
+              >
+                <MdRecordVoiceOver size={18} />
+              </button>
+            )}
+            <button
+              onClick={() => setShowVocabPanel(!showVocabPanel)}
+              className={`p-2.5 rounded-xl transition-all ${showVocabPanel ? 'bg-[#00c3ff] text-black' : 'bg-white/5 text-[#a0a0a0] hover:bg-white/10 hover:text-white'}`}
+            >
+              <FaBookOpen />
+            </button>
+          </div>
         </div>
 
         {/* Messages or Room Info */}
@@ -596,5 +614,18 @@ export default function ChatView() {
       )}
 
     </div >
+
+    {/* ── FLUID MODE OVERLAY ─────────────────────────────────────────────── */}
+    <AnimatePresence>
+      {fluidMode.isFluidMode && (
+        <FluidMode
+          room={room}
+          user={user}
+          fluidState={fluidMode}
+          onExit={() => fluidMode.exitFluidMode()}
+        />
+      )}
+    </AnimatePresence>
+    </>
   );
 }
