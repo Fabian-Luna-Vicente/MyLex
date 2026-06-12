@@ -220,7 +220,7 @@ export const useChatView = (roomId, user) => {
           ai_language: aiLanguage
         });
 
-        const newMessages = res.data; // The endpoint returns a list of messages [user_msg, ai_msg_1, ...]
+        const newMessages = res.data.messages || res.data; // The endpoint returns a dict with messages
         
         setMessages(prev => {
           const prevMap = new Map(prev.map(m => [m.id, m]));

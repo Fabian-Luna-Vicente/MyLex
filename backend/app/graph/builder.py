@@ -6,6 +6,7 @@ def build_chat_graph(ai_service, chat_repo):
     nodes = ChatGraphNodes(ai_service, chat_repo)
     builder = StateGraph(ChatState)
 
+    builder.add_node("grammar_check", nodes.grammar_check_node)
     builder.add_node("orchestrator", nodes.orchestrator_node) 
     builder.add_node("generate",     nodes.generate_node)       
     builder.add_node("review",       nodes.review_node)         
@@ -32,7 +33,8 @@ def build_chat_graph(ai_service, chat_repo):
             return "more_ais"
         return "done"
 
-    builder.add_edge(START, "orchestrator")
+    builder.add_edge(START, "grammar_check")
+    builder.add_edge("grammar_check", "orchestrator")
 
     builder.add_conditional_edges(
         "orchestrator",

@@ -110,3 +110,14 @@ class GrammarCheckRequest(BaseModel):
     message: str = Field(..., max_length=2000)
     language: str = Field("es", max_length=10)
     ai_language: str = Field("es", max_length=10)
+
+class PronunciationHelpRequest(BaseModel):
+    text: str = Field(..., max_length=2000)
+    language: str = Field(..., max_length=50)
+    phonetics_style: str = Field(..., max_length=50)
+    native_language: str = Field(..., max_length=50)
+
+class GrammarSummaryRequest(BaseModel):
+    corrections: List[dict]
+    language: str = Field("es", max_length=50)
+    ai_language: str = Field("es", max_length=50)

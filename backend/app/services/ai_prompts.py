@@ -305,3 +305,25 @@ def get_grammar_check_system_prompt(ai_language: str = "es") -> str:
         return f"You are a strict but friendly grammar checker. You must respond in {ai_language} and provide JSON."
     else:
         return f"Eres un corrector gramatical estricto pero amable. Debes responder en {ai_language} y proporcionar JSON."
+
+def get_pronunciation_prompt(text: str, language: str, phonetics_style: str, native_language: str) -> str:
+    if phonetics_style == "ipa":
+        style_instruction = "Use the International Phonetic Alphabet (IPA)."
+    else:
+        style_instruction = f"Use intuitive phonetic spelling based on the sounds of the {native_language} language. For example, if {native_language} is Spanish and the word is 'Apple', write 'ápol'."
+
+    return f"""
+    Provide the pronunciation for the following text.
+    Text: "{text}"
+    Language of the text: {language}
+    
+    Instruction: {style_instruction}
+    
+    Return STRICTLY a JSON object with this exact format:
+    {{
+        "pronunciation": "the phonetic spelling"
+    }}
+    """
+
+def get_pronunciation_system_prompt() -> str:
+    return "You are a precise linguistics and pronunciation expert. Return ONLY JSON."

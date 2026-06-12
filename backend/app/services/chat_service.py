@@ -314,7 +314,10 @@ class ChatService:
         if background_tasks:
             background_tasks.add_task(self._summarize_background, room_id)
 
-        return responses
+        return {
+            "messages": responses,
+            "grammar_correction": result_state.get("grammar_correction")
+        }
 
     async def _summarize_background(self, room_id: int):
         from app.core.database import SessionLocal

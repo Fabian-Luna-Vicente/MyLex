@@ -9,6 +9,40 @@ class ChatGraphNodes:
         self.ai_service = ai_service
         self.chat_repo = chat_repo
 
+    async def grammar_check_node(self, state: ChatState, config: RunnableConfig) -> dict:
+        """
+        Evaluates the user's latest message for grammar errors.
+        """
+        history = state.get("message_history", [])
+        user_msg = next((m for m in reversed(history) if not m.get("is_ai")), None)
+
+        if not user_msg or not user_msg.get("content"):
+            return {"grammar_correction": None}
+
+        from app.services.ai_prompts import get_grammar_check_prompt, get_grammar_check_system_prompt
+        
+        ai_language = state.get("ai_language", "es")
+        language = state.get("conversation_language", "English")
+        
+        prompt = get_grammar_check_prompt(user_msg["content"], language, ai_language)
+        system_prompt = get_grammar_check_system_prompt(ai_language)
+        
+        try:
+            resp_str = await self.ai_service._call_llm(
+                prompt=prompt,
+                system_prompt=system_prompt,
+                json_format=True,
+                temp=0.3
+            )
+            data = json.loads(resp_str)
+            if data.get("has_errors"):
+                return {"grammar_correction": data}
+            else:
+                return {"grammar_correction": None}
+        except Exception as e:
+            print(f"Grammar Check Node Error: {e}")
+            return {"grammar_correction": None}
+
     async def orchestrator_node(self, state: ChatState, config: RunnableConfig) -> dict:
         """
         Decides which AIs respond and in what order.

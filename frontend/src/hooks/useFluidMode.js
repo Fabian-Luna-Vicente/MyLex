@@ -330,6 +330,10 @@ export function useFluidMode({ room, user, wsRef, vocabData, setMessages }) {
     }
   }, [isDirectAudioEnabled]);
 
+  const [fluidGrammarCorrection, setFluidGrammarCorrection] = useState(null);
+  const [showGrammarSummary, setShowGrammarSummary] = useState(false);
+  const [grammarSummaryData, setGrammarSummaryData] = useState(null);
+
   // ─── Send message to AI ──────────────────────────────────────────────────────
   const sendFluidMessage = useCallback(async (text) => {
     if (!text.trim() || !room?.participants?.some(p => p.is_ai)) return;
@@ -341,13 +345,20 @@ export function useFluidMode({ room, user, wsRef, vocabData, setMessages }) {
           if (w.usage_count === 0 && contextWords.length < 3) contextWords.push(w.name);
         })
       );
-      // If no AIs selected and only 1 AI exists, target that AI; otherwise use selection
       const aiParticipants = room.participants.filter(p => p.is_ai);
       const targetAIs = selectedAIs.length > 0 ? selectedAIs
         : aiParticipants.length === 1 ? [aiParticipants[0].id]
           : [];
 
-      const newMsgs = await chatService.sendAIMessage(room.id, text, contextWords, targetAIs);
+      const responsePayload = await chatService.sendAIMessage(room.id, text, contextWords, targetAIs);
+      const newMsgs = responsePayload.messages || responsePayload;
+      
+      if (responsePayload.grammar_correction) {
+        setFluidGrammarCorrection({
+            ...responsePayload.grammar_correction,
+            original_text: text
+        });
+      }
 
       if (setMessages) {
         setMessages(prev => {
@@ -360,7 +371,6 @@ export function useFluidMode({ room, user, wsRef, vocabData, setMessages }) {
       const aiMsgs = newMsgs.filter(m => m.participant?.is_ai);
       if (aiMsgs.length > 0) {
         const lastAi = aiMsgs[aiMsgs.length - 1];
-        // Mark as spoken so incoming WS broadcast doesn't double-play
         aiMsgs.forEach(m => spokenMessageIds.current.add(m.id));
         speakWithSubtitles(lastAi.content, lastAi.participant?.name_display);
       } else {
@@ -487,5 +497,11 @@ export function useFluidMode({ room, user, wsRef, vocabData, setMessages }) {
     exitFluidMode,
     handleFluidSignal,
     handleIncomingAIMessage,
+    fluidGrammarCorrection,
+    setFluidGrammarCorrection,
+    showGrammarSummary,
+    setShowGrammarSummary,
+    grammarSummaryData,
+    setGrammarSummaryData
   };
 }

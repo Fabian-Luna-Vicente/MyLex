@@ -5,9 +5,9 @@ from app.core.database import get_db
 from app.core.dependencies import get_current_user, get_current_user_ws
 from app.models.user import User
 from app.services.chat_service import ChatService
-from app.schemas.chat import ChatRoomCreate, ChatRoomUpdate, RoomVocabularyListCreate, AIChatRequest, IcebreakerRequest, GrammarCheckRequest, ChatParticipantCreate, AIPersonaCreate, AIPersonaUpdate
+from app.schemas.chat import ChatRoomCreate, ChatRoomUpdate, RoomVocabularyListCreate, AIChatRequest, IcebreakerRequest, GrammarCheckRequest, ChatParticipantCreate, AIPersonaCreate, AIPersonaUpdate, PronunciationHelpRequest, GrammarSummaryRequest
 from app.services.ai_service import AIService
-from app.services.ai_prompts import get_grammar_check_prompt, get_grammar_check_system_prompt
+from app.services.ai_prompts import get_grammar_check_prompt, get_grammar_check_system_prompt, get_pronunciation_prompt, get_pronunciation_system_prompt
 from app.repositories.profile_repository import ProfileRepository
 from app.core.limiter import limiter
 from fastapi import Request
@@ -242,6 +242,57 @@ async def check_grammar(
             system_prompt=system_prompt,
             json_format=True,
             temp=0.3
+        )
+        data = json.loads(response_str)
+        return {"status": True, "data": data}
+    except Exception as e:
+        return {"status": False, "message": str(e)}
+
+@router.post("/grammar-summary")
+@limiter.limit("5/minute")
+async def get_grammar_summary(
+    request: Request,
+    payload: GrammarSummaryRequest,
+    current_user: User = Depends(get_current_user)
+):
+    ai_service = AIService()
+    corrections_text = json.dumps(payload.corrections, ensure_ascii=False, indent=2)
+    prompt = f"The user has finished a conversation in {payload.language}. Here are the grammar corrections made during the chat:\n{corrections_text}\n\nPlease generate a summary of their grammar, how much of the language was used correctly, statistics (e.g. number of mistakes, common error types), improvements, and the list of corrections. Return the output as HTML or formatted text suitable for a UI."
+    system_prompt = f"You are an expert language teacher in {payload.language}. Provide the response in {payload.ai_language}. Be encouraging and constructive."
+
+    try:
+        response_str = await ai_service._call_llm(
+            prompt=prompt,
+            system_prompt=system_prompt,
+            json_format=False,
+            temp=0.4
+        )
+        return {"status": True, "summary": response_str}
+    except Exception as e:
+        return {"status": False, "message": str(e)}
+
+@router.post("/pronunciation-help")
+@limiter.limit("10/minute")
+async def get_pronunciation_help(
+    request: Request,
+    payload: PronunciationHelpRequest,
+    current_user: User = Depends(get_current_user)
+):
+    ai_service = AIService()
+    prompt = get_pronunciation_prompt(
+        text=payload.text,
+        language=payload.language,
+        phonetics_style=payload.phonetics_style,
+        native_language=payload.native_language
+    )
+    system_prompt = get_pronunciation_system_prompt()
+
+    try:
+        response_str = await ai_service._call_llm(
+            prompt=prompt,
+            system_prompt=system_prompt,
+            json_format=True,
+            temp=0.1
         )
         data = json.loads(response_str)
         return {"status": True, "data": data}

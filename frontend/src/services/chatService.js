@@ -64,5 +64,24 @@ export const chatService = {
   deleteAIPersona: async (personaId) => {
     const response = await api.delete(`/api/chat/ai-personas/${personaId}`);
     return response.data;
+  },
+
+  getPronunciationHelp: async (text, language, phoneticsStyle, nativeLanguage) => {
+    const response = await api.post('/api/chat/pronunciation-help', {
+      text,
+      language,
+      phonetics_style: phoneticsStyle,
+      native_language: nativeLanguage
+    });
+    return response.data;
+  },
+
+  getGrammarSummary: async (corrections, language, aiLanguage) => {
+    const response = await api.post('/api/chat/grammar-summary', {
+      corrections,
+      language,
+      ai_language: aiLanguage
+    });
+    return response.data;
   }
 };
