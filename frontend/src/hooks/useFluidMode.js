@@ -11,7 +11,7 @@ function getLangCode(langName) {
   return LANGUAGE_CODES[langName?.toLowerCase()] || 'en-US';
 }
 
-export function useFluidMode({ room, user, wsRef, vocabData }) {
+export function useFluidMode({ room, user, wsRef, vocabData, setMessages }) {
   const [isFluidMode, setIsFluidMode] = useState(false);
   const [isAISpeaking, setIsAISpeaking] = useState(false);
   const [isAIThinking, setIsAIThinking] = useState(false);
@@ -321,6 +321,15 @@ export function useFluidMode({ room, user, wsRef, vocabData }) {
           : [];
 
       const newMsgs = await chatService.sendAIMessage(room.id, text, contextWords, targetAIs);
+
+      if (setMessages) {
+        setMessages(prev => {
+          const prevMap = new Map(prev.map(m => [m.id, m]));
+          newMsgs.forEach(m => prevMap.set(m.id, m));
+          return Array.from(prevMap.values()).sort((a, b) => new Date(a.created_at) - new Date(b.created_at));
+        });
+      }
+
       const aiMsgs = newMsgs.filter(m => m.participant?.is_ai);
       if (aiMsgs.length > 0) {
         const lastAi = aiMsgs[aiMsgs.length - 1];
@@ -334,7 +343,7 @@ export function useFluidMode({ room, user, wsRef, vocabData }) {
       console.error('Fluid send error:', e);
       setIsAIThinking(false);
     }
-  }, [room, selectedAIs, vocabData, speakWithSubtitles]);
+  }, [room, selectedAIs, vocabData, speakWithSubtitles, setMessages]);
 
   // ─── Mic control ─────────────────────────────────────────────────────────────
   const activateMic = useCallback(() => {

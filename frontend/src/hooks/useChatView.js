@@ -39,7 +39,7 @@ export const useChatView = (roomId, user) => {
   const scrollContainerRef = useRef(null);
 
   // Fluid mode hook — room and vocabData may be null initially, used lazily
-  const fluidMode = useFluidMode({ room, user, wsRef, vocabData });
+  const fluidMode = useFluidMode({ room, user, wsRef, vocabData, setMessages });
 
   // Stable refs so the WS onmessage callback always calls the latest handlers
   const handleFluidSignalRef = useRef(null);
