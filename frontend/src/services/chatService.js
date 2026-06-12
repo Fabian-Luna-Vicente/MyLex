@@ -36,14 +36,18 @@ export const chatService = {
     return response.data;
   },
 
-  sendAIMessage: async (roomId, message, contextWords = []) => {
+  sendAIMessage: async (roomId, message, contextWords = [], mentionedAIParticipantIds = []) => {
     const aiLanguage = localStorage.getItem('ai_language') || 'es';
-    const response = await api.post('/api/chat/ai/message', { 
+    const payload = { 
       room_id: roomId, 
       message, 
       context_words: contextWords,
       ai_language: aiLanguage
-    });
+    };
+    if (mentionedAIParticipantIds && mentionedAIParticipantIds.length > 0) {
+      payload.mentioned_ai_participant_ids = mentionedAIParticipantIds;
+    }
+    const response = await api.post('/api/chat/ai/message', payload);
     return response.data;
   },
 
