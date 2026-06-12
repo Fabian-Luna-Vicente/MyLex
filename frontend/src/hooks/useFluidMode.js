@@ -28,6 +28,8 @@ export function useFluidMode({ room, user, wsRef, vocabData, setMessages }) {
   const [isDirectAudioEnabled, setIsDirectAudioEnabled] = useState(
     () => localStorage.getItem('fluid_direct_audio') === 'true'
   );
+  const [fluidTranscript, setFluidTranscript] = useState('');
+  const [fluidInterimResult, setFluidInterimResult] = useState('');
 
   const recognitionRef = useRef(null);
   const mediaRecorderRef = useRef(null);
@@ -71,14 +73,23 @@ export function useFluidMode({ room, user, wsRef, vocabData, setMessages }) {
     const utterance = new SpeechSynthesisUtterance(text);
     utterance.lang = getLangCode(room?.language);
 
-    // Subtitle sync (~8 chars/s average speech = 40ms per 3 chars)
+    // Subtitle sync (Word-by-word chunking, ~300ms per word)
     if (subtitlesEnabledRef.current) {
-      let charIdx = 0;
+      const words = text.split(/\s+/);
+      let wordIdx = 0;
+      const WORDS_PER_CHUNK = 12;
+
       subtitleIntervalRef.current = setInterval(() => {
-        charIdx += 3;
-        setCurrentSubtitle(text.slice(0, Math.min(charIdx, text.length)));
-        if (charIdx >= text.length) clearInterval(subtitleIntervalRef.current);
-      }, 40);
+        wordIdx++;
+        const chunkStart = Math.floor((wordIdx - 1) / WORDS_PER_CHUNK) * WORDS_PER_CHUNK;
+        const chunkWords = words.slice(chunkStart, wordIdx);
+        
+        setCurrentSubtitle(chunkWords.join(' '));
+        
+        if (wordIdx >= words.length) {
+          clearInterval(subtitleIntervalRef.current);
+        }
+      }, 300);
     }
 
     const cleanup = () => {
@@ -147,13 +158,20 @@ export function useFluidMode({ room, user, wsRef, vocabData, setMessages }) {
           setLastAISpeakerName(signal.participant?.name_display || 'AI');
 
           if (subtitlesEnabledRef.current && signal.text) {
-            let charIdx = 0;
+            const words = signal.text.split(/\s+/);
+            let wordIdx = 0;
+            const WORDS_PER_CHUNK = 12;
+
             setCurrentSubtitle('');
             subtitleIntervalRef.current = setInterval(() => {
-              charIdx += 3;
-              setCurrentSubtitle(signal.text.slice(0, Math.min(charIdx, signal.text.length)));
-              if (charIdx >= signal.text.length) clearInterval(subtitleIntervalRef.current);
-            }, 40);
+              wordIdx++;
+              const chunkStart = Math.floor((wordIdx - 1) / WORDS_PER_CHUNK) * WORDS_PER_CHUNK;
+              const chunkWords = words.slice(chunkStart, wordIdx);
+              
+              setCurrentSubtitle(chunkWords.join(' '));
+              
+              if (wordIdx >= words.length) clearInterval(subtitleIntervalRef.current);
+            }, 300);
           } else {
             setCurrentSubtitle(signal.text);
           }
@@ -276,10 +294,19 @@ export function useFluidMode({ room, user, wsRef, vocabData, setMessages }) {
 
       recognition.onresult = (event) => {
         let final = '';
+        let interim = '';
         for (let i = event.resultIndex; i < event.results.length; ++i) {
-          if (event.results[i].isFinal) final += event.results[i][0].transcript;
+          if (event.results[i].isFinal) {
+            final += event.results[i][0].transcript;
+          } else {
+            interim += event.results[i][0].transcript;
+          }
         }
-        if (final) currentTranscriptRef.current += (currentTranscriptRef.current ? ' ' : '') + final;
+        if (final) {
+          currentTranscriptRef.current += (currentTranscriptRef.current ? ' ' : '') + final;
+          setFluidTranscript(currentTranscriptRef.current);
+        }
+        setFluidInterimResult(interim);
       };
       recognition.onerror = (e) => {
         console.error('Fluid mic error:', e.error);
@@ -349,6 +376,8 @@ export function useFluidMode({ room, user, wsRef, vocabData, setMessages }) {
   const activateMic = useCallback(() => {
     if (isBlocked || currentSpeaker !== user?.id) return;
     currentTranscriptRef.current = '';
+    setFluidTranscript('');
+    setFluidInterimResult('');
     setIsFluidMicActive(true);
     startRecognition();
   }, [isBlocked, currentSpeaker, user, startRecognition]);
@@ -400,6 +429,8 @@ export function useFluidMode({ room, user, wsRef, vocabData, setMessages }) {
     setCurrentSubtitle('');
     setIsFluidMicActive(false);
     currentTranscriptRef.current = '';
+    setFluidTranscript('');
+    setFluidInterimResult('');
     // Auto-grant floor if solo human
     if (humanParticipants.length <= 1) {
       setCurrentSpeaker(user?.id || null);
@@ -422,6 +453,8 @@ export function useFluidMode({ room, user, wsRef, vocabData, setMessages }) {
     setIsAISpeaking(false);
     setIsAIThinking(false);
     setCurrentSubtitle('');
+    setFluidTranscript('');
+    setFluidInterimResult('');
     setHandQueue([]);
     setCurrentSpeaker(null);
   }, [stopRecognition, broadcastFluidSignal]);
@@ -440,6 +473,8 @@ export function useFluidMode({ room, user, wsRef, vocabData, setMessages }) {
     lastAISpeakerName,
     isFluidMicActive,
     isDirectAudioEnabled,
+    fluidTranscript,
+    fluidInterimResult,
     raiseHand,
     lowerHand,
     toggleAISelection,

@@ -20,6 +20,8 @@ export default function FluidMode({ room, user, fluidState, onExit }) {
     lastAIText,
     lastAISpeakerName,
     isFluidMicActive,
+    fluidTranscript,
+    fluidInterimResult,
     toggleSubtitles,
     raiseHand,
     lowerHand,
@@ -276,6 +278,25 @@ export default function FluidMode({ room, user, fluidState, onExit }) {
             >
               <div className="bg-black/70 backdrop-blur-md border border-white/10 rounded-2xl px-6 py-4 text-center shadow-2xl">
                 <p className="text-white text-sm md:text-base leading-relaxed font-medium">{currentSubtitle}</p>
+              </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
+
+        {/* ── USER TRANSCRIPTION (Real-time Speech-to-Text) ────────────────────── */}
+        <AnimatePresence>
+          {isFluidMicActive && (fluidTranscript || fluidInterimResult) && (
+            <motion.div
+              initial={{ opacity: 0, y: 15 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: 15 }}
+              className="w-full max-w-2xl mt-4"
+            >
+              <div className="bg-black/70 backdrop-blur-md border border-green-400/20 rounded-2xl px-6 py-4 text-center shadow-2xl">
+                <p className="text-white text-sm md:text-base leading-relaxed font-medium">
+                  {fluidTranscript}
+                  <span className="text-gray-400 italic ml-1">{fluidInterimResult}</span>
+                </p>
               </div>
             </motion.div>
           )}
