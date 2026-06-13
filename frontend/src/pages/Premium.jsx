@@ -1,9 +1,27 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { premiumService } from '../services/premiumService';
+import { FaSpinner } from 'react-icons/fa';
 
 const Premium = () => {
   const navigate = useNavigate();
   const [billingCycle, setBillingCycle] = useState('monthly');
+  const [loadingPlan, setLoadingPlan] = useState(null);
+
+  const handleSubscribe = async (tier) => {
+    if (tier === 'free') return;
+    setLoadingPlan(tier);
+    try {
+      const response = await premiumService.createCheckoutSession(tier, billingCycle);
+      if (response.url) {
+        window.location.href = response.url;
+      }
+    } catch (error) {
+      console.error("Error creating checkout session:", error);
+      alert("Hubo un error al iniciar el pago. Por favor intenta de nuevo.");
+      setLoadingPlan(null);
+    }
+  };
 
   const plans = [
     {
@@ -149,8 +167,12 @@ const Premium = () => {
                 <p className="text-sm text-green-400 mb-6 font-medium">Facturado ${plan.price.yearly} anualmente</p>
               )}
 
-              <button className={`w-full py-4 rounded-xl font-bold text-lg mb-8 ${plan.buttonVariant}`}>
-                {plan.buttonText}
+              <button 
+                className={`w-full py-4 rounded-xl font-bold text-lg mb-8 flex justify-center items-center gap-2 ${plan.buttonVariant} ${loadingPlan === plan.name.toLowerCase() ? 'opacity-70 cursor-wait' : ''}`}
+                onClick={() => handleSubscribe(plan.name.toLowerCase())}
+                disabled={plan.name === 'Free' || loadingPlan}
+              >
+                {loadingPlan === plan.name.toLowerCase() ? <FaSpinner className="animate-spin" /> : plan.buttonText}
               </button>
 
               <div className="flex-1">

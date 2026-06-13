@@ -83,5 +83,10 @@ export const chatService = {
       ai_language: aiLanguage
     });
     return response.data;
+  },
+
+  getUsage: async () => {
+    const response = await api.get('/api/profile/me/usage');
+    return response.data;
   }
 };

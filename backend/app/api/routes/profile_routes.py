@@ -25,6 +25,17 @@ def get_my_profile(
     return service.get_my_profile(current_user.id)
 
 
+@router.get("/profile/me/usage")
+def get_my_usage(
+    request: Request,
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db)
+):
+    from app.services.usage_service import get_or_create_usage
+    usage = get_or_create_usage(db, current_user.id)
+    return usage
+
+
 @router.put("/profile/me")
 def update_my_profile(
     request: Request,

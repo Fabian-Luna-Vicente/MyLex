@@ -30,6 +30,7 @@ export function useFluidMode({ room, user, wsRef, vocabData, setMessages }) {
   );
   const [fluidTranscript, setFluidTranscript] = useState('');
   const [fluidInterimResult, setFluidInterimResult] = useState('');
+  const [directModeUsage, setDirectModeUsage] = useState(null);
 
   const recognitionRef = useRef(null);
   const mediaRecorderRef = useRef(null);
@@ -223,13 +224,40 @@ export function useFluidMode({ room, user, wsRef, vocabData, setMessages }) {
   }, []);
 
   // ─── Direct Audio / Recognition ──────────────────────────────────────────────
+  const fetchUsage = useCallback(async () => {
+    if (user?.subscription_plan && user.subscription_plan.toLowerCase() !== 'free') {
+      try {
+        const usage = await chatService.getUsage();
+        const plan = user.subscription_plan.toLowerCase();
+        const limit = plan === 'premium' ? -1 : (plan === 'pro' ? 20 : 0);
+        setDirectModeUsage({
+          used: usage.daily_direct_mode_messages || 0,
+          limit: limit
+        });
+      } catch (e) {
+        console.error("Error fetching usage:", e);
+      }
+    }
+  }, [user]);
+
+  useEffect(() => {
+    if (isFluidMode) {
+      fetchUsage();
+    }
+  }, [isFluidMode, fetchUsage]);
+
   const toggleDirectAudio = useCallback(() => {
+    const plan = user?.subscription_plan?.toLowerCase() || 'free';
+    if (plan === 'free') {
+      window.dispatchEvent(new CustomEvent('limit:exceeded', { detail: 'El Direct Mode con voz de IA natural en tiempo real es una característica premium.' }));
+      return;
+    }
     setIsDirectAudioEnabled(prev => {
       const next = !prev;
       localStorage.setItem('fluid_direct_audio', String(next));
       return next;
     });
-  }, []);
+  }, [user]);
 
   const startRecognition = useCallback(async () => {
     if (isDirectAudioEnabled) {
@@ -483,6 +511,7 @@ export function useFluidMode({ room, user, wsRef, vocabData, setMessages }) {
     lastAISpeakerName,
     isFluidMicActive,
     isDirectAudioEnabled,
+    directModeUsage,
     fluidTranscript,
     fluidInterimResult,
     raiseHand,

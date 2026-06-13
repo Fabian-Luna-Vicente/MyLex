@@ -169,14 +169,17 @@ export default function FluidMode({ room, user, fluidState, onExit }) {
           </button>
           <button
             onClick={fluidState.toggleDirectAudio}
-            title={fluidState.isDirectAudioEnabled ? "Direct Audio: ON (Gemini 2.0)" : "Direct Audio: OFF (Local TTS)"}
+            title={fluidState.isDirectAudioEnabled ? "Direct Mode: ON (Gemini 2.0)" : "Direct Mode: OFF (Local TTS)"}
             className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-bold border transition-all ${
               fluidState.isDirectAudioEnabled
-                ? 'bg-purple-500/20 text-purple-400 border-purple-500/40 shadow-[0_0_10px_rgba(168,85,247,0.2)]'
+                ? 'bg-[#00c3ff]/20 text-[#00c3ff] border-[#00c3ff]/40 shadow-[0_0_10px_rgba(0,195,255,0.2)]'
                 : 'bg-white/5 text-[#a0a0a0] border-white/10 hover:border-white/20 hover:text-white'
             }`}
           >
-            <RiRobot3Fill size={14} /> AI Voice
+            <RiRobot3Fill size={14} /> Direct Mode
+            {user?.subscription_plan !== 'free' && user?.subscription_plan !== 'Free' && fluidState.directModeUsage && (
+               <span className="text-[9px] opacity-80 ml-1">({fluidState.directModeUsage.used}/{fluidState.directModeUsage.limit === -1 ? '∞' : fluidState.directModeUsage.limit})</span>
+            )}
           </button>
           <button
             onClick={toggleSubtitles}
