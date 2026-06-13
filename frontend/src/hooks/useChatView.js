@@ -167,6 +167,12 @@ export const useChatView = (roomId, user) => {
     wsRef.current.onmessage = (event) => {
       const msg = JSON.parse(event.data);
 
+      if (msg.type === "system_error") {
+        alert(msg.message);
+        window.location.href = '/chat';
+        return;
+      }
+
       // Fluid Mode signaling — route to fluid handler, don't save as message
       if (msg._fluid_signal) {
         handleFluidSignalRef.current?.(msg);

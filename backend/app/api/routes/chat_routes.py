@@ -169,7 +169,7 @@ async def websocket_endpoint(
         await websocket.close(code=1008)
         return
 
-    await manager.connect(websocket, room_id)
+    await manager.connect(websocket, room_id, str(user.id))
     try:
         while True:
             data_str = await websocket.receive_text()
@@ -225,7 +225,7 @@ async def websocket_endpoint(
             await manager.broadcast(json.dumps(msg.model_dump(mode='json')), room_id)
             
     except WebSocketDisconnect:
-        manager.disconnect(websocket, room_id)
+        manager.disconnect(websocket, room_id, str(user.id))
 
 @router.post("/icebreaker")
 @limiter.limit("5/minute")
