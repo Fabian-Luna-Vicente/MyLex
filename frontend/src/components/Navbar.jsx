@@ -4,7 +4,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import {
   FaHome, FaListUl, FaChartLine, FaGamepad,
   FaUserCircle, FaCog, FaSignOutAlt, FaChevronDown,
-  FaPlusCircle, FaComments, FaGlobe, FaUsers, FaSearch, FaBars, FaTimes
+  FaPlusCircle, FaComments, FaGlobe, FaUsers, FaSearch, FaBars, FaTimes, FaStar
 } from 'react-icons/fa';
 import { useNavbar } from '../hooks/useNavbar';
 
@@ -18,14 +18,16 @@ export default function Navbar() {
     setIsMobileMenuOpen,
     isCommunityOpen,
     setIsCommunityOpen,
+    isVocabularyOpen,
+    setIsVocabularyOpen,
     isCommunityActive,
+    isVocabularyActive,
     handleLogout,
     isActive
   } = useNavbar();
 
   const navLinks = [
     { name: 'Dashboard', path: '/dashboard', icon: <FaHome /> },
-    { name: 'My Lists', path: '/lists', icon: <FaListUl /> },
     { name: 'Statistics', path: '/statistics', icon: <FaChartLine /> },
   ];
 
@@ -117,12 +119,55 @@ export default function Navbar() {
             </AnimatePresence>
           </div>
 
+          {/* Vocabulary Dropdown */}
+          <div className="relative">
+            <button
+              onClick={() => setIsVocabularyOpen(!isVocabularyOpen)}
+              className={`flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-bold transition-all duration-300 ${isVocabularyActive
+                ? 'bg-[#00c3ff]/10 text-[#00c3ff] border border-[#00c3ff]/20'
+                : 'text-[#a0a0a0] hover:text-white hover:bg-white/5'
+                }`}
+            >
+              <span className={isVocabularyActive ? 'text-[#00c3ff]' : 'text-[#a0a0a0]'}>
+                <FaListUl />
+              </span>
+              Vocabulary
+              <FaChevronDown className={`text-[10px] transition-transform duration-300 ${isVocabularyOpen ? 'rotate-180' : ''}`} />
+            </button>
+            <AnimatePresence>
+              {isVocabularyOpen && (
+                <>
+                  <div className="fixed inset-0 z-[-1]" onClick={() => setIsVocabularyOpen(false)}></div>
+                  <motion.div
+                    initial={{ opacity: 0, y: 10, scale: 0.95 }}
+                    animate={{ opacity: 1, y: 0, scale: 1 }}
+                    exit={{ opacity: 0, y: 10, scale: 0.95 }}
+                    className="absolute right-0 mt-3 w-56 bg-[#0e0c1d] border border-white/10 rounded-2xl p-2 shadow-[0_10px_40px_rgba(0,0,0,0.5)] overflow-hidden"
+                  >
+                    <button
+                      onClick={() => { setIsVocabularyOpen(false); navigate('/lists'); }}
+                      className="w-full flex items-center gap-3 px-4 py-2.5 text-sm font-bold text-[#a0a0a0] hover:text-white hover:bg-white/5 rounded-xl transition-all"
+                    >
+                      <FaListUl className="text-[#00c3ff]" /> My Lists
+                    </button>
+                    <button
+                      onClick={() => { setIsVocabularyOpen(false); navigate('/create-word'); }}
+                      className="w-full flex items-center gap-3 px-4 py-2.5 text-sm font-bold text-[#a0a0a0] hover:text-white hover:bg-white/5 rounded-xl transition-all"
+                    >
+                      <FaPlusCircle className="text-[#00c3ff]" /> Add Word
+                    </button>
+                  </motion.div>
+                </>
+              )}
+            </AnimatePresence>
+          </div>
+
           <Link
-            to="/create-word"
-            className="flex items-center gap-2 px-4 py-2 bg-[#00c3ff] text-black rounded-xl text-sm font-black hover:shadow-[0_0_20px_rgba(0,195,255,0.5)] transition-all ml-2"
+            to="/premium"
+            className="flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-[#00c3ff] to-blue-600 text-white rounded-xl text-sm font-black hover:shadow-[0_0_20px_rgba(0,195,255,0.5)] transition-all ml-2 hover:scale-105"
           >
-            <FaPlusCircle />
-            ADD WORD
+            <FaStar />
+            PREMIUM
           </Link>
         </div>
 
@@ -225,14 +270,24 @@ export default function Navbar() {
               </Link>
 
               <div className="w-full h-px bg-white/10 my-2"></div>
+              <p className="text-[10px] text-[#00c3ff] font-bold uppercase tracking-widest px-4 mb-1">Vocabulary</p>
+
+              <Link to="/lists" onClick={() => setIsMobileMenuOpen(false)} className="flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-bold text-[#a0a0a0] hover:text-white hover:bg-white/5 transition-all">
+                <FaListUl className="text-[#00c3ff]" /> My Lists
+              </Link>
+              <Link to="/create-word" onClick={() => setIsMobileMenuOpen(false)} className="flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-bold text-[#a0a0a0] hover:text-white hover:bg-white/5 transition-all">
+                <FaPlusCircle className="text-[#00c3ff]" /> Add Word
+              </Link>
+
+              <div className="w-full h-px bg-white/10 my-2"></div>
 
               <Link
-                to="/create-word"
+                to="/premium"
                 onClick={() => setIsMobileMenuOpen(false)}
-                className="flex items-center justify-center gap-2 w-full py-3 bg-[#00c3ff] text-black rounded-xl font-black hover:shadow-[0_0_20px_rgba(0,195,255,0.5)] transition-all"
+                className="flex items-center justify-center gap-2 w-full py-3 bg-gradient-to-r from-[#00c3ff] to-blue-600 text-white rounded-xl font-black hover:shadow-[0_0_20px_rgba(0,195,255,0.5)] transition-all mt-2"
               >
-                <FaPlusCircle />
-                Add Vocabulary
+                <FaStar />
+                Mejorar Plan
               </Link>
             </div>
           </motion.div>

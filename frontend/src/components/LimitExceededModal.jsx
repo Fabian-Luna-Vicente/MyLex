@@ -20,7 +20,7 @@ const LimitExceededModal = () => {
 
   const handleUpgrade = () => {
     setIsOpen(false);
-    navigate('/settings'); // Asumiendo que pueden cambiar su plan en settings
+    navigate('/premium');
   };
 
   return (

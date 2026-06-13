@@ -10,8 +10,10 @@ export function useNavbar() {
   const [isProfileOpen, setIsProfileOpen] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isCommunityOpen, setIsCommunityOpen] = useState(false);
+  const [isVocabularyOpen, setIsVocabularyOpen] = useState(false);
 
   const isCommunityActive = ['/friends', '/search', '/chat'].includes(location.pathname);
+  const isVocabularyActive = ['/lists', '/create-word'].includes(location.pathname);
 
   const handleLogout = () => {
     logout();
@@ -30,7 +32,10 @@ export function useNavbar() {
     setIsMobileMenuOpen,
     isCommunityOpen,
     setIsCommunityOpen,
+    isVocabularyOpen,
+    setIsVocabularyOpen,
     isCommunityActive,
+    isVocabularyActive,
     handleLogout,
     isActive
   };

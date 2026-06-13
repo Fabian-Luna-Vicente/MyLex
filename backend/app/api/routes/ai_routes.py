@@ -1,4 +1,5 @@
 from fastapi import APIRouter, Depends
+from sqlalchemy.orm import Session
 from app.schemas.ai import DictionaryRequest, GrammarRequest, CorrectorRequest, TranslationRequest
 from app.services.ai_service import AIService
 from app.core.dependencies import get_current_user
