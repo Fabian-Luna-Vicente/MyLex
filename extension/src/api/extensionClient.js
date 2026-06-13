@@ -43,6 +43,17 @@ api.interceptors.response.use(
         await chrome.storage.local.remove(['access_token']);
       }
     }
+    if (error.response?.status === 429) {
+      const detailMsg = error.response.data?.detail || 'Has alcanzado el límite de tu plan.';
+      window.dispatchEvent(new CustomEvent('limit:exceeded', { detail: detailMsg }));
+      // Also show a browser notification as a fallback since it's an extension
+      chrome.notifications.create({
+        type: 'basic',
+        iconUrl: chrome.runtime.getURL('icons/icon128.png'),
+        title: 'Límite de Uso Alcanzado',
+        message: detailMsg
+      });
+    }
 
     return Promise.reject(error);
   }

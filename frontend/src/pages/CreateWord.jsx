@@ -15,7 +15,7 @@ export default function CreateWord() {
   const { lists, addWord, fetchLists } = useVocabulary();
   const { searchDictionary, loading: aiLoading } = useAi();
 
-  const { searchWord, setSearchWord, useAiMode, setUseAiMode, searchResults, aiContext,
+  const { searchWord, setSearchWord, useContextMode, setUseContextMode, searchResults, aiContext,
     setAiContext, handleSubmit, handleSelectResult, handleSearch, setSelectedListId,
     selectedListId, error, formData, setFormData, imageQuery, setImageQuery, imageResults,
     isSearchingImages, imagePage, setImagePage, searchGoogleImages, handleImageSearchSubmit,
@@ -52,7 +52,7 @@ export default function CreateWord() {
         <div className="bg-[#0e0c1d]/60 backdrop-blur-[10px] border border-[#00c3ff]/20 p-6 md:p-8 rounded-[20px] mb-8 shadow-[0_5px_15px_rgba(0,0,0,0.3)]">
           <h2 className="text-[1.5rem] font-bold mb-6 text-white transition-colors duration-300 flex items-center gap-3 drop-shadow-[0_0_5px_rgba(0,195,255,0.3)]">
             <FaSearch className="text-[#00c3ff]" />
-            Dictionary Search
+            Dictionary Search (AI)
           </h2>
 
           <form onSubmit={handleSearch} className="flex flex-col gap-4">
@@ -78,23 +78,27 @@ export default function CreateWord() {
             <div className="flex items-center gap-3 mt-2">
               <button
                 type="button"
-                onClick={() => setUseAiMode(!useAiMode)}
-                className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${useAiMode ? 'bg-[#00c3ff]' : 'bg-[#a0a0a0]/30 border border-[#00c3ff]/30'}`}
+                onClick={() => setUseContextMode(!useContextMode)}
+                className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${useContextMode ? 'bg-[#00c3ff]' : 'bg-[#a0a0a0]/30 border border-[#00c3ff]/30'}`}
               >
-                <span className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${useAiMode ? 'translate-x-6' : 'translate-x-1'}`} />
+                <span className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${useContextMode ? 'translate-x-6' : 'translate-x-1'}`} />
               </button>
               <span className="text-sm font-bold tracking-wide text-[#a0a0a0]">
-                AI Contextual Search {useAiMode && <span className="text-[#00c3ff] ml-1 inline-flex items-center gap-1"><RiRobot3Fill /> Groq</span>}
+                Add Context (For higher precision)
               </span>
             </div>
 
-            {useAiMode && (
-              <textarea
-                value={aiContext}
-                onChange={(e) => setAiContext(e.target.value)}
-                placeholder="Where did you read this word? Paste the sentence here for a highly accurate AI definition..."
-                className="mt-2 w-full bg-[#071320] border border-[#00c3ff]/30 rounded-[15px] px-4 py-3 text-white placeholder-[#a0a0a0]/50 focus:outline-none focus:border-[#00c3ff] focus:ring-1 focus:ring-[#00c3ff] transition-all duration-300 min-h-[100px]"
-              />
+            {useContextMode && (
+              <div className="flex flex-col gap-1">
+                <textarea
+                  value={aiContext}
+                  onChange={(e) => setAiContext(e.target.value)}
+                  placeholder="Where did you read this word? Paste the sentence here..."
+                  maxLength={300}
+                  className="mt-2 w-full bg-[#071320] border border-[#00c3ff]/30 rounded-[15px] px-4 py-3 text-white placeholder-[#a0a0a0]/50 focus:outline-none focus:border-[#00c3ff] focus:ring-1 focus:ring-[#00c3ff] transition-all duration-300 min-h-[100px]"
+                />
+                <span className="text-[10px] text-[#a0a0a0] self-end">{aiContext.length} / 300</span>
+              </div>
             )}
           </form>
 

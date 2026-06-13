@@ -13,6 +13,7 @@ class User(Base):
     hashed_password = Column(String, nullable=True)
     is_active = Column(Boolean, default=True)
     is_verified = Column(Boolean, default=False)
+    subscription_tier = Column(String, default="free", nullable=False)
     created_at = Column(DateTime(timezone=True), server_default=func.now())
 
     refresh_tokens = relationship("UserRefreshToken", back_populates="user", cascade="all, delete-orphan")

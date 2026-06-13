@@ -85,20 +85,39 @@ const FloatingMenu = ({
 
           {showSettings && (
             <div className="fab-settings-panel">
-              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "10px" }}>
-                <span style={{ fontSize: "14.4px", fontWeight: "bold", color: "#ccc" }}>AI Mode:</span>
-                <button
-                  onClick={() => setUseAI(!useAI)}
-                  style={{
-                    background: useAI ? "#00c3ff" : "#444",
-                    color: "#fff",
-                    border: "none", borderRadius: "20px", padding: "5px 15px",
-                    cursor: "pointer", fontWeight: "bold", fontSize: "12.8px",
-                    transition: "0.3s", display: "flex", alignItems: "center", gap: "5px",
-                  }}
-                >
-                  <RiRobot3Fill /> {useAI ? "ON" : "OFF"}
-                </button>
+              <div style={{ display: "flex", flexDirection: "column", gap: "10px", marginBottom: "15px" }}>
+                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                  <span style={{ fontSize: "14.4px", fontWeight: "bold", color: "#ccc" }}>AI Mode:</span>
+                  <button
+                    onClick={() => setUseAI(!useAI)}
+                    style={{
+                      background: useAI ? "#00c3ff" : "#444",
+                      color: "#fff",
+                      border: "none", borderRadius: "20px", padding: "5px 15px",
+                      cursor: "pointer", fontWeight: "bold", fontSize: "12.8px",
+                      transition: "0.3s", display: "flex", alignItems: "center", gap: "5px",
+                    }}
+                  >
+                    <RiRobot3Fill /> {useAI ? "ON" : "OFF"}
+                  </button>
+                </div>
+                
+                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                  <span style={{ fontSize: "12.8px", fontWeight: "bold", color: "#ccc" }}>Send Context:</span>
+                  <button
+                    onClick={() => handleUseAIContextChange(!useAIContext)}
+                    style={{
+                      background: useAIContext ? "#00c3ff" : "#444",
+                      color: "#fff",
+                      border: "none", borderRadius: "20px", padding: "5px 15px",
+                      cursor: "pointer", fontWeight: "bold", fontSize: "12.8px",
+                      transition: "0.3s", display: "flex", alignItems: "center", gap: "5px",
+                    }}
+                    title="Send surrounding text for higher AI precision"
+                  >
+                    {useAIContext ? "ON" : "OFF"}
+                  </button>
+                </div>
               </div>
 
               <div className="fab-language-row">

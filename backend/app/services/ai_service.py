@@ -85,7 +85,31 @@ class AIService:
     async def search_dictionary(self, request: DictionaryRequest, ai_language: str = "es"):
         clean_word = request.word.strip()
         
+        # Enforce character limit for context
+        if len(request.context) > 300:
+            request.context = request.context[:300] + "..."
+            
         if request.use_ai:
+            has_context = bool(request.context.strip() or request.title.strip())
+
+            # 1. Check cache if there is NO context
+            if not has_context:
+                from app.core.database import SessionLocal
+                from app.models.vocabulary import CachedDictionaryWord
+                try:
+                    with SessionLocal() as db:
+                        cached_word = db.query(CachedDictionaryWord).filter(
+                            CachedDictionaryWord.word.ilike(clean_word),
+                            CachedDictionaryWord.language == request.language,
+                            CachedDictionaryWord.target_language == request.t_lang
+                        ).first()
+                        if cached_word:
+                            print(f"[CACHE HIT] {clean_word}", flush=True)
+                            return cached_word.response_json
+                except Exception as e:
+                    print(f"Error reading dictionary cache: {e}", flush=True)
+
+            # 2. Prepare Prompt
             prompt = f"""
             PALABRA A DEFINIR: "{clean_word}"
             INFORMACIÓN DE CONTEXTO:
@@ -94,16 +118,40 @@ class AIService:
             """
             sys_prompt = self._get_prompt("dictionary", request.language, request.t_lang, ai_language)
             # LLM requires json output but prompt returns array inside a wrapper or directly an array.
-            # Using JSON object response_format requires root to be an object. We'll wrap prompt instructions implicitly.
-            # Groq JSON mode requires the output to be a JSON object, not an array.
             sys_prompt += "\nDEBES ENVOLVER LA RESPUESTA EN UN OBJETO CON LA CLAVE 'result'."
             
             resp_str = await self._call_llm(prompt, sys_prompt, json_format=True)
             try:
                 parsed = json.loads(resp_str)
-                if "result" in parsed:
-                    return parsed["result"]
-                return [parsed]
+                result_array = parsed.get("result")
+                if result_array is None:
+                    result_array = [parsed]
+                
+                # 3. Save to cache if NO context and no error
+                if not has_context and isinstance(result_array, list) and len(result_array) > 0 and not result_array[0].get("error"):
+                    try:
+                        with SessionLocal() as db:
+                            # Avoid duplicate saving if concurrent requests happened
+                            exists = db.query(CachedDictionaryWord).filter(
+                                CachedDictionaryWord.word.ilike(clean_word),
+                                CachedDictionaryWord.language == request.language,
+                                CachedDictionaryWord.target_language == request.t_lang
+                            ).first()
+                            
+                            if not exists:
+                                new_cache = CachedDictionaryWord(
+                                    word=clean_word.lower(),
+                                    language=request.language,
+                                    target_language=request.t_lang,
+                                    response_json=result_array
+                                )
+                                db.add(new_cache)
+                                db.commit()
+                                print(f"[CACHE SAVED] {clean_word}", flush=True)
+                    except Exception as e:
+                        print(f"Error saving dictionary cache: {e}", flush=True)
+
+                return result_array
             except:
                 return [{"name": clean_word, "meaning": "Error parsing AI", "examples": [], "error": True}]
         

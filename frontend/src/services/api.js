@@ -35,6 +35,11 @@ api.interceptors.response.use(
         return Promise.reject(refreshError);
       }
     }
+    if (error.response?.status === 429) {
+      // Dispatch a custom event so the UI can show a modal/toast
+      const detailMsg = error.response.data?.detail || 'Has alcanzado el límite de tu plan.';
+      window.dispatchEvent(new CustomEvent('limit:exceeded', { detail: detailMsg }));
+    }
 
     return Promise.reject(error);
   }

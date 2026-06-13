@@ -79,3 +79,16 @@ class WordProgress(Base):
     user = relationship("User", backref="word_progress")
     word = relationship("Word", back_populates="progress")
 
+class CachedDictionaryWord(Base):
+    __tablename__ = "cached_dictionary_words"
+
+    id = Column(Integer, primary_key=True, index=True, autoincrement=True)
+    word = Column(String, index=True, nullable=False)
+    language = Column(String, nullable=False)
+    target_language = Column(String, nullable=False)
+    response_json = Column(JSON().with_variant(ARRAY(String), "postgresql") if False else JSON, nullable=False) # fallback if needed, but standard JSON is fine
+    created_at = Column(DateTime(timezone=True), server_default=func.now())
+    
+    __table_args__ = (
+        UniqueConstraint("word", "language", "target_language", name="uq_cached_word"),
+    )

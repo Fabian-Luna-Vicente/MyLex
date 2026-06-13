@@ -18,11 +18,21 @@ async def search_dictionary(
     request: Request,
     data: DictionaryRequest,
     current_user: User = Depends(get_current_user),
-    ai_service: AIService = Depends(get_ai_service)
+    ai_service: AIService = Depends(get_ai_service),
+    db: Session = Depends(get_db)
 ):
     """
     Search word definition using traditional dictionary or AI based on use_ai flag.
     """
+    from app.services.usage_service import check_and_increment_limit
+    
+    # Simple heuristic: if context is provided, it's contextualized.
+    if data.use_ai:
+        if getattr(data, "context", None):
+            check_and_increment_limit(db, current_user, "weekly_dict_context_words")
+        else:
+            check_and_increment_limit(db, current_user, "daily_dict_words")
+            
     return await ai_service.search_dictionary(data, data.ai_language)
 
 @router.post("/grammar/analyze")
@@ -31,11 +41,14 @@ async def analyze_grammar(
     request: Request,
     data: GrammarRequest,
     current_user: User = Depends(get_current_user),
-    ai_service: AIService = Depends(get_ai_service)
+    ai_service: AIService = Depends(get_ai_service),
+    db: Session = Depends(get_db)
 ):
     """
     Analyze grammatical structure of a sentence using AI.
     """
+    from app.services.usage_service import check_and_increment_limit
+    check_and_increment_limit(db, current_user, "daily_grammar_analysis")
     return await ai_service.analyze_grammar(data, data.ai_language)
 
 @router.post("/corrector/assist")
@@ -44,11 +57,14 @@ async def assist_writing(
     request: Request,
     data: CorrectorRequest,
     current_user: User = Depends(get_current_user),
-    ai_service: AIService = Depends(get_ai_service)
+    ai_service: AIService = Depends(get_ai_service),
+    db: Session = Depends(get_db)
 ):
     """
     Correct student's writing, verify target words usage and provide explanations.
     """
+    from app.services.usage_service import check_and_increment_limit
+    check_and_increment_limit(db, current_user, "daily_writing_corrections")
     return await ai_service.correct_text(data, data.ai_language)
 
 @router.post("/translate")

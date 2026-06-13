@@ -12,6 +12,7 @@ from app.models import user
 from app.models import vocabulary
 from app.models import profile
 from app.models import chat
+from app.models import usage
 
 # this is the Alembic Config object, which provides
 # access to the values within the .ini file in use.

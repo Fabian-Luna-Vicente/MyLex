@@ -38,6 +38,14 @@ def create_list(
     current_user: User = Depends(get_current_user),
     list_service: ListService = Depends(get_list_service)
 ):
+    from app.core.config_limits import get_user_limit
+    limit = get_user_limit(current_user.subscription_tier, "max_lists")
+    if limit != -1:
+        current_lists = list_service.get_lists(current_user.id)
+        if len(current_lists) >= limit:
+            from fastapi import HTTPException, status
+            raise HTTPException(status_code=status.HTTP_429_TOO_MANY_REQUESTS, detail=f"Has alcanzado el límite de {limit} listas de tu plan.")
+            
     return list_service.create_list(current_user.id, list_in)
 
 @router.get("/lists", response_model=List[VocabularyListBasic])
@@ -116,6 +124,20 @@ def create_word(
     current_user: User = Depends(get_current_user),
     word_service: WordService = Depends(get_word_service)
 ):
+    from app.core.config_limits import get_user_limit
+    limit = get_user_limit(current_user.subscription_tier, "max_words_per_list")
+    if limit != -1:
+        # Get current words in the list to check the limit
+        # This requires fetching the list's words count. We can do len(get_words_by_list) but WordService might not have it directly.
+        # Actually, words belong to a list. Let's just check all words? No, the limit is PER LIST.
+        # Let's check how many words are in the list.
+        # word_in.list_id is the list ID.
+        db_list = word_service.list_repo.get_list_by_id(word_in.list_id)
+        if db_list:
+            if len(db_list.words) >= limit:
+                from fastapi import HTTPException, status
+                raise HTTPException(status_code=status.HTTP_429_TOO_MANY_REQUESTS, detail=f"Has alcanzado el límite de {limit} palabras por lista.")
+
     return word_service.create_word(current_user.id, word_in)
 
 @router.get("/words", response_model=List[WordResponse])

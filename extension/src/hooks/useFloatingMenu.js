@@ -39,15 +39,19 @@ export const useFloatingMenu = ({
   const [showSettings, setShowSettings] = useState(false);
   const { translation, setTranslation, analyzeGrammar, translateText, processDictionary } = useAiActions();
   const [useAI, setUseAI] = useState(true);
+  const [useAIContext, setUseAIContext] = useState(false);
   const [sourceLang, setSourceLang] = useState("auto");
   const [targetLang, setTargetLang] = useState("en");
   const [audioLang, setAudioLang] = useState("en");
 
   useEffect(() => {
     if (typeof chrome !== 'undefined' && chrome.storage && chrome.storage.local) {
-      chrome.storage.local.get(['audioLang'], (result) => {
+      chrome.storage.local.get(['audioLang', 'useAIContext'], (result) => {
         if (result.audioLang) {
           setAudioLang(result.audioLang);
+        }
+        if (result.useAIContext !== undefined) {
+          setUseAIContext(result.useAIContext);
         }
       });
     }
@@ -57,6 +61,13 @@ export const useFloatingMenu = ({
     setAudioLang(newLang);
     if (typeof chrome !== 'undefined' && chrome.storage && chrome.storage.local) {
       chrome.storage.local.set({ audioLang: newLang });
+    }
+  };
+
+  const handleUseAIContextChange = (newVal) => {
+    setUseAIContext(newVal);
+    if (typeof chrome !== 'undefined' && chrome.storage && chrome.storage.local) {
+      chrome.storage.local.set({ useAIContext: newVal });
     }
   };
 
@@ -131,7 +142,7 @@ export const useFloatingMenu = ({
       language: sourceLang,
       t_lang: TlangForDict,
       use_ai: useAI,
-      context: contextParagraph,
+      context: useAIContext ? contextParagraph : "",
       title: pageTitle,
       url: pageUrl
     });
@@ -199,6 +210,8 @@ export const useFloatingMenu = ({
     translation,
     useAI,
     setUseAI,
+    useAIContext,
+    handleUseAIContextChange,
     sourceLang,
     setSourceLang,
     targetLang,

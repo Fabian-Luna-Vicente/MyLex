@@ -68,3 +68,14 @@ async def get_current_user_ws(token: str, db: Session) -> User | None:
     if user is None or not user.is_active:
         return None
     return user
+
+def require_limit(limit_key: str, amount: int = 1):
+    """
+    Dependency to check if the user has enough limit quota for the action.
+    It DOES NOT increment the quota. You must increment it in the route after success.
+    """
+    def _require_limit(user: User = Depends(get_current_user), db: Session = Depends(get_db)):
+        from app.services.usage_service import check_limit_only
+        check_limit_only(db, user, limit_key, amount)
+        return True
+    return _require_limit

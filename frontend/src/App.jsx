@@ -41,6 +41,8 @@ function Layout({ children }) {
   );
 }
 
+import LimitExceededModal from './components/LimitExceededModal';
+
 function App() {
   return (
     <AuthProvider>
@@ -48,6 +50,7 @@ function App() {
         <AiProvider>
           <Router>
             <ScrollToTop />
+            <LimitExceededModal />
             <Routes>
               <Route path="/login" element={<Login />} />
               <Route path="/verify-email" element={<VerifyEmail />} />

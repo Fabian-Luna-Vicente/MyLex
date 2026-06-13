@@ -35,6 +35,14 @@ def create_room(
     current_user: User = Depends(get_current_user),
     service: ChatService = Depends(get_chat_service)
 ):
+    from app.core.config_limits import get_user_limit
+    limit = get_user_limit(current_user.subscription_tier, "max_chat_rooms")
+    if limit != -1:
+        current_rooms = service.get_user_rooms(current_user.id)
+        if len(current_rooms) >= limit:
+            from fastapi import HTTPException, status
+            raise HTTPException(status_code=status.HTTP_429_TOO_MANY_REQUESTS, detail=f"Has alcanzado el límite de {limit} chat rooms de tu plan.")
+            
     return service.create_room(current_user.id, data)
 
 @router.put("/rooms/{room_id}")
@@ -66,6 +74,16 @@ def add_participant(
     current_user: User = Depends(get_current_user),
     service: ChatService = Depends(get_chat_service)
 ):
+    from app.core.config_limits import get_user_limit
+    limit = get_user_limit(current_user.subscription_tier, "max_companions_per_room")
+    if limit != -1 and data.is_ai:
+        room = service.repo.get_room_by_id(room_id)
+        if room:
+            ai_count = sum(1 for p in room.participants if p.is_ai)
+            if ai_count >= limit:
+                from fastapi import HTTPException, status
+                raise HTTPException(status_code=status.HTTP_429_TOO_MANY_REQUESTS, detail=f"Límite de {limit} compañeros AI por sala alcanzado.")
+                
     return service.add_participant(room_id, current_user.id, data)
 
 @router.get("/rooms/{room_id}/messages")
@@ -94,6 +112,14 @@ def link_list_to_room(
     current_user: User = Depends(get_current_user),
     service: ChatService = Depends(get_chat_service)
 ):
+    from app.core.config_limits import get_user_limit
+    limit = get_user_limit(current_user.subscription_tier, "max_linked_lists_per_room")
+    if limit != -1:
+        vocab = service.get_room_vocabulary(room_id, current_user.id)
+        if len(vocab) >= limit:
+            from fastapi import HTTPException, status
+            raise HTTPException(status_code=status.HTTP_429_TOO_MANY_REQUESTS, detail=f"Límite de {limit} listas vinculadas por sala alcanzado.")
+            
     return service.link_list_to_room(room_id, data.list_id, current_user.id)
 
 @router.post("/ai/message")
@@ -103,8 +129,12 @@ async def send_ai_message(
     data: AIChatRequest,
     background_tasks: BackgroundTasks,
     current_user: User = Depends(get_current_user),
-    service: ChatService = Depends(get_chat_service)
+    service: ChatService = Depends(get_chat_service),
+    db: Session = Depends(get_db)
 ):
+    from app.services.usage_service import check_and_increment_limit
+    check_and_increment_limit(db, current_user, "daily_chat_messages")
+    
     return await service.send_ai_message(
         room_id=data.room_id, 
         user_id=current_user.id, 
@@ -202,8 +232,12 @@ async def websocket_endpoint(
 async def get_icebreaker(
     request: Request,
     payload: IcebreakerRequest,
+    current_user: User = Depends(get_current_user),
     db: Session = Depends(get_db)
 ):
+    from app.services.usage_service import check_and_increment_limit
+    check_and_increment_limit(db, current_user, "daily_icebreakers")
+    
     service = ChatService(db)
     room = service.repo.get_room_by_id(payload.room_id)
     if not room:
@@ -232,6 +266,9 @@ async def check_grammar(
     current_user: User = Depends(get_current_user),
     db: Session = Depends(get_db)
 ):
+    from app.services.usage_service import check_and_increment_limit
+    check_and_increment_limit(db, current_user, "daily_chat_grammar_corrections")
+
     ai_service = AIService()
     prompt = get_grammar_check_prompt(payload.message, payload.language, payload.ai_language)
     system_prompt = get_grammar_check_system_prompt(payload.ai_language)
@@ -276,8 +313,15 @@ async def get_grammar_summary(
 async def get_pronunciation_help(
     request: Request,
     payload: PronunciationHelpRequest,
-    current_user: User = Depends(get_current_user)
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db)
 ):
+    from app.services.usage_service import check_and_increment_limit
+    # the user asked for audio with TTS natively if limit is passed.
+    # we can intercept this or handle it gracefully.
+    # We will raise HTTP 429 and let the frontend catch it to use native TTS.
+    check_and_increment_limit(db, current_user, "daily_ai_pronunciation")
+    
     ai_service = AIService()
     prompt = get_pronunciation_prompt(
         text=payload.text,
@@ -317,6 +361,14 @@ def create_ai_persona(
     current_user: User = Depends(get_current_user),
     service: ChatService = Depends(get_chat_service)
 ):
+    from app.core.config_limits import get_user_limit
+    limit = get_user_limit(current_user.subscription_tier, "max_ai_companions")
+    if limit != -1:
+        personas = service.get_ai_personas(current_user.id)
+        if len(personas) >= limit:
+            from fastapi import HTTPException, status
+            raise HTTPException(status_code=status.HTTP_429_TOO_MANY_REQUESTS, detail=f"Límite de {limit} compañeros AI alcanzado.")
+            
     return service.create_ai_persona(current_user.id, data)
 
 @router.put("/ai-personas/{persona_id}")

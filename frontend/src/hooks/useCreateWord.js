@@ -8,7 +8,7 @@ export const useCreateWord = (lists, addWord, fetchLists, searchDictionary, aiLo
     const defaultListId = searchParams.get('listId') || 0;
     // --- Estados del Buscador de Diccionario ---
     const [searchWord, setSearchWord] = useState('');
-    const [useAiMode, setUseAiMode] = useState(false);
+    const [useContextMode, setUseContextMode] = useState(false);
     const [aiContext, setAiContext] = useState('');
     const [searchResults, setSearchResults] = useState([]);
 
@@ -55,9 +55,9 @@ export const useCreateWord = (lists, addWord, fetchLists, searchDictionary, aiLo
             const results = await searchDictionary({
                 word: searchWord,
                 language: 'en',
-                t_lang: 'en', // Cambiado a 'en' para definiciones en el mismo idioma
-                use_ai: useAiMode,
-                context: aiContext
+                t_lang: 'en',
+                use_ai: true, // Always use AI as requested
+                context: useContextMode ? aiContext : ""
             });
             if (results[0]?.error) {
                 setError(results[0].meaning || results[0].message);
@@ -195,7 +195,7 @@ export const useCreateWord = (lists, addWord, fetchLists, searchDictionary, aiLo
 
     return {
         searchWord, setSearchWord,
-        useAiMode, setUseAiMode,
+        useContextMode, setUseContextMode,
         searchResults,
         aiContext, setAiContext,
         imageQuery, setImageQuery,
